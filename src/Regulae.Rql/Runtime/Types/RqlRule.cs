@@ -1,0 +1,167 @@
+namespace Regulae.Rql.Runtime.Types
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Text;
+    using Regulae;
+    using Regulae.ConditionNodes;
+    using Regulae.Rql.Runtime;
+
+    /// <summary>
+    /// Defines the .NET representation of a RQL &lt;rule&gt; value.
+    /// </summary>
+    [DebuggerDisplay("<{this.Type.Name,nq}> ({this.Value.Priority}) {this.Value.Name, nq}")]
+    public readonly struct RqlRule : IRuntimeValue, IEquatable<RqlRule>
+    {
+        private static readonly Type runtimeType = typeof(Rule);
+        private readonly Dictionary<string, RqlAny> properties;
+
+        internal RqlRule(Rule rule)
+        {
+            this.Value = rule;
+            this.properties = new Dictionary<string, RqlAny>(StringComparer.Ordinal)
+            {
+                { "Active", new RqlBool(rule.Active) },
+                { "DateBegin", new RqlDate(rule.DateBegin) },
+                { "DateEnd", rule.DateEnd.HasValue ? new RqlDate(rule.DateEnd.Value) : new RqlNothing() },
+                { "Name", new RqlString(rule.Name) },
+                { "Priority", new RqlInteger(rule.Priority) },
+                { "RootCondition", rule.RootCondition is not null ? ConvertCondition(rule.RootCondition) : new RqlNothing() },
+                { "Ruleset", new RqlString(rule.Ruleset) },
+            };
+        }
+
+        /// <inheritdoc/>
+        public Type RuntimeType => runtimeType;
+
+        /// <inheritdoc/>
+        public object RuntimeValue => this.Value;
+
+        /// <inheritdoc/>
+        public RqlType Type => RqlTypes.Rule;
+
+        /// <summary>
+        /// Gets the value.
+        /// </summary>
+        /// <value>The value.</value>
+        public readonly Rule Value { get; }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="RqlRule"/> to <see cref="RqlAny"/>.
+        /// </summary>
+        /// <param name="rqlRule">The RQL rule.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static implicit operator RqlAny(RqlRule rqlRule) => new RqlAny(rqlRule);
+
+        /// <inheritdoc/>
+        public bool Equals(RqlRule other) => this.Value.Equals(other.Value);
+
+        /// <inheritdoc/>
+        public override string ToString() => $"<{Type.Name}>{Environment.NewLine}{this.ToString(4)}";
+
+        internal string ToString(int indent)
+        {
+            var stringBuilder = new StringBuilder()
+                .Append('{');
+
+            foreach (var property in this.properties)
+            {
+                stringBuilder.AppendLine()
+                    .Append(new string(' ', indent))
+                    .Append(property.Key)
+                    .Append(": ");
+
+                if (property.Value.UnderlyingType == RqlTypes.Object)
+                {
+                    stringBuilder.Append(property.Value.Unwrap<RqlObject>().ToString(indent + 4));
+                    continue;
+                }
+
+                if (property.Value.UnderlyingType == RqlTypes.ReadOnlyObject)
+                {
+                    stringBuilder.Append(property.Value.Unwrap<RqlReadOnlyObject>().ToString(indent + 4));
+                    continue;
+                }
+
+                if (property.Value.UnderlyingType == RqlTypes.Array)
+                {
+                    stringBuilder.Append(property.Value.Unwrap<RqlArray>().ToString());
+                    continue;
+                }
+
+                stringBuilder.Append(property.Value.Value);
+            }
+
+            return stringBuilder.AppendLine()
+                .Append(new string(' ', indent - 4))
+                .Append('}')
+                .ToString();
+        }
+
+        private static RqlAny ConvertCondition(IConditionNode condition)
+        {
+            switch (condition)
+            {
+                case ComposedConditionNode ccn:
+                    var childConditions = new RqlArray(ccn.ChildConditionNodes.Count());
+                    var i = 0;
+                    foreach (var childConditionNode in ccn.ChildConditionNodes)
+                    {
+                        childConditions.SetAtIndex(i++, ConvertCondition(childConditionNode));
+                    }
+
+                    var composedConditionProperties = new Dictionary<string, RqlAny>(StringComparer.Ordinal)
+                    {
+                        { "ChildConditionNodes", childConditions },
+                        { "LogicalOperator", new RqlString(ccn.LogicalOperator.ToString()) },
+                    };
+                    return new RqlReadOnlyObject(composedConditionProperties);
+
+                case ValueConditionNode vcn:
+                    var valueConditionProperties = new Dictionary<string, RqlAny>(StringComparer.Ordinal)
+                    {
+                        { "Condition", new RqlString(vcn.Condition) },
+                        { "DataType", new RqlString(vcn.DataType.ToString()) },
+                        { "LogicalOperator", new RqlString(vcn.LogicalOperator.ToString()) },
+                        { "Operand", ConvertValue(vcn.Operand) },
+                        { "Operator", new RqlString(vcn.Operator.ToString()) },
+                    };
+                    return new RqlReadOnlyObject(valueConditionProperties);
+
+                default:
+                    throw new NotSupportedException($"Specified condition node type is not supported: {condition.GetType().FullName}");
+            }
+        }
+
+        private static RqlAny ConvertValue(object value)
+        {
+            return value switch
+            {
+                IEnumerable<int> intArray => CreateArray(intArray),
+                IEnumerable<decimal> decimalArray => CreateArray(decimalArray),
+                IEnumerable<bool> boolArray => CreateArray(boolArray),
+                IEnumerable<string> stringArray => CreateArray(stringArray),
+                int i => new RqlInteger(i),
+                decimal d => new RqlDecimal(d),
+                bool b => new RqlBool(b),
+                string s => new RqlString(s),
+                null => new RqlNothing(),
+                _ => throw new NotSupportedException($"Specified value is not supported for conversion to RQL type system: {value.GetType().FullName}"),
+            };
+        }
+
+        private static RqlArray CreateArray<T>(IEnumerable<T> source)
+        {
+            var count = source.Count();
+            var rqlArray = new RqlArray(count);
+            for (var i = 0; i < count; i++)
+            {
+                rqlArray.SetAtIndex(i, ConvertValue(source.ElementAt(i)!));
+            }
+
+            return rqlArray;
+        }
+    }
+}

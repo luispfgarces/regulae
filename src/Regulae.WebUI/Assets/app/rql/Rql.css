@@ -1,0 +1,71 @@
+.layered {
+    display: grid;
+    justify-items: start;
+    align-items: start;
+}
+
+    .layered > .layered-item {
+        grid-column-start: 1;
+        grid-row-start: 1;
+    }
+
+.terminal {
+    height: 80vh !important;
+    scroll-behavior: smooth;
+}
+
+.terminal-assist {
+    box-shadow: 0 0 0.25rem rgba(255, 255, 255, 0.075);
+    display: none;
+    position: absolute;
+    width: 12rem;
+    max-height: 8rem;
+    overflow-y: auto;
+}
+
+.terminal-assist-item {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    height: 2rem;
+    padding: 0 0.5rem;
+}
+
+.terminal-assist-item-focused {
+    background: rgb(226 232 240);
+}
+
+.terminal-input {
+    caret-color: rgb(255, 255, 255);
+    caret-shape: bar;
+    height: 1.7rem;
+    margin: 0.1em 0 0 0;
+    outline: none;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    padding: 0;
+}
+
+.terminal-line {
+    background-color: rgba(0, 0, 0, 0) !important;
+    font-size: 1rem;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    padding: 0rem !important;
+    width: 100%;
+    word-wrap: break-word;
+}
+
+    .terminal-line ::deep {
+        overflow-wrap: break-word !important;
+    }
+
+.terminal-output {
+    flex-direction: column;
+    white-space: pre-wrap;
+}
+
+.terminal-text {
+    font-family: var(--bs-font-monospace);
+    font-size: 1rem !important;
+}

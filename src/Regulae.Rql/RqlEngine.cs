@@ -1,0 +1,142 @@
+namespace Regulae.Rql
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Regulae.Rql.Messages;
+    using Regulae.Rql.Pipeline.Assist;
+    using Regulae.Rql.Pipeline.Interpret;
+    using Regulae.Rql.Pipeline.Parse;
+    using Regulae.Rql.Pipeline.Scan;
+    using Regulae.Rql.Runtime.Types;
+
+    internal class RqlEngine : IRqlEngine
+    {
+        private const string ExceptionMessage = "Errors have occurred processing provided RQL source";
+        private const string RqlErrorSourceUnavailable = "<unavailable>";
+        private IAssistEngine assistEngine;
+        private bool disposedValue;
+        private IInterpreter interpreter;
+        private IParser parser;
+        private ITokenScanner tokenScanner;
+
+        public RqlEngine(RqlEngineArgs rqlEngineArgs)
+        {
+            this.tokenScanner = rqlEngineArgs.TokenScanner;
+            this.parser = rqlEngineArgs.Parser;
+            this.interpreter = rqlEngineArgs.Interpreter;
+            this.assistEngine = rqlEngineArgs.AssistEngine;
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public async Task<IEnumerable<IResult>> ExecuteAsync(string rql)
+        {
+            var scanResult = this.tokenScanner.ScanTokens(rql);
+            if (!scanResult.Success)
+            {
+                var errors = scanResult.Messages.Where(m => m.Severity == MessageSeverity.Error)
+                    .Select(m => new RqlError(m.Text, RqlErrorSourceUnavailable, m.BeginPosition, m.EndPosition))
+                    .ToArray();
+                throw new RqlException(ExceptionMessage, errors);
+            }
+
+            var tokens = scanResult.Tokens;
+            var parserResult = parser.Parse(tokens);
+            if (!parserResult.Success)
+            {
+                var errors = parserResult.Messages.Where(m => m.Severity == MessageSeverity.Error)
+                    .Select(m => new RqlError(m.Text, RqlErrorSourceUnavailable, m.BeginPosition, m.EndPosition))
+                    .ToArray();
+                throw new RqlException(ExceptionMessage, errors);
+            }
+
+            var statements = parserResult.Statements;
+            var interpretResult = await interpreter.InterpretAsync(statements).ConfigureAwait(false);
+            if (interpretResult.Success)
+            {
+                return interpretResult.Results.Select(s => ConvertResult(s)).ToArray();
+            }
+
+            var errorResults = interpretResult.Results.Where(s => s is ErrorStatementResult)
+                .Cast<ErrorStatementResult>()
+                .Select(s => new RqlError(s.Message, s.Rql, s.BeginPosition, s.EndPosition));
+            throw new RqlException(ExceptionMessage, errorResults);
+        }
+
+        public async Task<IEnumerable<IAssistSuggestion>> ProvideAssistSuggestionsAsync(string rql, RqlSourcePosition position)
+        {
+            var scanResult = this.tokenScanner.ScanTokens(rql);
+            var tokens = scanResult.Tokens;
+            var parserResult = parser.Parse(tokens);
+            var statements = parserResult.Statements;
+            return await this.assistEngine.ProcessAssistAsync(tokens, statements, position).ConfigureAwait(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.interpreter = null!;
+                    this.tokenScanner = null!;
+                    this.parser = null!;
+                    this.assistEngine = null!;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        private static IResult ConvertResult(Pipeline.Interpret.IResult result) => result switch
+        {
+            NothingStatementResult nothingStatementResult => new NothingResult(nothingStatementResult.Rql),
+            ExpressionStatementResult expressionStatementResult when IsRulesSetResult(expressionStatementResult) => ConvertToRulesSetResult(expressionStatementResult),
+            ExpressionStatementResult expressionStatementResult => new ValueResult(expressionStatementResult.Rql, expressionStatementResult.Result),
+            _ => throw new NotSupportedException($"Result of type '{result.GetType().FullName}' is not supported."),
+        };
+
+        private static RulesSetResult ConvertToRulesSetResult(ExpressionStatementResult expressionStatementResult)
+        {
+            var rqlArray = (RqlArray)expressionStatementResult.Result;
+            var lines = new List<RulesSetResultLine>(rqlArray.Size);
+            for (var i = 0; i < rqlArray.Size; i++)
+            {
+                var rule = rqlArray.Value[i].Unwrap<RqlRule>();
+                var rulesSetResultLine = new RulesSetResultLine(i + 1, rule);
+                lines.Add(rulesSetResultLine);
+            }
+
+            return new RulesSetResult(expressionStatementResult.Rql, rqlArray.Size, lines);
+        }
+
+        private static bool IsRulesSetResult(ExpressionStatementResult expressionStatementResult)
+        {
+            if (expressionStatementResult.Result is RqlArray rqlArray)
+            {
+                if (rqlArray.Size <= 0)
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < rqlArray.Size; i++)
+                {
+                    if (rqlArray.Value[i].UnderlyingType != RqlTypes.Rule)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+    }
+}

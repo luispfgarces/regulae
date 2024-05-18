@@ -1,0 +1,96 @@
+namespace Regulae.IntegrationTests.Common.Scenarios.Scenario8
+{
+    using System.Collections.Generic;
+    using Regulae;
+    using Regulae.Extensions;
+    using Regulae.Generic;
+    using Regulae.IntegrationTests.Common.Scenarios;
+
+    public partial class Scenario8Data : IScenarioData<PokerRulesets, PokerConditions>
+    {
+        private IEnumerable<Rule<PokerRulesets, PokerConditions>> GetPairsRules()
+        {
+            return new[]
+            {
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Deuces")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfDeuces, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Treys")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfTreys, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Fours")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfFours, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Fives")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfFives, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Sixes")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfSixes, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Sevens")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfSevens, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Eights")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfEigths, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Nines")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfNines, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Tens")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfTens, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Jacks")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfJacks, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Queens")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfQueens, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Kings")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfKings, Operators.Equal, 2)
+                    .Build().Rule,
+                Rule.Create<PokerRulesets, PokerConditions>("Scenario 8 - Pair Aces")
+                    .InRuleset(PokerRulesets.TexasHoldemPokerSingleCombinations)
+                    .SetContent(new SingleCombinationPokerScore { Combination = "Pair" })
+                    .Since("2000-01-01")
+                    .ApplyWhen(PokerConditions.NumberOfAces, Operators.Equal, 2)
+                    .Build().Rule,
+            };
+        }
+    }
+}

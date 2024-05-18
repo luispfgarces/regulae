@@ -1,0 +1,80 @@
+namespace Regulae.Rql.Tests.Pipeline.Interpret
+{
+    using System;
+    using System.Threading.Tasks;
+    using FluentAssertions;
+    using Moq;
+    using Regulae.Rql;
+    using Regulae.Rql.Ast.Expressions;
+    using Regulae.Rql.Pipeline.Interpret;
+    using Regulae.Rql.Runtime;
+    using Regulae.Rql.Runtime.Types;
+    using Xunit;
+
+    public partial class InterpreterTests
+    {
+        [Fact]
+        public async Task VisitNewArrayExpression_GivenValidNewArrayExpressionWithSizeInitializer_ReturnsArrayFilledWithRqlNothing()
+        {
+            // Arrange
+            var arrayToken = NewToken("array", null, Regulae.Rql.Tokens.TokenType.ARRAY);
+            var initializerBeginToken = NewToken("[", null, Regulae.Rql.Tokens.TokenType.STRAIGHT_BRACKET_LEFT);
+            var sizeExpression = CreateMockedExpression(NewRqlInteger(2));
+            var values = Array.Empty<Expression>();
+            var initializerEndToken = NewToken("]", null, Regulae.Rql.Tokens.TokenType.STRAIGHT_BRACKET_RIGHT);
+
+            var newArrayExpression = NewArrayExpression.Create(arrayToken, initializerBeginToken, sizeExpression, values, initializerEndToken);
+
+            var runtime = Mock.Of<IRuntime>();
+            var reverseRqlBuilder = Mock.Of<IReverseRqlBuilder>();
+
+            var interpreter = new Interpreter(runtime, reverseRqlBuilder);
+
+            // Act
+            var actual = await interpreter.VisitNewArrayExpression(newArrayExpression);
+
+            // Assert
+            actual.Should().NotBeNull()
+                .And.BeOfType<RqlArray>();
+            var array = (RqlArray)actual;
+            array.Size.Should().Be(NewRqlInteger(2));
+            array.Value.Should().AllSatisfy(i => i.Unwrap().Should().BeOfType<RqlNothing>());
+        }
+
+        [Fact]
+        public async Task VisitNewArrayExpression_GivenValidNewArrayExpressionWithValuesInitializer_ReturnsArrayFilledWithValues()
+        {
+            // Arrange
+            var arrayToken = NewToken("array", null, Regulae.Rql.Tokens.TokenType.ARRAY);
+            var initializerBeginToken = NewToken("{", null, Regulae.Rql.Tokens.TokenType.BRACE_LEFT);
+            var sizeExpression = CreateMockedExpression(NewRqlNothing());
+            var values = new[]
+            {
+                CreateMockedExpression(NewRqlInteger(1)),
+                CreateMockedExpression(NewRqlString("test")),
+                CreateMockedExpression(NewRqlBool(true)),
+            };
+            var initializerEndToken = NewToken("}", null, Regulae.Rql.Tokens.TokenType.BRACE_RIGHT);
+
+            var newArrayExpression = NewArrayExpression.Create(arrayToken, initializerBeginToken, sizeExpression, values, initializerEndToken);
+
+            var runtime = Mock.Of<IRuntime>();
+            var reverseRqlBuilder = Mock.Of<IReverseRqlBuilder>();
+
+            var interpreter = new Interpreter(runtime, reverseRqlBuilder);
+
+            // Act
+            var actual = await interpreter.VisitNewArrayExpression(newArrayExpression);
+
+            // Assert
+            actual.Should().NotBeNull()
+                .And.BeOfType<RqlArray>();
+            var array = (RqlArray)actual;
+            array.Size.Should().Be(NewRqlInteger(3));
+            array.Value.Should().SatisfyRespectively(
+                v => v.Unwrap<RqlInteger>().Value.Should().Be(1),
+                v => v.Unwrap<RqlString>().Value.Should().Be("test"),
+                v => v.Unwrap<RqlBool>().Value.Should().BeTrue());
+        }
+    }
+}

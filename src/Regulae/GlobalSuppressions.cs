@@ -1,0 +1,20 @@
+// This file is used by Code Analysis to maintain SuppressMessage attributes that are applied to
+// this project. Project-level suppressions either have no target or are given a specific target and
+// scoped to a namespace, type, member, etc.
+
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Major Code Smell", "S3925:\"ISerializable\" should be implemented correctly", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.InvalidRulesEngineOptionsException")]
+[assembly: SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.Core.DataTypes")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.PriorityCriterias")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.MissingConditionBehaviors")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.Core.Operators")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.Core.LogicalOperators")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.Core.DataTypes")]
+[assembly: SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "<Pending>", Scope = "member", Target = "~P:Regulae.Core.ConditionNodes.IValueConditionNode`1.Operator")]
+[assembly: SuppressMessage("Microsoft.Performace", "CA1801", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.InvalidRulesEngineOptionsException")]
+[assembly: SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>", Scope = "member", Target = "~M:Regulae.RulesEngine`2.AddRuleAsync(Regulae.Core.Rule{`0,`1})~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Naming", "CA1717:Only FlagsAttribute enums should have plural names", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.PriorityOptions")]
+[assembly: SuppressMessage("Major Bug", "S2259:Null pointers should not be dereferenced", Justification = "That is validated somes lines above, and if it is null, a RuleOperationResult with error is returned right away.", Scope = "member", Target = "~M:Regulae.RulesEngine`2.UpdateRuleInternalAsync(Regulae.Core.Rule{`0,`1})~System.Threading.Tasks.Task{Regulae.RuleOperationResult}")]
+[assembly: SuppressMessage("Minor Code Smell", "S3963:\"static\" fields should be initialized inline", Justification = "To ensure initialization logic ordered as specified in class constructor.", Scope = "member", Target = "~M:Regulae.Evaluation.OperatorsMetadata.#cctor")]
+[assembly: SuppressMessage("Major Code Smell", "S2326:Unused type parameters should be removed", Justification = "<Pending>", Scope = "type", Target = "~T:Regulae.Providers.InMemory.DataModel.ConditionNodeDataModel`1")]

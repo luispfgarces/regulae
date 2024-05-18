@@ -1,0 +1,43 @@
+@attribute [ExcludeFromCodeCoverage]
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="regulae-ui/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="regulae-ui/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="_content/Blazor.Bootstrap/blazor.bootstrap.css" />
+    <link rel="stylesheet" href="regulae-ui/app.css" />
+    <link rel="stylesheet" href="regulae-ui/highlightjs/styles/vs2015.css">
+    <link rel="stylesheet" href="regulae-ui/Regulae.WebUI.styles.css" />
+    <link rel="stylesheet" href="regulae-ui/app/rql/Rql.css" />
+    <link rel="icon" type="image/svg" href="regulae-ui/favicon.svg" />
+    <link rel="logo" type="image/svg" href="regulae-ui/logo.svg" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/Blazor.Bootstrap/blazor.bootstrap.js"></script>
+    <script src="regulae-ui/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="regulae-ui/highlightjs/highlight.min.js"></script>
+    <script src="regulae-ui/highlightjs/languages/rql.min.js"></script>
+    <script>
+        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+namespace Regulae.Rql.Pipeline.Parse.Strategies
+{
+    using System;
+    using System.Collections.Generic;
+    using Regulae.Rql.Ast.Expressions;
+    using Regulae.Rql.Pipeline.Parse;
+    using Regulae.Rql.Tokens;
+
+    internal class ObjectParseStrategy : ParseStrategyBase<Expression>, IExpressionParseStrategy
+    {
+        public ObjectParseStrategy(IParseStrategyProvider parseStrategyProvider)
+            : base(parseStrategyProvider)
+        {
+        }
+
+        public override Expression Parse(ParseContext parseContext)
+        {
+            if (!parseContext.IsMatchCurrentToken(TokenType.OBJECT))
+            {
+                throw new InvalidOperationException("Unable to handle object expression.");
+            }
+
+            var objectToken = parseContext.GetCurrentToken();
+            if (parseContext.MoveNextIfNextToken(TokenType.BRACE_LEFT))
+            {
+                _ = parseContext.MoveNext();
+                var objectAssignment = this.ParseObjectAssignment(parseContext);
+                if (parseContext.PanicMode)
+                {
+                    return Expression.None;
+                }
+
+                var objectAssignments = new List<Expression> { objectAssignment };
+                while (parseContext.MoveNextIfNextToken(TokenType.COMMA))
+                {
+                    _ = parseContext.MoveNext();
+                    objectAssignment = this.ParseObjectAssignment(parseContext);
+                    if (parseContext.PanicMode)
+                    {
+                        return Expression.None;
+                    }
+
+                    objectAssignments.Add(objectAssignment);
+                }
+
+                if (!parseContext.MoveNextIfNextToken(TokenType.BRACE_RIGHT))
+                {
+                    parseContext.EnterPanicMode("Expected token '}'.", parseContext.GetNextToken());
+                    return Expression.None;
+                }
+
+                return new NewObjectExpression(objectToken, objectAssignments.ToArray());
+            }
+
+            return new NewObjectExpression(objectToken, Array.Empty<Expression>());
+        }
+
+        private Expression ParseObjectAssignment(ParseContext parseContext)
+        {
+            var left = Expression.None;
+            var assign = Token.None;
+            var right = Expression.None;
+            if (!parseContext.IsMatchCurrentToken(Constants.AllowedUnescapedIdentifierNames))
+            {
+                var currentToken = parseContext.GetCurrentToken();
+                if (!currentToken.IsEscaped || !parseContext.IsMatchCurrentToken(Constants.AllowedEscapedIdentifierNames))
+                {
+                    parseContext.EnterPanicMode("Expected identifier for object property.", currentToken);
+                    return new AssignmentExpression(left, assign, right);
+                }
+            }
+
+            left = this.ParseExpressionWith<IdentifierParseStrategy>(parseContext);
+            if (!parseContext.MoveNextIfNextToken(TokenType.ASSIGN))
+            {
+                parseContext.EnterPanicMode("Expected token '='.", parseContext.GetNextToken());
+                return new AssignmentExpression(left, assign, right);
+            }
+
+            assign = parseContext.GetCurrentToken();
+            _ = parseContext.MoveNext();
+
+            // TODO: update according to future logic to process 'or' expressions.
+            right = this.ParseExpressionWith<TermParseStrategy>(parseContext);
+            return new AssignmentExpression(left, assign, right);
+        }
+    }
+}
