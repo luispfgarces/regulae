@@ -1,5 +1,7 @@
 # Regulae
 
+![Regulae logo](./docs/logos/regulae-logo-565x128.png)
+
 Regulae is a general purpose library that allows defining, evaluating, and managing rules for complex business scenarios. 
 
 [![.NET build](https://github.com/luispfgarces/regulae/actions/workflows/dotnet-build.yml/badge.svg)](https://github.com/luispfgarces/regulae/actions/workflows/dotnet-build.yml)
@@ -12,7 +14,7 @@ A rule is a data structure limited in time (`date begin` and `date end`), and th
 
 By using rules, we're able to abstract a multiplicity of business scenarios through rules configurations, instead of heavy code developments. Rules enable a fast response to change and a better control of the business logic by the product owners.
 
-## Rules.Framework
+## Regulae package
 [![Nuget Package](https://img.shields.io/nuget/v/Rules.Framework.svg?logo=nuget)](https://www.nuget.org/packages/Rules.Framework/)
 
 The Regulae package contains the core of the rules engine. It includes an in-memory provider for the rules data source.
@@ -61,7 +63,7 @@ For a more thorough explanation of the Regulae library and all it enables, check
 
 Check also the test scenarios and samples available within the source-code, to see more elaborated examples of its application.
 
-## Regulae.Providers.MongoDb
+## Regulae.Providers.MongoDb package
 [![Nuget Package](https://img.shields.io/nuget/v/Rules.Framework.Providers.MongoDb?logo=nuget)](https://www.nuget.org/packages/Rules.Framework.Providers.MongoDb/)
 
 To keep rules persisted in a MongoDB database, use the extension method in the Providers.MongoDB package to pass your MongoClient and MongoDbProviderSettings to the `RulesEngineBuilder`.
@@ -71,7 +73,7 @@ var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
     .SetInMongoDBDataSource(mongoClient, mongoDbProviderSettings)
 ```
 
-## Regulae.WebUI
+## Regulae.WebUI package
 [![Nuget Package](https://img.shields.io/nuget/v/Rules.Framework.WebUI?logo=nuget)](https://www.nuget.org/packages/Rules.Framework.WebUI/)
 
 The WebUI package offers a way of visualizing the rules in your web service. To configure the UI, pass the rules engine as generic to the `IApplicationBuilder` extension method provided.
