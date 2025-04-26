@@ -12,9 +12,9 @@ $currentDir = (Get-Location).Path
 $coverageDir = "$currentDir\\coverage-outputs\\$reportTimestamp\\"
 
 if ($OnlyRunUnitTests) {
-    dotnet test .\rules-framework.sln --collect:"XPlat Code Coverage" --results-directory:"$coverageDir" -m:1 --filter 'Category=Unit'
+    dotnet test .\regulae.sln --collect:"XPlat Code Coverage" --results-directory:"$coverageDir" -m:1 --filter 'Category=Unit'
 } else {
-    dotnet test .\rules-framework.sln --collect:"XPlat Code Coverage" --results-directory:"$coverageDir" -m:1
+    dotnet test .\regulae.sln --collect:"XPlat Code Coverage" --results-directory:"$coverageDir" -m:1
 }
 
 reportgenerator -reports:"$($coverageDir)*\\*.xml" -targetdir:"$($coverageDir)" -reporttypes:Cobertura

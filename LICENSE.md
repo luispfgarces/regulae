@@ -1,5 +1,7 @@
 MIT License
 
+Copyright (c) 2018 Luís Garcês
+
 Copyright (c) 2019 Farfetch
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
