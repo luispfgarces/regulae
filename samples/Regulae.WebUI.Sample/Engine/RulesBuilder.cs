@@ -15,6 +15,18 @@ namespace Regulae.WebUI.Sample.Engine
         {
             foreach (var ruleSpecificationsProvider in ruleSpecificationsProviders)
             {
+                foreach (var condition in ruleSpecificationsProvider.Conditions)
+                {
+                    var conditionOperationResult = await rulesEngine.CreateConditionAsync(
+                        condition.Condition.ToString(),
+                        condition.DataType);
+
+                    if (!conditionOperationResult.IsSuccess)
+                    {
+                        throw new RulesBuilderException("Rules builder error creating conditions", conditionOperationResult.Errors);
+                    }
+                }
+
                 foreach (var ruleset in ruleSpecificationsProvider.Rulesets)
                 {
                     await rulesEngine.CreateRulesetAsync(ruleset.ToString());
@@ -32,8 +44,7 @@ namespace Regulae.WebUI.Sample.Engine
                     var ruleOperationResult = await rulesEngine
                         .AddRuleAsync(
                             ruleSpecification.RuleBuilderResult.Rule,
-                            ruleSpecification.RuleAddPriorityOption
-                        );
+                            ruleSpecification.RuleAddPriorityOption);
 
                     if (!ruleOperationResult.IsSuccess)
                     {

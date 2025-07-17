@@ -15,6 +15,7 @@ namespace Regulae.WebUI.Sample.ReadmeExample
                 .Configure(c => c.UseSmallestNumberPriorityCriteria())
                 .Build();
 
+            this.CreateConditions();
             this.CreateRulesets();
 
             var rules = this.CreateRules();
@@ -32,6 +33,16 @@ namespace Regulae.WebUI.Sample.ReadmeExample
                     .GetAwaiter()
                     .GetResult();
             }
+        }
+
+        protected void CreateConditions()
+        {
+            this.RulesEngine.CreateConditionAsync(nameof(BasicConditionNames.ClientType), DataTypes.String)
+                .GetAwaiter()
+                .GetResult();
+            this.RulesEngine.CreateConditionAsync(nameof(BasicConditionNames.Country), DataTypes.String)
+                .GetAwaiter()
+                .GetResult();
         }
 
         protected void CreateRulesets()

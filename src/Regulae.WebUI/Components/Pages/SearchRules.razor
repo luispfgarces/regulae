@@ -33,7 +33,7 @@
                                 <Dropdown Color="DropdownColor.Secondary" AutoClose="true" AutoCloseBehavior="DropdownAutoCloseBehavior.Outside">
                                     <DropdownToggleButton>Select rulesets</DropdownToggleButton>
                                     <DropdownMenu Class="overflow-auto" Style="max-height: 15rem;">
-                                        @if (this.instanceId == Guid.Empty)
+                                        @if (this.instance is null)
                                         {
                                             <p>Loading...</p>
                                         }
@@ -57,7 +57,7 @@
                             </div>
                             <div class="ms-2 mt-2 d-flex flex-row align-items-center">
                                 <div>
-                                    @if (this.instanceId != Guid.Empty && this.rulesetIds.Any())
+                                    @if (this.instance is not null && this.rulesetIds.Any())
                                     {
                                         <b>@(this.rulesetIds.Count) selected: </b>
                                         var count = 0;

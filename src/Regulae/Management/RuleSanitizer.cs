@@ -65,15 +65,18 @@ namespace Regulae.Management
                     {
                         var dataTypeConfiguration = this.dataTypesConfigurationProvider.GetDataTypeConfiguration(condition.DataType);
 
+                        if (valueCondition.RightOperand.DataType == DataTypes.String && !dataTypeConfiguration.ValuePattern.IsMatch((string)valueCondition.RightOperand.Value!))
+                        {
+                            errors.Add($"Condition '{condition.Name}' value '{valueCondition.RightOperand.Value!}' is not a valid value for {condition.DataType}.");
+                            return;
+                        }
+
                         try
                         {
                             converted = Convert.ChangeType(valueCondition.RightOperand.Value!
                                 ?? dataTypeConfiguration.OneCardinality.Default, dataTypeConfiguration.OneCardinality.Type, CultureInfo.InvariantCulture);
 
-                            valueCondition.RightOperand = new Operand(
-                                converted,
-                                condition.DataType,
-                                Cardinalities.One);
+                            valueCondition.RightOperand = new Operand(converted, condition.DataType, Cardinalities.One);
                         }
                         catch (InvalidCastException)
                         {
@@ -85,10 +88,7 @@ namespace Regulae.Management
                         if (valueCondition.RightOperand.Value is IEnumerable enumerable)
                         {
                             converted = enumerable.Cast<object>();
-                            valueCondition.RightOperand = new Operand(
-                                converted,
-                                condition.DataType,
-                                Cardinalities.One);
+                            valueCondition.RightOperand = new Operand(converted, condition.DataType, Cardinalities.One);
                         }
 
                         errors.Add($"Condition '{condition.Name}' value must be of type {nameof(IEnumerable)}.");

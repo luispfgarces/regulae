@@ -18,8 +18,16 @@ namespace Regulae.WebUI.Sample.Rules
             this.random = new Random();
         }
 
-        public RulesetNames[] Rulesets => new[]
-        {
+        public (ConditionNames Condition, DataTypes DataType)[] Conditions =>
+        [
+            (ConditionNames.RoyalNumber, DataTypes.Integer),
+            (ConditionNames.SumAll, DataTypes.Integer),
+            (ConditionNames.IsPrimeNumber, DataTypes.Boolean),
+            (ConditionNames.CanNumberBeDividedBy3, DataTypes.Boolean),
+        ];
+
+        public RulesetNames[] Rulesets =>
+        [
             RulesetNames.TestDateTime,
             RulesetNames.TestDecimal,
             RulesetNames.TestLong,
@@ -28,7 +36,7 @@ namespace Regulae.WebUI.Sample.Rules
             RulesetNames.TestNumber,
             RulesetNames.TestString,
             RulesetNames.TestBlob,
-        };
+        ];
 
         public IEnumerable<RuleSpecification> GetRulesSpecifications()
         {
@@ -77,7 +85,7 @@ namespace Regulae.WebUI.Sample.Rules
                         )
                         .And(a => a
                             .Value(ConditionNames.CanNumberBeDividedBy3, Operators.Equal, false)
-                            .Value(ConditionNames.SumAll, Operators.NotEqual, string.Empty)
+                            .Value(ConditionNames.SumAll, Operators.NotEqual, "0")
                         )
                         .And(a => a
                             .Value(ConditionNames.IsPrimeNumber, Operators.Equal, true)

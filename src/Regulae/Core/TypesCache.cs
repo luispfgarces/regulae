@@ -4,6 +4,7 @@ namespace Regulae.Core
 
     internal static class TypesCache
     {
+        public static Type DataTypes { get; } = typeof(DataTypes);
         public static Type String { get; } = typeof(string);
     }
 }
