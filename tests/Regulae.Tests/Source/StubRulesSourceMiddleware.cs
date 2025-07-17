@@ -16,14 +16,16 @@ namespace Regulae.Tests.Source
         }
 
         public int AddRuleCalls { get; private set; }
+        public int CreateConditionCalls { get; private set; }
         public int CreateRulesetCalls { get; private set; }
+        public int GetConditionsCalls { get; private set; }
         public int GetRulesCalls { get; private set; }
         public int GetRulesetsCalls { get; private set; }
         public int GetRulesFilteredCalls { get; private set; }
         public string Name { get; }
         public int UpdateRulesCalls { get; private set; }
 
-        public async Task HandleAddRuleAsync(
+        public async ValueTask HandleAddRuleAsync(
             AddRuleArgs args,
             AddRuleDelegate next)
         {
@@ -33,7 +35,15 @@ namespace Regulae.Tests.Source
             this.middlewareMessages.Add($"Exit {this.Name}.");
         }
 
-        public async Task HandleCreateRulesetAsync(
+        public async ValueTask HandleCreateConditionAsync(CreateConditionArgs args, CreateConditionDelegate next)
+        {
+            this.CreateConditionCalls++;
+            this.middlewareMessages.Add($"Enter {this.Name}.");
+            await next.Invoke(args).ConfigureAwait(false);
+            this.middlewareMessages.Add($"Exit {this.Name}.");
+        }
+
+        public async ValueTask HandleCreateRulesetAsync(
             CreateRulesetArgs args,
             CreateRulesetDelegate next)
         {
@@ -43,7 +53,16 @@ namespace Regulae.Tests.Source
             this.middlewareMessages.Add($"Exit {this.Name}.");
         }
 
-        public async Task<IEnumerable<Rule>> HandleGetRulesAsync(
+        public async ValueTask<IReadOnlyDictionary<string, Condition>> HandleGetConditionsAsync(GetConditionsArgs args, GetConditionsDelegate next)
+        {
+            this.GetConditionsCalls++;
+            this.middlewareMessages.Add($"Enter {this.Name}.");
+            var conditions = await next.Invoke(args).ConfigureAwait(false);
+            this.middlewareMessages.Add($"Exit {this.Name}.");
+            return conditions;
+        }
+
+        public async ValueTask<IReadOnlyCollection<Rule>> HandleGetRulesAsync(
             GetRulesArgs args,
             GetRulesDelegate next)
         {
@@ -54,7 +73,7 @@ namespace Regulae.Tests.Source
             return rules;
         }
 
-        public async Task<IEnumerable<Ruleset>> HandleGetRulesetsAsync(GetRulesetsArgs args, GetRulesetsDelegate next)
+        public async ValueTask<IReadOnlyDictionary<string, Ruleset>> HandleGetRulesetsAsync(GetRulesetsArgs args, GetRulesetsDelegate next)
         {
             this.GetRulesetsCalls++;
             this.middlewareMessages.Add($"Enter {this.Name}.");
@@ -63,7 +82,7 @@ namespace Regulae.Tests.Source
             return rulesets;
         }
 
-        public async Task<IEnumerable<Rule>> HandleGetRulesFilteredAsync(
+        public async ValueTask<IReadOnlyCollection<Rule>> HandleGetRulesFilteredAsync(
             GetRulesFilteredArgs args,
             GetRulesFilteredDelegate next)
         {
@@ -74,7 +93,7 @@ namespace Regulae.Tests.Source
             return rules;
         }
 
-        public async Task HandleUpdateRuleAsync(
+        public async ValueTask HandleUpdateRuleAsync(
             UpdateRuleArgs args,
             UpdateRuleDelegate next)
         {

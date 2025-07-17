@@ -19,7 +19,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
             var sut = new OperatorEvalStrategyFactory();
 
             // Act
-            IManyToManyOperatorEvalStrategy actual = sut.GetManyToManyOperatorEvalStrategy(expectedOperator);
+            var actual = sut.GetManyToManyOperatorEvalStrategy(expectedOperator);
 
             // Assert
             actual.Should().NotBeNull().And.BeOfType(expectedType);
@@ -29,7 +29,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
         public void GetManyToManyOperatorEvalStrategy_GivenUnknownOperator_ThrowsNotSupportedException()
         {
             // Arrange
-            var expectedOperator = (Operators)(-1);
+            var expectedOperator = (Operators)0;
 
             var sut = new OperatorEvalStrategyFactory();
 
@@ -38,7 +38,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '-1' on the context of IManyToManyOperatorEvalStrategy.");
+            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '0' on the context of IManyToManyOperatorEvalStrategy.");
         }
 
         [Theory]
@@ -56,8 +56,8 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
             notSupportedException.Message.Should().Be($"Operator evaluation is not supported for operator '{@operator}' on the context of IManyToManyOperatorEvalStrategy.");
         }
 
-        [Theory(Skip = "Un-skip when operators using this eval strategy are created")]
-        [InlineData(Operators.In, typeof(InOperatorEvalStrategy))]
+        [Theory]
+        [InlineData(Operators.Contains, typeof(ContainsOperatorEvalStrategy))]
         public void GetManyToOneOperatorEvalStrategy_GivenOperator_ReturnsOperatorEvalStrategy(Operators @operator, Type type)
         {
             // Arrange
@@ -67,7 +67,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
             var sut = new OperatorEvalStrategyFactory();
 
             // Act
-            IManyToOneOperatorEvalStrategy actual = sut.GetManyToOneOperatorEvalStrategy(expectedOperator);
+            var actual = sut.GetManyToOneOperatorEvalStrategy(expectedOperator);
 
             // Assert
             actual.Should().NotBeNull().And.BeOfType(expectedType);
@@ -77,7 +77,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
         public void GetManyToOneOperatorEvalStrategy_GivenUnknownOperator_ThrowsNotSupportedException()
         {
             // Arrange
-            var expectedOperator = (Operators)(-1);
+            var expectedOperator = (Operators)0;
 
             var sut = new OperatorEvalStrategyFactory();
 
@@ -86,7 +86,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '-1' on the context of IManyToOneOperatorEvalStrategy.");
+            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '0' on the context of IManyToOneOperatorEvalStrategy.");
         }
 
         [Theory]
@@ -115,7 +115,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
             var sut = new OperatorEvalStrategyFactory();
 
             // Act
-            IOneToManyOperatorEvalStrategy actual = sut.GetOneToManyOperatorEvalStrategy(expectedOperator);
+            var actual = sut.GetOneToManyOperatorEvalStrategy(expectedOperator);
 
             // Assert
             actual.Should().NotBeNull().And.BeOfType(expectedType);
@@ -125,7 +125,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
         public void GetOneToManyOperatorEvalStrategy_GivenUnknownOperator_ThrowsNotSupportedException()
         {
             // Arrange
-            var expectedOperator = (Operators)(-1);
+            var expectedOperator = (Operators)0;
 
             var sut = new OperatorEvalStrategyFactory();
 
@@ -134,7 +134,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '-1' on the context of IOneToManyOperatorEvalStrategy.");
+            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '0' on the context of IOneToManyOperatorEvalStrategy.");
         }
 
         [Theory]
@@ -176,7 +176,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
             var sut = new OperatorEvalStrategyFactory();
 
             // Act
-            IOneToOneOperatorEvalStrategy actual = sut.GetOneToOneOperatorEvalStrategy(expectedOperator);
+            var actual = sut.GetOneToOneOperatorEvalStrategy(expectedOperator);
 
             // Assert
             actual.Should().NotBeNull().And.BeOfType(expectedType);
@@ -186,7 +186,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
         public void GetOneToOneOperatorEvalStrategy_GivenUnknownOperator_ThrowsNotSupportedException()
         {
             // Arrange
-            var expectedOperator = (Operators)(-1);
+            var expectedOperator = (Operators)0;
 
             var sut = new OperatorEvalStrategyFactory();
 
@@ -195,7 +195,7 @@ namespace Regulae.Tests.Evaluation.Interpreted.ValueEvaluation
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '-1' on the context of IOneToOneOperatorEvalStrategy.");
+            notSupportedException.Message.Should().Be("Operator evaluation is not supported for operator '0' on the context of IOneToOneOperatorEvalStrategy.");
         }
 
         [Theory]

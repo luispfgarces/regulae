@@ -43,6 +43,14 @@ namespace Regulae.Generic
         Task<OperationResult> AddRuleAsync(Rule<TRuleset, TCondition> rule, RuleAddPriorityOption ruleAddPriorityOption);
 
         /// <summary>
+        /// Creates a condition.
+        /// </summary>
+        /// <param name="name">The condition name.</param>
+        /// <param name="dataType">Type of the data.</param>
+        /// <returns></returns>
+        Task<OperationResult> CreateConditionAsync(TCondition name, DataTypes dataType);
+
+        /// <summary>
         /// Creates a ruleset.
         /// </summary>
         /// <param name="ruleset">the ruleset name.</param>
@@ -68,7 +76,7 @@ namespace Regulae.Generic
         /// Gets the rulesets.
         /// </summary>
         /// <returns>a collection of all rulesets, including respective metadata.</returns>
-        Task<IEnumerable<Ruleset<TRuleset>>> GetRulesetsAsync();
+        Task<IReadOnlyDictionary<TRuleset, Ruleset<TRuleset>>> GetRulesetsAsync();
 
         /// <summary>
         /// Get the unique conditions associated with rules of a specific ruleset.
@@ -85,7 +93,7 @@ namespace Regulae.Generic
         /// <returns>
         /// the distinct collection of all conditions present on the rules of the provided ruleset.
         /// </returns>
-        Task<IEnumerable<TCondition>> GetUniqueConditionsAsync(TRuleset ruleset, DateTime dateBegin, DateTime dateEnd);
+        Task<IReadOnlyCollection<TCondition>> GetUniqueConditionsAsync(TRuleset ruleset, DateTime dateBegin, DateTime dateEnd);
 
         /// <summary>
         /// Provides all rule matches (if any) to the given <paramref name="ruleset"/> at the
@@ -102,7 +110,7 @@ namespace Regulae.Generic
         /// <para>All rules matching supplied conditions are returned.</para>
         /// </remarks>
         /// <returns>the matched rule; otherwise, null.</returns>
-        Task<IEnumerable<Rule<TRuleset, TCondition>>> MatchManyAsync(TRuleset ruleset, DateTime matchDateTime, IDictionary<TCondition, object> conditions);
+        Task<IReadOnlyCollection<Rule<TRuleset, TCondition>>> MatchManyAsync(TRuleset ruleset, DateTime matchDateTime, IDictionary<TCondition, object> conditions);
 
         /// <summary>
         /// Provides a rule match (if any) to the given <paramref name="ruleset"/> at the specified
@@ -135,7 +143,7 @@ namespace Regulae.Generic
         /// </para>
         /// </remarks>
         /// <returns>the set of rules matching the conditions.</returns>
-        Task<IEnumerable<Rule<TRuleset, TCondition>>> SearchAsync(SearchArgs<TRuleset, TCondition> searchArgs);
+        Task<IReadOnlyCollection<Rule<TRuleset, TCondition>>> SearchAsync(SearchArgs<TRuleset, TCondition> searchArgs);
 
         /// <summary>
         /// Updates the specified existing rule.

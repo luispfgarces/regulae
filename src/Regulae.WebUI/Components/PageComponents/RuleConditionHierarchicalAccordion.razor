@@ -28,7 +28,7 @@
             }
             else if (conditionNode is ValueConditionNodeViewModel valueConditionNode)
             {
-                var shortValueConditionText = $"{valueConditionNode.Condition} {valueConditionNode.Operator} {GetOperandPrettyPrint(valueConditionNode.Operand)}";
+                var shortValueConditionText = $"{valueConditionNode.Condition} {valueConditionNode.Operator} {GetOperandPrettyPrint(valueConditionNode.RightOperand)}";
                 <AccordionItem Title="@shortValueConditionText">
                     <Content>
                         <div class="row">
@@ -47,7 +47,7 @@
                                                     <p><strong>Operator:</strong> <article>@(valueConditionNode.Operator)</article></p>
                                                 </div>
                                                 <div class="col-sm-3">
-                                                    <p><strong>Operand:</strong> <article>@(GetOperandPrettyPrint(valueConditionNode.Operand))</article></p>
+                                                    <p><strong>Right Operand:</strong> <article>@(GetOperandPrettyPrint(valueConditionNode.RightOperand))</article></p>
                                                 </div>
                                             </div>
                                         </CardText>

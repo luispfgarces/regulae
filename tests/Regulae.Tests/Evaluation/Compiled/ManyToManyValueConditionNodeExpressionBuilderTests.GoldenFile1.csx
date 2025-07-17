@@ -1,21 +1,8 @@
-public bool Main(object leftOperand, object rightOperand)
+public bool Main(Operand leftOperand, Operand rightOperand)
 {
     bool result;
-    object testCoalescedLeftOperand;
-    IEnumerable<string> testConvertedLeftOperand;
-    IEnumerable<string> testConvertedRightOperand;
 
-    if (leftOperand != null)
-    {
-        testCoalescedLeftOperand = leftOperand;
-    }
-    else
-    {
-        testCoalescedLeftOperand = null;
-    }
-    testConvertedLeftOperand = (IEnumerable<string>)testCoalescedLeftOperand;
-    testConvertedRightOperand = (IEnumerable<string>)rightOperand;
-    result = true && true;
+    result = (leftOperand != null && leftOperand.Value != null ? (IEnumerable<string>)leftOperand.Value : Enumerable.Empty<string>()) == (IEnumerable<string>)rightOperand.Value;
     return result;
 
 }

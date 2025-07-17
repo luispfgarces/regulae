@@ -77,11 +77,9 @@ namespace Regulae.Tests.Evaluation.Compiled.ConditionBuilders
             var compiledExpression = Expression.Lambda<Func<string, bool>>(actualExpression, expressionResult.Parameters).Compile(true);
             var notNullLeftHandValueResult1 = compiledExpression.Invoke("The quick brown fox");
             var notNullLeftHandValueResult2 = compiledExpression.Invoke("The Quick brown fox");
-            var nullLeftHandValueResult = compiledExpression.Invoke(null);
 
             notNullLeftHandValueResult1.Should().BeTrue();
             notNullLeftHandValueResult2.Should().BeFalse();
-            nullLeftHandValueResult.Should().BeFalse();
         }
     }
 }

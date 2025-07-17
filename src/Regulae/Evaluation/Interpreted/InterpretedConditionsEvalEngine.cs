@@ -6,21 +6,25 @@ namespace Regulae.Evaluation.Interpreted
     using Regulae;
     using Regulae.ConditionNodes;
     using Regulae.Evaluation;
+    using Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers;
 
     internal sealed class InterpretedConditionsEvalEngine : IConditionsEvalEngine
     {
+        private readonly IConditionEvalDispatcherProvider conditionsEvalDispatchProvider;
         private readonly IConditionsTreeAnalyzer conditionsTreeAnalyzer;
-        private readonly IDeferredEval deferredEval;
+        private readonly RulesEngineOptions rulesEngineOptions;
 
         public InterpretedConditionsEvalEngine(
-            IDeferredEval deferredEval,
-            IConditionsTreeAnalyzer conditionsTreeAnalyzer)
+            IConditionEvalDispatcherProvider conditionsEvalDispatchProvider,
+            IConditionsTreeAnalyzer conditionsTreeAnalyzer,
+            RulesEngineOptions rulesEngineOptions)
         {
-            this.deferredEval = deferredEval;
+            this.conditionsEvalDispatchProvider = conditionsEvalDispatchProvider;
             this.conditionsTreeAnalyzer = conditionsTreeAnalyzer;
+            this.rulesEngineOptions = rulesEngineOptions;
         }
 
-        public bool Eval(IConditionNode conditionNode, IDictionary<string, object> conditions, EvaluationOptions evaluationOptions)
+        public bool Eval(IConditionNode conditionNode, IDictionary<string, Operand> conditions, EvaluationOptions evaluationOptions)
         {
             if (evaluationOptions.ExcludeRulesWithoutSearchConditions && !this.conditionsTreeAnalyzer.AreAllSearchConditionsPresent(conditionNode, conditions))
             {
@@ -32,7 +36,7 @@ namespace Regulae.Evaluation.Interpreted
             return specification.IsSatisfiedBy(conditions);
         }
 
-        private ISpecification<IDictionary<string, object>> BuildSpecification(IConditionNode conditionNode, MatchModes matchMode)
+        private ISpecification<IDictionary<string, Operand>> BuildSpecification(IConditionNode conditionNode, MatchModes matchMode)
         {
             return conditionNode switch
             {
@@ -42,7 +46,7 @@ namespace Regulae.Evaluation.Interpreted
             };
         }
 
-        private ISpecification<IDictionary<string, object>> BuildSpecificationForComposedNode(ComposedConditionNode composedConditionNode, MatchModes matchMode)
+        private ISpecification<IDictionary<string, Operand>> BuildSpecificationForComposedNode(ComposedConditionNode composedConditionNode, MatchModes matchMode)
         {
             var childConditionNodesSpecifications = composedConditionNode
                 .ChildConditionNodes
@@ -56,9 +60,19 @@ namespace Regulae.Evaluation.Interpreted
             };
         }
 
-        private ISpecification<IDictionary<string, object>> BuildSpecificationForValueNode(IValueConditionNode valueConditionNode, MatchModes matchMode)
+        private ISpecification<IDictionary<string, Operand>> BuildSpecificationForValueNode(IValueConditionNode valueConditionNode, MatchModes matchMode)
         {
-            return new FuncSpecification<IDictionary<string, object>>(this.deferredEval.GetDeferredEvalFor(valueConditionNode, matchMode));
+            if (matchMode == MatchModes.Search)
+            {
+                return new SearchLeafSpecification(valueConditionNode, this.conditionsEvalDispatchProvider);
+            }
+
+            if (this.rulesEngineOptions.MissingConditionBehavior == MissingConditionBehaviors.Discard)
+            {
+                return new MatchWithDiscardOnMissingConditionLeafSpecification(valueConditionNode, this.conditionsEvalDispatchProvider);
+            }
+
+            return new MatchWithDefaultValueOnMissingConditionLeafSpecification(valueConditionNode, this.conditionsEvalDispatchProvider);
         }
     }
 }

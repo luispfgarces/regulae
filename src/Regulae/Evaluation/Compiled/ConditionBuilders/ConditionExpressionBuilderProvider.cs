@@ -1,17 +1,18 @@
 namespace Regulae.Evaluation.Compiled.ConditionBuilders
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using Regulae;
     using Regulae.Evaluation;
 
     internal sealed class ConditionExpressionBuilderProvider : IConditionExpressionBuilderProvider
     {
-        private readonly IDictionary<string, IConditionExpressionBuilder> conditionExpressionBuilders;
+        private readonly FrozenDictionary<int, IConditionExpressionBuilder> conditionExpressionBuilders;
 
         public ConditionExpressionBuilderProvider()
         {
-            this.conditionExpressionBuilders = new Dictionary<string, IConditionExpressionBuilder>(StringComparer.Ordinal)
+            this.conditionExpressionBuilders = new Dictionary<int, IConditionExpressionBuilder>()
             {
                 { Combine(Operators.CaseInsensitiveEndsWith, Multiplicities.OneToOne), new CaseInsensitiveEndsWithOneToOneConditionExpressionBuilder() },
                 { Combine(Operators.CaseInsensitiveStartsWith, Multiplicities.OneToOne), new CaseInsensitiveStartsWithOneToOneConditionExpressionBuilder() },
@@ -30,10 +31,10 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
                 { Combine(Operators.NotIn, Multiplicities.OneToMany), new NotInOneToManyConditionExpressionBuilder() },
                 { Combine(Operators.NotStartsWith, Multiplicities.OneToOne), new NotStartsWithOneToOneConditionExpressionBuilder() },
                 { Combine(Operators.StartsWith, Multiplicities.OneToOne), new StartsWithOneToOneConditionExpressionBuilder() },
-            };
+            }.ToFrozenDictionary();
         }
 
-        public IConditionExpressionBuilder GetConditionExpressionBuilderFor(Operators @operator, string multiplicity)
+        public IConditionExpressionBuilder GetConditionExpressionBuilderFor(Operators @operator, Multiplicities multiplicity)
         {
             if (this.conditionExpressionBuilders.TryGetValue(Combine(@operator, multiplicity), out var operatorEvalStrategy))
             {
@@ -43,6 +44,9 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
             throw new NotSupportedException($"Operator compilation is not supported for operator '{@operator}' with '{multiplicity}' multiplicity.");
         }
 
-        private static string Combine(Operators @operator, string multiplicity) => $"{multiplicity}-{@operator}";
+        private static int Combine(Operators @operator, Multiplicities multiplicity)
+        {
+            return ((byte)@operator << 2) | (byte)multiplicity;
+        }
     }
 }

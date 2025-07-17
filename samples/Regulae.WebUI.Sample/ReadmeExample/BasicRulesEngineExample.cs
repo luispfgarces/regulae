@@ -1,9 +1,9 @@
 namespace Regulae.WebUI.Sample.ReadmeExample
 {
     using System;
-    using Regulae.WebUI.Sample.Engine;
     using Regulae;
     using Regulae.Providers.InMemory;
+    using Regulae.WebUI.Sample.Engine;
 
     internal class BasicRulesEngineExample
     {
@@ -12,7 +12,7 @@ namespace Regulae.WebUI.Sample.ReadmeExample
             this.RulesEngine = RulesEngineBuilder
                 .CreateRulesEngine()
                 .SetInMemoryDataSource()
-                .Configure(c => c.PriorityCriteria = PriorityCriterias.TopmostRuleWins)
+                .Configure(c => c.UseSmallestNumberPriorityCriteria())
                 .Build();
 
             this.CreateRulesets();
@@ -72,11 +72,11 @@ namespace Regulae.WebUI.Sample.ReadmeExample
             return new List<RuleSpecificationBase<BasicRulesetNames, BasicConditionNames>>()
             {
                 new RuleSpecificationBase<BasicRulesetNames, BasicConditionNames>(
-                    ruleForPremiumFreeSampleJanuary, RuleAddPriorityOption.ByPriorityNumber(1)),
+                    ruleForPremiumFreeSampleJanuary, RuleAddPriorityOption.AtNumber(1)),
                 new RuleSpecificationBase<BasicRulesetNames, BasicConditionNames>(
-                    ruleForPremiumFreeSampleApril, RuleAddPriorityOption.ByPriorityNumber(2)),
+                    ruleForPremiumFreeSampleApril, RuleAddPriorityOption.AtNumber(2)),
                 new RuleSpecificationBase<BasicRulesetNames, BasicConditionNames>(
-                    ruleForPremiumFreeSampleSeptember, RuleAddPriorityOption.ByPriorityNumber(3))
+                    ruleForPremiumFreeSampleSeptember, RuleAddPriorityOption.AtNumber(3))
             };
         }
     }

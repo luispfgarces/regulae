@@ -32,7 +32,7 @@ namespace Regulae.WebUI.Services
         }
 
         public IRulesEngineInstancesRegistrar AddInstance(string name, Func<IServiceProvider, string, Task<IRulesEngine>> getRulesEngineFunc)
-            => this.AddInstance(name, (serviceProvider, name) => getRulesEngineFunc.Invoke(serviceProvider, name).GetAwaiter().GetResult());
+            => this.AddInstance(name, (serviceProvider, name) => getRulesEngineFunc(serviceProvider, name).GetAwaiter().GetResult());
 
         public void EnumerateInstances(IServiceProvider serviceProvider)
         {
@@ -44,7 +44,7 @@ namespace Regulae.WebUI.Services
                     {
                         Id = id,
                         Name = name,
-                        RulesEngine = getRulesEngineFunc.Invoke(serviceProvider, name),
+                        RulesEngine = getRulesEngineFunc(serviceProvider, name),
                     };
 
                     this.instances.Add(id, instance);

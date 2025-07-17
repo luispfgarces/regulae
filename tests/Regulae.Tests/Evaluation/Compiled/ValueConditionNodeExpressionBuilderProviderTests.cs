@@ -23,7 +23,7 @@ namespace Regulae.Tests.Evaluation.Compiled
         public void GetExpressionBuilder_GivenUnknownMultiplicity_ThrowsInvalidOperationException()
         {
             // Arrange
-            var multiplicity = "unknown-multiplicity";
+            var multiplicity = (Multiplicities)4;
             var conditionExpressionBuilderProvider = Mock.Of<IConditionExpressionBuilderProvider>();
 
             var valueConditionNodeExpressionBuilderProvider
@@ -34,12 +34,12 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Contain(multiplicity);
+            notSupportedException.Message.Should().Contain(multiplicity.ToString());
         }
 
         [Theory]
         [MemberData(nameof(SuccessScenarios))]
-        public void GetExpressionBuilder_GivenValidMultiplicity_ReturnsMatchingBuilder(string multiplicity, Type compilerType)
+        public void GetExpressionBuilder_GivenValidMultiplicity_ReturnsMatchingBuilder(object multiplicity, Type compilerType)
         {
             // Arrange
             var conditionExpressionBuilderProvider = Mock.Of<IConditionExpressionBuilderProvider>();
@@ -48,7 +48,7 @@ namespace Regulae.Tests.Evaluation.Compiled
                 = new ValueConditionNodeExpressionBuilderProvider(conditionExpressionBuilderProvider);
 
             // Act
-            var valueConditionNodeExpressionBuilder = valueConditionNodeExpressionBuilderProvider.GetExpressionBuilder(multiplicity);
+            var valueConditionNodeExpressionBuilder = valueConditionNodeExpressionBuilderProvider.GetExpressionBuilder((Multiplicities)multiplicity);
 
             // Assert
             valueConditionNodeExpressionBuilder.Should().NotBeNull().And.BeOfType(compilerType);

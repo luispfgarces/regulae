@@ -12,7 +12,9 @@ namespace Regulae.Tests
     using Moq;
     using Regulae;
     using Regulae.ConditionNodes;
+    using Regulae.Core;
     using Regulae.Evaluation;
+    using Regulae.Management;
     using Regulae.Source;
     using Regulae.Tests.TestStubs;
     using Regulae.Validation;
@@ -22,11 +24,13 @@ namespace Regulae.Tests
     {
         private readonly IConditionsEvalEngine conditionsEvalEngineMock;
         private readonly IRuleConditionsExtractor ruleConditionsExtractorMock;
+        private readonly IRuleSanitizer ruleSanitizerMock;
         private readonly IRulesSource rulesSourceMock;
         private readonly IValidatorProvider validatorProviderMock;
 
         public RulesEngineTests()
         {
+            this.ruleSanitizerMock = Mock.Of<IRuleSanitizer>();
             this.rulesSourceMock = Mock.Of<IRulesSource>();
             this.ruleConditionsExtractorMock = Mock.Of<IRuleConditionsExtractor>();
             this.conditionsEvalEngineMock = Mock.Of<IConditionsEvalEngine>();
@@ -47,7 +51,7 @@ namespace Regulae.Tests
                 Name = "Update test rule",
                 Priority = 3,
                 Active = false,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
                 Ruleset = ruleset,
             };
 
@@ -55,10 +59,9 @@ namespace Regulae.Tests
                 .Setup(s => s.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
                 .ReturnsAsync(new List<Rule> { testRule });
 
-            var validatorProvider = Mock.Of<IValidatorProvider>();
+            var validatorProviderMock = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.ActivateRuleAsync(testRule);
@@ -85,21 +88,26 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             Mock.Get(rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new[] { ruleset });
+                .ReturnsAsync(new Dictionary<string, Ruleset> { { ruleset.Name, ruleset } });
+            Mock.Get(rulesSourceMock)
+                .Setup(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
+                .ReturnsAsync(new List<Rule>());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
+            Mock.Get(this.ruleSanitizerMock)
+                .Setup(x => x.SanitizeAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(OperationResult.Success());
 
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
-            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtBottom);
+            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtLargestNumber);
 
             // Assert
             actual.IsSuccess.Should().BeTrue();
@@ -123,21 +131,20 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             Mock.Get(rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(Array.Empty<Ruleset>());
+                .ReturnsAsync(new Dictionary<string, Ruleset>());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
-            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtBottom);
+            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtLargestNumber);
 
             // Assert
             actual.IsSuccess.Should().BeFalse();
@@ -161,24 +168,29 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(Array.Empty<Ruleset>());
+                .ReturnsAsync(new Dictionary<string, Ruleset>());
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
+            Mock.Get(this.rulesSourceMock)
+                .Setup(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
+                .ReturnsAsync(new List<Rule>());
+            Mock.Get(this.ruleSanitizerMock)
+                .Setup(x => x.SanitizeAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(OperationResult.Success());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
             rulesEngineOptions.AutoCreateRulesets = true;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
-            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtBottom);
+            var actual = await sut.AddRuleAsync(testRule, RuleAddPriorityOption.AtLargestNumber);
 
             // Assert
             actual.IsSuccess.Should().BeTrue();
@@ -198,13 +210,11 @@ namespace Regulae.Tests
 
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new[] { new Ruleset(nameof(RulesetNames.Type1), DateTime.UtcNow), });
+                .ReturnsAsync(new Dictionary<string, Ruleset> { { nameof(RulesetNames.Type1), new Ruleset(nameof(RulesetNames.Type1), DateTime.UtcNow) } });
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var operationResult = await sut.CreateRulesetAsync(ruleset);
@@ -228,16 +238,14 @@ namespace Regulae.Tests
 
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(Array.Empty<Ruleset>());
+                .ReturnsAsync(new Dictionary<string, Ruleset>());
             Mock.Get(rulesSourceMock)
                 .Setup(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var operationResult = await sut.CreateRulesetAsync(ruleset);
@@ -266,7 +274,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Update test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
                 Ruleset = ruleset,
             };
 
@@ -280,8 +288,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.DeactivateRuleAsync(testRule);
@@ -293,7 +300,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
         }
 
@@ -303,12 +310,14 @@ namespace Regulae.Tests
             // Arrange
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new[] { new Ruleset(nameof(RulesetNames.Type1), DateTime.UtcNow), new Ruleset(nameof(RulesetNames.Type2), DateTime.UtcNow), });
+                .ReturnsAsync(new Dictionary<string, Ruleset>
+                {
+                    { nameof(RulesetNames.Type1), new Ruleset(nameof(RulesetNames.Type1), DateTime.UtcNow) },
+                    { nameof(RulesetNames.Type2), new Ruleset(nameof(RulesetNames.Type2), DateTime.UtcNow) },
+                });
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProviderMock, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var rulesets = await sut.GetRulesetsAsync();
@@ -316,8 +325,8 @@ namespace Regulae.Tests
             // Assert
             rulesets.Should().NotBeNull()
                 .And.HaveCount(2)
-                .And.Contain(r => string.Equals(r.Name, nameof(RulesetNames.Type1), StringComparison.Ordinal))
-                .And.Contain(r => string.Equals(r.Name, nameof(RulesetNames.Type2), StringComparison.Ordinal));
+                .And.ContainKey(nameof(RulesetNames.Type1))
+                .And.ContainKey(nameof(RulesetNames.Type2));
 
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
@@ -339,18 +348,16 @@ namespace Regulae.Tests
             var expectedConditions = new List<string> { ConditionNames.IsoCountryCode.ToString() };
 
             Mock.Get(ruleConditionsExtractorMock)
-                .Setup(x => x.GetConditions(It.IsAny<IEnumerable<Rule>>()))
+                .Setup(x => x.GetConditions(It.IsAny<IReadOnlyCollection<Rule>>()))
                 .Returns(expectedConditions);
 
             this.SetupMockForConditionsEvalEngine(
-                (rootConditionNode, _, _) => rootConditionNode is ValueConditionNode stringConditionNode && stringConditionNode.Operand.ToString() == "USA",
+                (rootConditionNode, _, _) => rootConditionNode is ValueConditionNode stringConditionNode && stringConditionNode.RightOperand.ToString() == "USA",
                 evaluationOptions);
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
-
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.GetUniqueConditionsAsync(RulesetNames.Type1.ToString(), dateBegin, dateEnd);
@@ -380,7 +387,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Expected rule 1",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var expected2 = new Rule
@@ -390,7 +397,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2021, 01, 01),
                 Name = "Expected rule 2",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var notExpected = new Rule
@@ -400,7 +407,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Not expected rule",
                 Priority = 1, // Topmost rule, should be the one that wins if options are set to topmost wins.
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "CHE")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "CHE")
             };
 
             var rules = new[]
@@ -418,14 +425,12 @@ namespace Regulae.Tests
 
             this.SetupMockForConditionsEvalEngine((rootConditionNode, _, _) =>
             {
-                return rootConditionNode is ValueConditionNode stringConditionNode && stringConditionNode.Operand.ToString() == "USA";
+                return rootConditionNode is ValueConditionNode stringConditionNode && stringConditionNode.RightOperand.Value.ToString() == "USA";
             }, evaluationOptions);
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
-
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.MatchManyAsync(ruleset, matchDateTime, conditions);
@@ -437,7 +442,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
         }
 
@@ -460,7 +465,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Expected rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var expected = new Rule
@@ -470,7 +475,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2021, 01, 01),
                 Name = "Expected rule",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var rules = new[]
@@ -490,10 +495,8 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.MatchOneAsync(ruleset, matchDateTime, conditions);
@@ -503,7 +506,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
         }
 
@@ -526,7 +529,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Expected rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var other = new Rule
@@ -536,7 +539,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2021, 01, 01),
                 Name = "Expected rule",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var rules = new[]
@@ -556,8 +559,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.MatchOneAsync(ruleset, matchDateTime, conditions);
@@ -567,7 +569,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
         }
 
@@ -592,7 +594,7 @@ namespace Regulae.Tests
                     DateEnd = new DateTime(2019, 01, 01),
                     Name = "Expected rule",
                     Priority = 3,
-                    RootCondition = new ValueConditionNode(DataTypes.String,ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
                 },
                 new Rule
                 {
@@ -601,7 +603,7 @@ namespace Regulae.Tests
                     DateEnd = new DateTime(2021, 01, 01),
                     Name = "Expected rule",
                     Priority = 200,
-                    RootCondition = new ValueConditionNode(DataTypes.String,ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
                 }
             };
 
@@ -616,8 +618,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await sut.MatchOneAsync(ruleset, matchDateTime, conditions);
@@ -627,7 +628,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
         }
 
@@ -644,7 +645,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Update test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
                 Ruleset = ruleset,
             };
 
@@ -658,8 +659,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             testRule.DateEnd = new DateTime(2019, 01, 02);
             testRule.Priority = 1;
@@ -674,7 +674,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
         }
 
@@ -689,7 +689,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2019, 01, 01),
                 Name = "Update test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var evaluationOptions = new EvaluationOptions
@@ -702,8 +702,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             testRule.DateEnd = testRule.DateBegin.AddYears(-2);
             testRule.Priority = 1;
@@ -718,7 +717,7 @@ namespace Regulae.Tests
             Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
             Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, object>>(),
+                It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
         }
 
@@ -746,13 +745,11 @@ namespace Regulae.Tests
             Mock.Get(validator)
                 .Setup(x => x.ValidateAsync(It.IsAny<SearchArgs<string, string>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult(new[] { new ValidationFailure("Prop1", "Sample error message") }));
-            var validatorProvider = Mock.Of<IValidatorProvider>();
-            Mock.Get(validatorProvider)
+            Mock.Get(this.validatorProviderMock)
                 .Setup(x => x.GetValidatorFor<SearchArgs<string, string>>())
                 .Returns(validator);
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-
-            var sut = new RulesEngine(conditionsEvalEngineMock, rulesSourceMock, validatorProvider, rulesEngineOptions, ruleConditionsExtractorMock);
+            var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
             var actual = await Assert.ThrowsAsync(exceptionType, async () =>
@@ -767,7 +764,7 @@ namespace Regulae.Tests
                         switch (parameterName)
                         {
                             case "rule":
-                                _ = await sut.AddRuleAsync(null, RuleAddPriorityOption.AtTop);
+                                _ = await sut.AddRuleAsync(null, RuleAddPriorityOption.AtSmallestNumber);
                                 break;
 
                             case "ruleAddPriorityOption":
@@ -845,12 +842,29 @@ namespace Regulae.Tests
                 .Build()
                 .Rule;
 
+        private RulesEngine CreateRulesEngine(RulesEngineOptions rulesEngineOptions)
+        {
+            var rulesEngineArgs = new RulesEngineArgs
+            {
+                ConditionsConverter = Mock.Of<IConditionsConverter>(),
+                ConditionsEvalEngine = this.conditionsEvalEngineMock,
+                RulesSource = this.rulesSourceMock,
+                ValidatorProvider = this.validatorProviderMock,
+                RulesEngineOptions = rulesEngineOptions,
+                RuleConditionsExtractor = this.ruleConditionsExtractorMock,
+                RuleSanitizer = this.ruleSanitizerMock,
+            };
+
+            var sut = new RulesEngine(rulesEngineArgs);
+            return sut;
+        }
+
         private void SetupMockForConditionsEvalEngine(Func<IConditionNode, IDictionary<string, object>, EvaluationOptions, bool> evalFunc, EvaluationOptions evaluationOptions)
         {
             Mock.Get(this.conditionsEvalEngineMock)
                 .Setup(x => x.Eval(
                     It.IsAny<IConditionNode>(),
-                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IDictionary<string, Operand>>(),
                     It.Is<EvaluationOptions>(eo => eo == evaluationOptions)))
                 .Returns(evalFunc);
         }
@@ -860,12 +874,12 @@ namespace Regulae.Tests
             Mock.Get(this.conditionsEvalEngineMock)
                 .Setup(x => x.Eval(
                     It.IsAny<IConditionNode>(),
-                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IDictionary<string, Operand>>(),
                     It.Is<EvaluationOptions>(eo => eo == evaluationOptions)))
                 .Returns(result);
         }
 
-        private void SetupMockForRulesDataSource(IEnumerable<Rule> rules)
+        private void SetupMockForRulesDataSource(IReadOnlyCollection<Rule> rules)
         {
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()))

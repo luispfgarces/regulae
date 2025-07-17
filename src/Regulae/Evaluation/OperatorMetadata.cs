@@ -1,6 +1,6 @@
 namespace Regulae.Evaluation
 {
-    using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using System.Linq;
     using Regulae;
@@ -9,27 +9,27 @@ namespace Regulae.Evaluation
     {
         private bool? leftSupportForOneMultiplicity = null;
 
+        public OperatorMetadata(Operators @operator, params Multiplicities[] supportedMultiplicities)
+        {
+            this.Operator = @operator;
+            this.SupportedMultiplicities = supportedMultiplicities.ToFrozenSet();
+        }
+
         public bool HasSupportForOneMultiplicityAtLeft
         {
             get
             {
                 if (this.leftSupportForOneMultiplicity is null)
                 {
-#if NETSTANDARD2_0
-                    this.leftSupportForOneMultiplicity = this.SupportedMultiplicities?.Any(m => m.Contains("one-to")) ?? false;
-#else
-                    this.leftSupportForOneMultiplicity = this.SupportedMultiplicities?.Any(m => m.Contains("one-to", StringComparison.Ordinal)) ?? false;
-#endif
+                    this.leftSupportForOneMultiplicity = this.SupportedMultiplicities.Any(m => (((int)m >> 1) | 0x0) == 0x0);
                 }
 
                 return this.leftSupportForOneMultiplicity.GetValueOrDefault();
             }
         }
 
-        public Operators Operator { get; set; }
+        public Operators Operator { get; }
 
-        public string[] SupportedMultiplicities { get; set; } = Array.Empty<string>();
-
-        public IEnumerable<string> GetAllCombinations() => this.SupportedMultiplicities.Select(x => $"{x}-{this.Operator}");
+        public ISet<Multiplicities> SupportedMultiplicities { get; }
     }
 }

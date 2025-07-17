@@ -122,8 +122,8 @@ else
                             Value = instance.RulesEngine.Options.PriorityCriteria.ToString(),
                             ValueDescription = instance.RulesEngine.Options.PriorityCriteria switch
                             {
-                                PriorityCriterias.TopmostRuleWins => WebUIConstants.OptionPriorityCriteriaTopmostRuleWinsDescription,
-                                PriorityCriterias.BottommostRuleWins => WebUIConstants.OptionPriorityCriteriaBottommostRuleWinsDescription,
+                                PriorityCriterias.SmallestNumber => WebUIConstants.OptionPriorityCriteriaSmallestNumberRuleWinsDescription,
+                                PriorityCriterias.LargestNumber => WebUIConstants.OptionPriorityCriteriaLargestNumberRuleWinsDescription,
                                 _ => "",
                             },
                         },

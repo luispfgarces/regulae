@@ -17,7 +17,7 @@ namespace Regulae.Tests.Builder
 
             configuredRulesEngineBuilder.Configure(opt =>
             {
-                opt.EnableCompilation = true;
+                opt.SetAutoCreateRulesets(true);
             });
 
             // Act
@@ -51,7 +51,7 @@ namespace Regulae.Tests.Builder
             // Act
             var actual = configuredRulesEngineBuilder.Configure(opt =>
             {
-                opt.MissingConditionBehavior = MissingConditionBehaviors.Discard;
+                opt.SetMissingConditionBehavior(MissingConditionBehaviors.Discard);
             });
 
             // Assert

@@ -7,11 +7,12 @@ namespace Regulae.Source
     internal sealed class RulesSource : IRulesSource
     {
         private readonly AddRuleDelegate addRuleDelegate;
+        private readonly CreateConditionDelegate createConditionDelegate;
         private readonly CreateRulesetDelegate createRulesetDelegate;
+        private readonly GetConditionsDelegate getConditionsDelegate;
         private readonly GetRulesDelegate getRulesDelegate;
         private readonly GetRulesetsDelegate getRulesetsDelegate;
         private readonly GetRulesFilteredDelegate getRulesFilteredDelegate;
-        private readonly IRulesDataSource rulesDataSource;
         private readonly UpdateRuleDelegate updateRuleDelegate;
 
         public RulesSource(
@@ -20,49 +21,60 @@ namespace Regulae.Source
         {
             var middlewaresLinkedList = new LinkedList<IRulesSourceMiddleware>(middlewares);
             this.addRuleDelegate = CreateAddRulePipelineDelegate(rulesDataSource, middlewaresLinkedList);
+            this.createConditionDelegate = CreateCreateConditionPipelineDelegate(rulesDataSource, middlewaresLinkedList);
             this.createRulesetDelegate = CreateCreateRulesetPipelineDelegate(rulesDataSource, middlewaresLinkedList);
+            this.getConditionsDelegate = CreateGetConditionsPipelineDelegate(rulesDataSource, middlewaresLinkedList);
             this.getRulesetsDelegate = CreateGetRulesetsPipelineDelegate(rulesDataSource, middlewaresLinkedList);
             this.getRulesDelegate = CreateGetRulesPipelineDelegate(rulesDataSource, middlewaresLinkedList);
             this.getRulesFilteredDelegate = CreateGetRulesFilteredPipelineDelegate(rulesDataSource, middlewaresLinkedList);
             this.updateRuleDelegate = CreateUpdateRulePipelineDelegate(rulesDataSource, middlewaresLinkedList);
-            this.rulesDataSource = rulesDataSource;
         }
 
-        public async Task AddRuleAsync(AddRuleArgs args)
+        public ValueTask AddRuleAsync(AddRuleArgs args)
         {
-            await this.addRuleDelegate.Invoke(args).ConfigureAwait(false);
+            return this.addRuleDelegate(args);
         }
 
-        public async Task CreateRulesetAsync(CreateRulesetArgs args)
+        public ValueTask CreateConditionAsync(CreateConditionArgs args)
         {
-            await this.createRulesetDelegate(args).ConfigureAwait(false);
+            return this.createConditionDelegate(args);
         }
 
-        public async Task<IEnumerable<Rule>> GetRulesAsync(GetRulesArgs args)
+        public ValueTask CreateRulesetAsync(CreateRulesetArgs args)
         {
-            return await this.getRulesDelegate.Invoke(args).ConfigureAwait(false);
+            return this.createRulesetDelegate(args);
         }
 
-        public async Task<IEnumerable<Ruleset>> GetRulesetsAsync(GetRulesetsArgs args)
+        public ValueTask<IReadOnlyDictionary<string, Condition>> GetConditionsAsync(GetConditionsArgs args)
         {
-            return await this.getRulesetsDelegate(args).ConfigureAwait(false);
+            return this.getConditionsDelegate(args);
         }
 
-        public async Task<IEnumerable<Rule>> GetRulesFilteredAsync(GetRulesFilteredArgs args)
+        public ValueTask<IReadOnlyCollection<Rule>> GetRulesAsync(GetRulesArgs args)
         {
-            return await this.getRulesFilteredDelegate.Invoke(args).ConfigureAwait(false);
+            return this.getRulesDelegate(args);
         }
 
-        public async Task UpdateRuleAsync(UpdateRuleArgs args)
+        public ValueTask<IReadOnlyDictionary<string, Ruleset>> GetRulesetsAsync(GetRulesetsArgs args)
         {
-            await this.updateRuleDelegate.Invoke(args).ConfigureAwait(false);
+            return this.getRulesetsDelegate(args);
+        }
+
+        public ValueTask<IReadOnlyCollection<Rule>> GetRulesFilteredAsync(GetRulesFilteredArgs args)
+        {
+            return this.getRulesFilteredDelegate(args);
+        }
+
+        public ValueTask UpdateRuleAsync(UpdateRuleArgs args)
+        {
+            return this.updateRuleDelegate(args);
         }
 
         private static AddRuleDelegate CreateAddRulePipelineDelegate(
             IRulesDataSource rulesDataSource,
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
-            AddRuleDelegate action = async (args) => await rulesDataSource.AddRuleAsync(args.Rule).ConfigureAwait(false);
+            AddRuleDelegate action = (args) => rulesDataSource.AddRuleAsync(args.Rule);
 
             if (middlewares.Count > 0)
             {
@@ -72,7 +84,31 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleAddRuleAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleAddRuleAsync(args, immutableAction);
+
+                    // Get previous middleware node.
+                    middlewareNode = middlewareNode.Previous;
+                }
+            }
+
+            return action;
+        }
+
+        private static CreateConditionDelegate CreateCreateConditionPipelineDelegate(
+            IRulesDataSource rulesDataSource,
+            LinkedList<IRulesSourceMiddleware> middlewares)
+        {
+            CreateConditionDelegate action = (args) => rulesDataSource.CreateConditionAsync(args.Name, args.DataType);
+
+            if (middlewares.Count > 0)
+            {
+                var middlewareNode = middlewares.Last;
+
+                while (middlewareNode is { })
+                {
+                    var middleware = middlewareNode.Value;
+                    var immutableAction = action;
+                    action = (args) => middleware.HandleCreateConditionAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;
@@ -86,7 +122,7 @@ namespace Regulae.Source
             IRulesDataSource rulesDataSource,
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
-            CreateRulesetDelegate action = async (args) => await rulesDataSource.CreateRulesetAsync(args.Name).ConfigureAwait(false);
+            CreateRulesetDelegate action = (args) => rulesDataSource.CreateRulesetAsync(args.Name);
 
             if (middlewares.Count > 0)
             {
@@ -96,7 +132,31 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleCreateRulesetAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleCreateRulesetAsync(args, immutableAction);
+
+                    // Get previous middleware node.
+                    middlewareNode = middlewareNode.Previous;
+                }
+            }
+
+            return action;
+        }
+
+        private static GetConditionsDelegate CreateGetConditionsPipelineDelegate(
+            IRulesDataSource rulesDataSource,
+            LinkedList<IRulesSourceMiddleware> middlewares)
+        {
+            GetConditionsDelegate action = (_) => rulesDataSource.GetConditionsAsync();
+
+            if (middlewares.Count > 0)
+            {
+                var middlewareNode = middlewares.Last;
+
+                while (middlewareNode is { })
+                {
+                    var middleware = middlewareNode.Value;
+                    var immutableAction = action;
+                    action = (args) => middleware.HandleGetConditionsAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;
@@ -110,7 +170,7 @@ namespace Regulae.Source
             IRulesDataSource rulesDataSource,
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
-            GetRulesetsDelegate action = async (_) => await rulesDataSource.GetRulesetsAsync().ConfigureAwait(false);
+            GetRulesetsDelegate action = (_) => rulesDataSource.GetRulesetsAsync();
 
             if (middlewares.Count > 0)
             {
@@ -120,7 +180,7 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleGetRulesetsAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleGetRulesetsAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;
@@ -135,7 +195,7 @@ namespace Regulae.Source
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
             GetRulesFilteredDelegate action =
-                async (args) =>
+                (args) =>
                 {
                     RulesFilterArgs rulesFilterArgs = new()
                     {
@@ -144,7 +204,7 @@ namespace Regulae.Source
                         Priority = args.Priority,
                     };
 
-                    return await rulesDataSource.GetRulesByAsync(rulesFilterArgs).ConfigureAwait(false);
+                    return rulesDataSource.GetRulesByAsync(rulesFilterArgs);
                 };
 
             if (middlewares.Count > 0)
@@ -155,7 +215,7 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleGetRulesFilteredAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleGetRulesFilteredAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;
@@ -170,8 +230,8 @@ namespace Regulae.Source
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
             GetRulesDelegate action =
-                async (args)
-                    => await rulesDataSource.GetRulesAsync(args.Ruleset, args.DateBegin, args.DateEnd).ConfigureAwait(false);
+                (args)
+                    => rulesDataSource.GetRulesAsync(args.Ruleset, args.DateBegin, args.DateEnd);
 
             if (middlewares.Count > 0)
             {
@@ -181,7 +241,7 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleGetRulesAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleGetRulesAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;
@@ -196,8 +256,7 @@ namespace Regulae.Source
             LinkedList<IRulesSourceMiddleware> middlewares)
         {
             UpdateRuleDelegate action =
-                async (args)
-                    => await rulesDataSource.UpdateRuleAsync(args.Rule).ConfigureAwait(false);
+                (args) => rulesDataSource.UpdateRuleAsync(args.Rule);
 
             if (middlewares.Count > 0)
             {
@@ -207,7 +266,7 @@ namespace Regulae.Source
                 {
                     var middleware = middlewareNode.Value;
                     var immutableAction = action;
-                    action = async (args) => await middleware.HandleUpdateRuleAsync(args, immutableAction).ConfigureAwait(false);
+                    action = (args) => middleware.HandleUpdateRuleAsync(args, immutableAction);
 
                     // Get previous middleware node.
                     middlewareNode = middlewareNode.Previous;

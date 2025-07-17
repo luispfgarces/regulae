@@ -33,7 +33,7 @@ namespace Regulae.Builder.Generic.RulesBuilder
         public IRuleBuilder<TRuleset, TCondition> ApplyWhen(Func<IRootConditionNodeBuilder<TCondition>, IConditionNode> conditionFunc)
         {
             var rootConditionNodeBuilder = new RootConditionNodeBuilder<TCondition>();
-            var condition = conditionFunc.Invoke(rootConditionNodeBuilder);
+            var condition = conditionFunc(rootConditionNodeBuilder);
             return this.ApplyWhen(condition);
         }
 

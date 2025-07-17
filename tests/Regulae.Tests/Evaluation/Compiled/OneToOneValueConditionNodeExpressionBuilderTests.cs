@@ -10,9 +10,9 @@ namespace Regulae.Tests.Evaluation.Compiled
     using Moq;
     using Regulae;
     using Regulae.Evaluation;
+    using Regulae.Evaluation.Compiled;
     using Regulae.Evaluation.Compiled.ConditionBuilders;
     using Regulae.Evaluation.Compiled.ExpressionBuilders;
-    using Regulae.Evaluation.Compiled;
     using Xunit;
 
     public class OneToOneValueConditionNodeExpressionBuilderTests
@@ -30,16 +30,17 @@ namespace Regulae.Tests.Evaluation.Compiled
             Expression actualLeftExpression = null;
             Expression actualRightExpression = null;
 
-            var conditionExpression = Expression.AndAlso(Expression.Constant(true, typeof(bool)), Expression.Constant(true, typeof(bool))); // For testing purposes, does not need to stay true to the scenario
             var conditionExpressionBuilder = Mock.Of<IConditionExpressionBuilder>();
             Mock.Get(conditionExpressionBuilder)
                 .Setup(x => x.BuildConditionExpression(It.IsAny<IExpressionBlockBuilder>(), It.IsAny<BuildConditionExpressionArgs>()))
-                .Callback<IExpressionBlockBuilder, BuildConditionExpressionArgs>((_, args) =>
+                .Returns<IExpressionBlockBuilder, BuildConditionExpressionArgs>((b, args) =>
                 {
                     actualLeftExpression = args.LeftHandOperand;
                     actualRightExpression = args.RightHandOperand;
-                })
-                .Returns(conditionExpression);
+
+                    // For testing purposes, does not need to stay true to the scenario
+                    return Expression.Equal(actualLeftExpression, actualRightExpression);
+                });
             var conditionExpressionBuilderProvider = Mock.Of<IConditionExpressionBuilderProvider>();
             Mock.Get(conditionExpressionBuilderProvider)
                 .Setup(x => x.GetConditionExpressionBuilderFor(Operators.Equal, Multiplicities.OneToOne))
@@ -52,20 +53,32 @@ namespace Regulae.Tests.Evaluation.Compiled
             var expressionResult = ExpressionBuilder.NewExpression("TestDummy")
                 .WithParameters(p =>
                 {
-                    p.CreateParameter("leftOperand", typeof(object));
-                    p.CreateParameter("rightOperand", typeof(object));
+                    p.CreateParameter("leftOperand", typeof(Operand));
+                    p.CreateParameter("rightOperand", typeof(Operand));
                 })
                 .HavingReturn(typeof(bool), false)
                 .SetImplementation(builder =>
                 {
                     var resultVariableExpression = builder.CreateVariable("result", typeof(bool));
+                    var operandValueFieldInfo = typeof(Operand).GetField("Value");
+                    var leftOperandVariableExpression = builder.GetParameter("leftOperand");
+                    var leftOperandValueFieldAccessExpression = builder.AccessField(
+                        leftOperandVariableExpression,
+                        operandValueFieldInfo);
+                    var rightOperandValueFieldAccessExpression = builder.AccessField(
+                        builder.GetParameter("rightOperand"),
+                        operandValueFieldInfo);
+                    var testPresentLeftOperand = builder.AndAlso(
+                        builder.NotEqual(leftOperandVariableExpression, builder.Constant<object>(value: null!)),
+                        builder.NotEqual(leftOperandValueFieldAccessExpression, builder.Constant<object>(value: null!)));
                     var args = new BuildValueConditionNodeExpressionArgs
                     {
                         DataTypeConfiguration = DataTypeConfiguration.Create(DataTypes.String, typeof(string), null),
-                        LeftOperandVariableExpression = builder.GetParameter("leftOperand"),
+                        LeftOperandExpression = leftOperandValueFieldAccessExpression,
                         Operator = Operators.Equal,
                         ResultVariableExpression = resultVariableExpression,
-                        RightOperandVariableExpression = builder.GetParameter("rightOperand"),
+                        RightOperandExpression = rightOperandValueFieldAccessExpression,
+                        TestLeftOperand = testPresentLeftOperand
                     };
 
                     var blockExpression = builder.Block("test", innerBuilder =>
@@ -84,11 +97,11 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             // Purely for the effect of comparing the generated lambda expression code with the
             // golden file.
-            var lambdaExpression = Expression.Lambda<Func<object, object, bool>>(expressionResult.Implementation, expressionResult.Parameters);
+            var lambdaExpression = Expression.Lambda<Func<Operand, Operand, bool>>(expressionResult.Implementation, expressionResult.Parameters);
             var actualScript = lambdaExpression.ToScript();
             var diffResult = SideBySideDiffBuilder.Diff(expectedScript, actualScript, ignoreWhiteSpace: true);
             diffResult.NewText.HasDifferences.Should().BeFalse();
-            Func<object, object, bool> compiledLambdaExpression = null;
+            Func<Operand, Operand, bool> compiledLambdaExpression = null;
             FluentActions.Invoking(() => compiledLambdaExpression = lambdaExpression.Compile())
                 .Should()
                 .NotThrow("expression should be compilable");

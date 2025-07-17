@@ -6,7 +6,7 @@ namespace Regulae.Providers.InMemory.DataModel
     {
         public bool Active { get; set; } = true;
 
-        public dynamic Content { get; set; }
+        public object Content { get; set; }
 
         public DateTime DateBegin { get; set; }
 

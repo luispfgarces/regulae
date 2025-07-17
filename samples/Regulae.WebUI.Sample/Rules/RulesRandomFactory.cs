@@ -42,14 +42,14 @@ namespace Regulae.WebUI.Sample.Rules
                     var dateBegin = CreateRandomDateBegin(currentYear);
 
                     Add(CreateMultipleRule(ruleset, i, dateBegin, CreateRandomDateEnd(dateBegin)),
-                        RuleAddPriorityOption.ByPriorityNumber(i),
+                        RuleAddPriorityOption.AtNumber(i),
                         rulesSpecifications);
                 }
 
                 var deactiveDateBegin = CreateRandomDateBegin(currentYear);
 
                 Add(CreateMultipleRule(ruleset, finalNumber, deactiveDateBegin, CreateRandomDateEnd(deactiveDateBegin), isActive: false),
-                        RuleAddPriorityOption.ByPriorityNumber(finalNumber),
+                        RuleAddPriorityOption.AtNumber(finalNumber),
                         rulesSpecifications);
             }
 

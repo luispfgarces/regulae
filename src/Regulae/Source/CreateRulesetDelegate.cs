@@ -2,5 +2,5 @@ namespace Regulae.Source
 {
     using System.Threading.Tasks;
 
-    internal delegate Task CreateRulesetDelegate(CreateRulesetArgs args);
+    internal delegate ValueTask CreateRulesetDelegate(CreateRulesetArgs args);
 }

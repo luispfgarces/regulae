@@ -6,16 +6,20 @@ namespace Regulae.Source
 
     internal interface IRulesSource
     {
-        Task AddRuleAsync(AddRuleArgs args);
+        ValueTask AddRuleAsync(AddRuleArgs args);
 
-        Task CreateRulesetAsync(CreateRulesetArgs args);
+        ValueTask CreateConditionAsync(CreateConditionArgs args);
 
-        Task<IEnumerable<Rule>> GetRulesAsync(GetRulesArgs args);
+        ValueTask CreateRulesetAsync(CreateRulesetArgs args);
 
-        Task<IEnumerable<Ruleset>> GetRulesetsAsync(GetRulesetsArgs args);
+        ValueTask<IReadOnlyDictionary<string, Condition>> GetConditionsAsync(GetConditionsArgs args);
 
-        Task<IEnumerable<Rule>> GetRulesFilteredAsync(GetRulesFilteredArgs args);
+        ValueTask<IReadOnlyCollection<Rule>> GetRulesAsync(GetRulesArgs args);
 
-        Task UpdateRuleAsync(UpdateRuleArgs args);
+        ValueTask<IReadOnlyDictionary<string, Ruleset>> GetRulesetsAsync(GetRulesetsArgs args);
+
+        ValueTask<IReadOnlyCollection<Rule>> GetRulesFilteredAsync(GetRulesFilteredArgs args);
+
+        ValueTask UpdateRuleAsync(UpdateRuleArgs args);
     }
 }

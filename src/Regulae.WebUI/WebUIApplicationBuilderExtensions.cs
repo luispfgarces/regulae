@@ -42,7 +42,7 @@ namespace Regulae.WebUI
 
             // Options
             var webUIOptions = new WebUIOptions();
-            webUIOptionsAction.Invoke(webUIOptions);
+            webUIOptionsAction(webUIOptions);
             var webUIOptionsRegistry = app.ApplicationServices.GetRequiredService<WebUIOptionsRegistry>();
             webUIOptionsRegistry.Register(webUIOptions);
 

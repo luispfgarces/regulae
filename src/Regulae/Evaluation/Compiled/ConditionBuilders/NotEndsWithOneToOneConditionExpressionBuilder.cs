@@ -20,12 +20,10 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
                 throw new NotSupportedException($"The operator '{Operators.NotEndsWith}' is not supported for data type '{args.DataTypeConfiguration.DataType}'.");
             }
 
-            return builder.AndAlso(
-                builder.NotEqual(args.LeftHandOperand, builder.Constant<object>(value: null)),
-                builder.Not(builder.Call(
-                    args.LeftHandOperand,
-                    endsWithMethodInfo,
-                    new Expression[] { args.RightHandOperand, builder.Constant(StringComparison.InvariantCulture) })));
+            return builder.Not(builder.Call(
+                args.LeftHandOperand,
+                endsWithMethodInfo,
+                new Expression[] { args.RightHandOperand, builder.Constant(StringComparison.InvariantCulture) }));
         }
     }
 }

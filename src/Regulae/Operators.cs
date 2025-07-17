@@ -3,7 +3,7 @@ namespace Regulae
     /// <summary>
     /// Defines the set of operators supported for rule's conditions.
     /// </summary>
-    public enum Operators
+    public enum Operators : byte
     {
         /// <summary>
         /// The equal operator.

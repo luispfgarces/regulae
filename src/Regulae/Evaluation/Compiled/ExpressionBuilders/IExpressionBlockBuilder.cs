@@ -15,7 +15,13 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         IReadOnlyDictionary<string, ParameterExpression> Variables { get; }
 
+        Expression AccessField(Expression instance, FieldInfo field);
+
         void AddExpression(Expression expression);
+
+        Expression And(Expression left, Expression right);
+
+        Expression And(IEnumerable<Expression> expressions);
 
         Expression AndAlso(Expression left, Expression right);
 
@@ -30,6 +36,10 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         Expression Call(Expression instance, MethodInfo method);
 
         Expression Call(Expression instance, MethodInfo method, IEnumerable<Expression> arguments);
+
+        Expression Coalesce(Expression left, Expression right);
+
+        Expression Condition(Expression evaluation, Expression ifTrue, Expression ifFalse);
 
         Expression Constant<T>(T value);
 
@@ -80,6 +90,10 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         Expression NotEqual(Expression left, Expression right);
 
+        Expression Or(Expression left, Expression right);
+
+        Expression Or(IEnumerable<Expression> expressions);
+
         Expression OrElse(Expression left, Expression right);
 
         Expression OrElse(IEnumerable<Expression> expressions);
@@ -89,5 +103,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         void Switch(
             Expression expressionSwitchValue,
             Action<IExpressionSwitchBuilder> expressionSwitchBuilderAction);
+
+        Expression Unbox(Expression expression, Type type);
     }
 }

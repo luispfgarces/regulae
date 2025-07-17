@@ -5,7 +5,7 @@ namespace Regulae
     /// <summary>
     /// Defines a content container with lazily loaded content.
     /// </summary>
-    public class ContentContainer
+    public class ContentContainer : IContentContainer
     {
         private readonly Func<Type, object> getContentFunc;
 
@@ -29,7 +29,7 @@ namespace Regulae
         {
             try
             {
-                return (TContent)this.getContentFunc.Invoke(typeof(TContent));
+                return (TContent)this.getContentFunc(typeof(TContent));
             }
             catch (InvalidCastException ice)
             {

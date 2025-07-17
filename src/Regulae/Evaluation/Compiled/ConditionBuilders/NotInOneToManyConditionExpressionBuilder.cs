@@ -17,7 +17,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
         {
             var callExpression = builder.Call(
                 instance: null,
-                enumerableGenericContains.MakeGenericMethod(args.DataTypeConfiguration.Type),
+                enumerableGenericContains.MakeGenericMethod(args.DataTypeConfiguration.OneCardinality.Type),
                 new Expression[] { args.RightHandOperand, args.LeftHandOperand });
 
             return builder.Not(callExpression);

@@ -4,5 +4,5 @@ namespace Regulae.Source
     using System.Threading.Tasks;
     using Regulae;
 
-    internal delegate Task<IEnumerable<Rule>> GetRulesFilteredDelegate(GetRulesFilteredArgs args);
+    internal delegate ValueTask<IReadOnlyCollection<Rule>> GetRulesFilteredDelegate(GetRulesFilteredArgs args);
 }

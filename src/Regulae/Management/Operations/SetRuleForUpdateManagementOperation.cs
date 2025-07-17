@@ -16,14 +16,14 @@ namespace Regulae.Management.Operations
             this.updatedRule = updatedRule;
         }
 
-        public Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
+        public ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
         {
             var result = new List<Rule>(rules);
 
             result.RemoveAll(r => string.Equals(r.Name, this.updatedRule.Name, StringComparison.InvariantCultureIgnoreCase));
             result.Add(this.updatedRule);
 
-            return Task.FromResult(result.AsEnumerable());
+            return new ValueTask<IEnumerable<Rule>>(result.AsEnumerable());
         }
     }
 }

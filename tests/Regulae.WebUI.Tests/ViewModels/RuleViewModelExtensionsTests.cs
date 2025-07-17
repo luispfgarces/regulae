@@ -4,7 +4,6 @@ namespace Regulae.WebUI.Tests.ViewModels
     using FluentAssertions;
     using Regulae;
     using Regulae.WebUI.ViewModels;
-    using Regulae.WebUI.ViewModels;
     using Xunit;
 
     public class RuleViewModelExtensionsTests
@@ -30,7 +29,7 @@ namespace Regulae.WebUI.Tests.ViewModels
                             Condition = "Condition1",
                             DataType = "String",
                             LogicalOperator = "Eval",
-                            Operand = "xyz",
+                            RightOperand = "xyz",
                             Operator = "Equal",
                         },
                         new ValueConditionNodeViewModel
@@ -38,7 +37,7 @@ namespace Regulae.WebUI.Tests.ViewModels
                             Condition = "Condition2",
                             DataType = "Integer",
                             LogicalOperator = "Eval",
-                            Operand = "123",
+                            RightOperand = "123",
                             Operator = "Equal",
                         },
                     },
@@ -99,7 +98,7 @@ namespace Regulae.WebUI.Tests.ViewModels
                             Condition = "Condition1",
                             DataType = "String",
                             LogicalOperator = "Eval",
-                            Operand = "xyz",
+                            RightOperand = "xyz",
                             Operator = "Equal",
                         },
                         new ValueConditionNodeViewModel
@@ -107,7 +106,7 @@ namespace Regulae.WebUI.Tests.ViewModels
                             Condition = "Condition2",
                             DataType = "Integer",
                             LogicalOperator = "Eval",
-                            Operand = "123",
+                            RightOperand = "123",
                             Operator = "Equal",
                         },
                     },

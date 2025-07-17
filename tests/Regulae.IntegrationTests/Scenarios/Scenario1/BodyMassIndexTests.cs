@@ -7,19 +7,17 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
     using Microsoft.Extensions.DependencyInjection;
     using Regulae;
     using Regulae.Extensions;
-    using Regulae.IntegrationTests;
+    using Regulae.IntegrationTests.Common.Scenarios;
     using Regulae.IntegrationTests.Common.Scenarios.Scenario1;
     using Regulae.Providers.InMemory;
     using Xunit;
 
     public class BodyMassIndexTests
     {
-        private static string DataSourceFilePath => $@"{Environment.CurrentDirectory}/Scenarios/Scenario1/regulae-tests.body-mass-index.datasource.json";
-
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task AddRule_AddingNewRuleFromScratchWithAgeConditionAtPriority1AndNewRuleAtPriority3_NewRuleIsInsertedAndExistentRulePriorityUpdatedAndNewRuleInsertedAfter(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task AddRule_AddingNewRuleFromScratchWithAgeConditionAtPriority1AndNewRuleAtPriority3_NewRuleIsInsertedAndExistentRulePriorityUpdatedAndNewRuleInsertedAfter(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -28,12 +26,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(options => options.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             await genericRulesEngine.CreateRulesetAsync(Scenario1RulesetNames.BodyMassIndexFormula);
 
@@ -49,7 +47,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
                 .Build();
 
             var newRule1 = newRuleResult1.Rule;
-            var ruleAddPriorityOption1 = RuleAddPriorityOption.ByPriorityNumber(1);
+            var ruleAddPriorityOption1 = RuleAddPriorityOption.AtNumber(1);
 
             var ruleBuilderResult2 = Rule.Create<Scenario1RulesetNames, Scenario1ConditionNames>("Sample rule")
                 .InRuleset(Scenario1RulesetNames.BodyMassIndexFormula)
@@ -62,7 +60,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
                 .Build();
 
             var newRule2 = ruleBuilderResult2.Rule;
-            var ruleAddPriorityOption2 = RuleAddPriorityOption.ByPriorityNumber(4);
+            var ruleAddPriorityOption2 = RuleAddPriorityOption.AtNumber(4);
 
             // Act
             var ruleOperationResult1 = await genericRulesEngine.AddRuleAsync(newRule1, ruleAddPriorityOption1);
@@ -85,9 +83,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task AddRule_AddingNewRuleWithAgeConditionAtPriority1AndNewRuleAtPriority3_NewRuleIsInsertedAndExistentRulePriorityUpdatedAndNewRuleInsertedAfter(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task AddRule_AddingNewRuleWithAgeConditionAtPriority1AndNewRuleAtPriority3_NewRuleIsInsertedAndExistentRulePriorityUpdatedAndNewRuleInsertedAfter(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -96,15 +94,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(options => options.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(Formula));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario1Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
             var newRuleResult1 = Rule.Create<Scenario1RulesetNames, Scenario1ConditionNames>("Body Mass Index up to 18 years formula")
                 .InRuleset(Scenario1RulesetNames.BodyMassIndexFormula)
@@ -118,7 +112,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
                 .Build();
 
             var newRule1 = newRuleResult1.Rule;
-            var ruleAddPriorityOption1 = RuleAddPriorityOption.ByPriorityNumber(1);
+            var ruleAddPriorityOption1 = RuleAddPriorityOption.AtNumber(1);
 
             var ruleBuilderResult2 = Rule.Create<Scenario1RulesetNames, Scenario1ConditionNames>("Sample rule")
                 .InRuleset(Scenario1RulesetNames.BodyMassIndexFormula)
@@ -131,7 +125,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
                 .Build();
 
             var newRule2 = ruleBuilderResult2.Rule;
-            var ruleAddPriorityOption2 = RuleAddPriorityOption.ByPriorityNumber(4);
+            var ruleAddPriorityOption2 = RuleAddPriorityOption.AtNumber(4);
 
             // Act
             var ruleOperationResult1 = await genericRulesEngine.AddRuleAsync(newRule1, ruleAddPriorityOption1);
@@ -154,9 +148,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task AddRule_AddingNewRuleWithAgeConditionOnTop_NewRuleIsInsertedAndExistentRulePriorityUpdated(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task AddRule_AddingNewRuleWithAgeConditionOnTop_NewRuleIsInsertedAndExistentRulePriorityUpdated(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -165,15 +159,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(options => options.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(Formula));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario1Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
             var newRuleResult = Rule.Create<Scenario1RulesetNames, Scenario1ConditionNames>("Body Mass Index up to 18 years formula")
                 .InRuleset(Scenario1RulesetNames.BodyMassIndexFormula)
@@ -187,10 +177,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
                 .Build();
 
             var newRule = newRuleResult.Rule;
-            var ruleAddPriorityOption = new RuleAddPriorityOption
-            {
-                PriorityOption = PriorityOptions.AtTop
-            };
+            var ruleAddPriorityOption = RuleAddPriorityOption.AtSmallestNumber;
 
             // Act
             var ruleOperationResult = await genericRulesEngine.AddRuleAsync(newRule, ruleAddPriorityOption);
@@ -208,9 +195,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task BodyMassIndex_NoConditions_ReturnsDefaultFormula(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BodyMassIndex_NoConditions_ReturnsDefaultFormula(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var expectedFormulaDescription = "Body Mass Index default formula";
@@ -225,15 +212,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario1
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(options => options.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(Formula));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario1Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<Scenario1RulesetNames, Scenario1ConditionNames>();
 
             // Act
             var actual = await genericRulesEngine.MatchOneAsync(expectedContent, expectedMatchDate, expectedConditions);

@@ -14,9 +14,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario8
     public class TexasHoldEmPokerSingleCombinationsTests
     {
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task PokerCombinations_Given_EvaluatesStraightCombination(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task PokerCombinations_Given_EvaluatesStraightCombination(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var matchDate = new DateTime(2023, 1, 1);
@@ -38,7 +38,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario8
                 .SetInMemoryDataSource()
                 .Configure(options =>
                 {
-                    options.EnableCompilation = enableCompilation;
+                    options.UseEvaluationStrategy(evaluationStrategy);
                 })
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<PokerRulesets, PokerConditions>();

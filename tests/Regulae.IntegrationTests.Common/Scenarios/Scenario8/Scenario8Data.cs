@@ -1,30 +1,31 @@
 namespace Regulae.IntegrationTests.Common.Scenarios.Scenario8
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Regulae.Generic;
     using Regulae.IntegrationTests.Common.Scenarios;
 
     public partial class Scenario8Data : IScenarioData<PokerRulesets, PokerConditions>
     {
-        public IDictionary<PokerConditions, object> Conditions => new Dictionary<PokerConditions, object>
+        public IEnumerable<(PokerConditions, DataTypes)> AllConditions => this.GetConditions();
+
+        public IEnumerable<Rule<PokerRulesets, PokerConditions>> AllRules => this.GetRules();
+
+        public IEnumerable<PokerRulesets> AllRulesets => new[] { PokerRulesets.TexasHoldemPokerSingleCombinations };
+
+        private IEnumerable<(PokerConditions, DataTypes)> GetConditions()
         {
-            { PokerConditions.NumberOfKings, 1 },
-            { PokerConditions.NumberOfQueens, 1 },
-            { PokerConditions.NumberOfJacks, 1 },
-            { PokerConditions.NumberOfTens, 1 },
-            { PokerConditions.NumberOfNines, 1 },
-            { PokerConditions.KingOfClubs, true },
-            { PokerConditions.QueenOfDiamonds, true },
-            { PokerConditions.JackOfClubs, true },
-            { PokerConditions.TenOfHearts, true },
-            { PokerConditions.NineOfSpades, true },
-        };
+            var conditionType = typeof(PokerConditions);
+            var conditions = Enum.GetValues(conditionType).Cast<PokerConditions>();
+            foreach (var condition in conditions)
+            {
+                var dataTypeAttribute = conditionType.GetMember(condition!.ToString()).First().GetCustomAttribute<DataTypeAttribute>();
+                yield return (condition, dataTypeAttribute.DataType);
+            }
 
-        public DateTime MatchDate => DateTime.Parse("2022-12-01");
-
-        public IEnumerable<Rule<PokerRulesets, PokerConditions>> Rules => this.GetRules();
+            yield break;
+        }
 
         private IEnumerable<Rule<PokerRulesets, PokerConditions>> GetRules()
         {

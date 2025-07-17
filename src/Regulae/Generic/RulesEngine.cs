@@ -47,7 +47,14 @@ namespace Regulae.Generic
 
             // Implicit conversion from Rule<TRuleset, TCondition> to Rule.
             return this.wrappedRulesEngine.AddRuleAsync(rule, ruleAddPriorityOption);
-            }
+        }
+
+        /// <inheritdoc/>
+        public Task<OperationResult> CreateConditionAsync(TCondition name, DataTypes dataType)
+        {
+            var conditionNameAsString = GenericConversions.Convert(name);
+            return this.wrappedRulesEngine.CreateConditionAsync(conditionNameAsString, dataType);
+        }
 
         /// <inheritdoc/>
         public async Task CreateRulesetAsync(TRuleset ruleset)
@@ -69,15 +76,15 @@ namespace Regulae.Generic
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Ruleset<TRuleset>>> GetRulesetsAsync()
+        public async Task<IReadOnlyDictionary<TRuleset, Ruleset<TRuleset>>> GetRulesetsAsync()
         {
             var rulesets = await this.wrappedRulesEngine.GetRulesetsAsync().ConfigureAwait(false);
 
-            return rulesets.Select(x => new Ruleset<TRuleset>(x)).ToArray();
+            return rulesets.Select(x => new Ruleset<TRuleset>(x.Value)).ToDictionary(x => x.Name);
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<TCondition>> GetUniqueConditionsAsync(TRuleset ruleset, DateTime dateBegin, DateTime dateEnd)
+        public async Task<IReadOnlyCollection<TCondition>> GetUniqueConditionsAsync(TRuleset ruleset, DateTime dateBegin, DateTime dateEnd)
         {
             var rulesetAsString = GenericConversions.Convert(ruleset);
             var conditions = await this.wrappedRulesEngine.GetUniqueConditionsAsync(rulesetAsString, dateBegin, dateEnd).ConfigureAwait(false);
@@ -85,7 +92,7 @@ namespace Regulae.Generic
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Rule<TRuleset, TCondition>>> MatchManyAsync(
+        public async Task<IReadOnlyCollection<Rule<TRuleset, TCondition>>> MatchManyAsync(
             TRuleset ruleset,
             DateTime matchDateTime,
             IDictionary<TCondition, object> conditions)
@@ -107,7 +114,12 @@ namespace Regulae.Generic
             IDictionary<TCondition, object> conditions)
         {
             var rulesetAsString = GenericConversions.Convert(ruleset);
-            var conditionsConverted = conditions.ToDictionary(c => GenericConversions.Convert(c.Key), c => c.Value, StringComparer.Ordinal);
+            var conditionsConverted = new Dictionary<string, object>(conditions.Count, StringComparer.Ordinal);
+            foreach (var condition in conditions)
+            {
+                conditionsConverted[GenericConversions.Convert(condition.Key)] = condition.Value;
+            }
+
             var rule = await this.wrappedRulesEngine.MatchOneAsync(
                 rulesetAsString,
                 matchDateTime,
@@ -117,7 +129,7 @@ namespace Regulae.Generic
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Rule<TRuleset, TCondition>>> SearchAsync(SearchArgs<TRuleset, TCondition> searchArgs)
+        public async Task<IReadOnlyCollection<Rule<TRuleset, TCondition>>> SearchAsync(SearchArgs<TRuleset, TCondition> searchArgs)
         {
             if (searchArgs is null)
             {

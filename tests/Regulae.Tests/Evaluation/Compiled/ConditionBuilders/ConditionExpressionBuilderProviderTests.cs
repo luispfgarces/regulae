@@ -29,18 +29,18 @@ namespace Regulae.Tests.Evaluation.Compiled.ConditionBuilders
 
             // Assert
             notSupportedException.Should().NotBeNull();
-            notSupportedException.Message.Should().Contain(@operator.ToString()).And.Contain(multiplicity);
+            notSupportedException.Message.Should().Contain(@operator.ToString()).And.Contain(multiplicity.ToString());
         }
 
         [Theory]
         [MemberData(nameof(Scenarios))]
-        public void GetConditionExpressionBuilderFor_GivenOperatorAndSupportedMultiplicity_ReturnsConditionExpressionBuilder(Operators @operator, string multiplicity)
+        public void GetConditionExpressionBuilderFor_GivenOperatorAndSupportedMultiplicity_ReturnsConditionExpressionBuilder(Operators @operator, object multiplicity)
         {
             // Arrange
             var conditionExpressionBuilderProvider = new ConditionExpressionBuilderProvider();
 
             // Act
-            var conditionExpressionBuilder = conditionExpressionBuilderProvider.GetConditionExpressionBuilderFor(@operator, multiplicity);
+            var conditionExpressionBuilder = conditionExpressionBuilderProvider.GetConditionExpressionBuilderFor(@operator, (Multiplicities)multiplicity);
 
             // Assert
             conditionExpressionBuilder.Should().NotBeNull();

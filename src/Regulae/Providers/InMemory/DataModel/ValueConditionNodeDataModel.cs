@@ -6,10 +6,8 @@ namespace Regulae.Providers.InMemory.DataModel
     {
         public string Condition { get; set; }
 
-        public DataTypes DataType { get; set; }
-
-        public object Operand { get; set; }
-
         public Operators Operator { get; set; }
+
+        public Operand RightOperand { get; set; }
     }
 }

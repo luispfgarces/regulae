@@ -5,10 +5,10 @@ namespace Regulae.Tests.Builder
     using FluentAssertions;
     using Moq;
     using Regulae;
+    using Regulae.Builder.Generic.RulesBuilder;
     using Regulae.Generic.ConditionNodes;
     using Regulae.Serialization;
     using Regulae.Tests.TestStubs;
-    using Regulae.Builder.Generic.RulesBuilder;
     using Xunit;
 
     public class RuleBuilderTests
@@ -60,7 +60,7 @@ namespace Regulae.Tests.Builder
             var isoCountryChildNode = childNodes[0] as ValueConditionNode<ConditionNames>;
             isoCountryChildNode.Condition.Should().Be(ConditionNames.IsoCountryCode);
             isoCountryChildNode.Operator.Should().Be(Operators.Equal);
-            isoCountryChildNode.Operand.Should().Be("PT");
+            isoCountryChildNode.RightOperand.Should().Be(new Operand("PT"));
 
             // second child nodes
             childNodes[1].Should().BeOfType<ComposedConditionNode<ConditionNames>>();
@@ -73,13 +73,13 @@ namespace Regulae.Tests.Builder
             var numberOfSalesChildNode = composedChildNodes[0] as ValueConditionNode<ConditionNames>;
             numberOfSalesChildNode.Condition.Should().Be(ConditionNames.NumberOfSales);
             numberOfSalesChildNode.Operator.Should().Be(Operators.GreaterThan);
-            numberOfSalesChildNode.Operand.Should().Be(1000);
+            numberOfSalesChildNode.RightOperand.Should().Be(new Operand(1000));
 
             composedChildNodes[1].Should().BeOfType<ValueConditionNode<ConditionNames>>();
             var isoCurrencyChildNode = composedChildNodes[1] as ValueConditionNode<ConditionNames>;
             isoCurrencyChildNode.Condition.Should().Be(ConditionNames.IsoCurrency);
             isoCurrencyChildNode.Operator.Should().Be(Operators.In);
-            isoCurrencyChildNode.Operand.Should().BeEquivalentTo(new[] { "EUR", "USD" });
+            isoCurrencyChildNode.RightOperand.Should().Be(new Operand(new[] { "EUR", "USD" }));
         }
 
         [Theory]
@@ -129,6 +129,7 @@ namespace Regulae.Tests.Builder
             var conditionOperator = containsOperator;
             const LogicalOperators logicalOperator = LogicalOperators.Eval;
             const DataTypes dataType = DataTypes.String;
+            const Cardinalities cardinality = Cardinalities.One;
 
             // Act
             var ruleBuilderResult = Rule.Create<RulesetNames, ConditionNames>(ruleName)
@@ -154,7 +155,8 @@ namespace Regulae.Tests.Builder
 
             var rootCondition = rule.RootCondition as IValueConditionNode<ConditionNames>;
             rootCondition.Condition.Should().Be(condition);
-            rootCondition.DataType.Should().Be(dataType);
+            rootCondition.RightOperand.DataType.Should().Be(dataType);
+            rootCondition.RightOperand.Cardinality.Should().Be(cardinality);
             rootCondition.LogicalOperator.Should().Be(logicalOperator);
             rootCondition.Operator.Should().Be(conditionOperator);
         }

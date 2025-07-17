@@ -1,6 +1,7 @@
 namespace Regulae.Evaluation.Compiled
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using Regulae;
     using Regulae.Core;
@@ -8,6 +9,12 @@ namespace Regulae.Evaluation.Compiled
 
     internal sealed class CompiledConditionsEvalEngine : IConditionsEvalEngine
     {
+        private static readonly FrozenDictionary<MatchModes, string> compiledDelegateKeyByMatchMode = new Dictionary<MatchModes, string>
+        {
+            { MatchModes.Search, ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey },
+            { MatchModes.Exact, ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey },
+        }.ToFrozenDictionary();
+
         private readonly IConditionsTreeAnalyzer conditionsTreeAnalyzer;
         private readonly RulesEngineOptions rulesEngineOptions;
 
@@ -19,24 +26,24 @@ namespace Regulae.Evaluation.Compiled
             this.rulesEngineOptions = rulesEngineOptions;
         }
 
-        public bool Eval(IConditionNode conditionNode, IDictionary<string, object> conditions, EvaluationOptions evaluationOptions)
+        public bool Eval(IConditionNode conditionNode, IDictionary<string, Operand> conditions, EvaluationOptions evaluationOptions)
         {
             if (evaluationOptions.ExcludeRulesWithoutSearchConditions && !this.conditionsTreeAnalyzer.AreAllSearchConditionsPresent(conditionNode, conditions))
             {
                 return false;
             }
 
-            if (!conditionNode.Properties.TryGetValue(ConditionNodeProperties.CompilationProperties.CompiledDelegateKey, out var conditionFuncAux))
+            if (!compiledDelegateKeyByMatchMode.TryGetValue(evaluationOptions.MatchMode, out var key))
+            {
+                throw new NotSupportedException($"Match mode '{evaluationOptions.MatchMode}' is not supported.");
+            }
+
+            if (!conditionNode.Properties.TryGetValue(key, out var conditionFuncAux))
             {
                 throw new ArgumentException("Condition node does not contain compiled information.", nameof(conditionNode));
             }
 
-            var conditionFunc = (Func<EvaluationContext, bool>)conditionFuncAux;
-            var compiledConditionsEvaluationContext = new EvaluationContext(
-                conditions,
-                evaluationOptions.MatchMode,
-                this.rulesEngineOptions.MissingConditionBehavior);
-            return conditionFunc.Invoke(compiledConditionsEvaluationContext);
+            return ((Func<IDictionary<string, Operand>, bool>)conditionFuncAux)(conditions);
         }
     }
 }

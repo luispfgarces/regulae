@@ -17,7 +17,7 @@ namespace Regulae
         /// <summary>
         /// Gets the content container which contains the rule content.
         /// </summary>
-        public ContentContainer ContentContainer { get; internal set; }
+        public IContentContainer ContentContainer { get; internal set; }
 
         /// <summary>
         /// Gets the date from which the rule begins being applicable.

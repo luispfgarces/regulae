@@ -8,15 +8,19 @@ namespace Regulae.IntegrationTests.Common.Scenarios
             IRulesEngine rulesEngine,
             IScenarioData<TRuleset, TCondition> scenarioData)
         {
-            var rulesets = scenarioData.Rules.Select(r => ((Rule)r).Ruleset).Distinct().ToArray();
-            foreach (var ruleset in rulesets)
+            foreach (var condition in scenarioData.AllConditions)
             {
-                await rulesEngine.CreateRulesetAsync(ruleset).ConfigureAwait(false);
+                await rulesEngine.CreateConditionAsync(condition.Item1!.ToString(), condition.Item2);
             }
 
-            foreach (var rule in scenarioData.Rules)
+            foreach (var ruleset in scenarioData.AllRulesets)
             {
-                await rulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop).ConfigureAwait(false);
+                await rulesEngine.CreateRulesetAsync(ruleset!.ToString());
+            }
+
+            foreach (var rule in scenarioData.AllRules)
+            {
+                await rulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
             }
         }
     }

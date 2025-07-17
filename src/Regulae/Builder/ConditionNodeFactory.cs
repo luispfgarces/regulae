@@ -1,7 +1,6 @@
 namespace Regulae.Builder
 {
     using System;
-    using System.Collections.Generic;
     using Regulae;
     using Regulae.Builder.Generic.RulesBuilder;
     using Regulae.Builder.RulesBuilder;
@@ -26,8 +25,7 @@ namespace Regulae.Builder
         {
             var composedConditionNodeBuilder = new FluentConditionNodeBuilder(logicalOperator);
 
-            var composedConditionNode = conditionFunc
-                .Invoke(composedConditionNodeBuilder)
+            var composedConditionNode = conditionFunc(composedConditionNodeBuilder)
                 .Build();
 
             return composedConditionNode;
@@ -48,8 +46,7 @@ namespace Regulae.Builder
         {
             var composedConditionNodeBuilder = new FluentConditionNodeBuilder<TCondition>(logicalOperator);
 
-            var composedConditionNode = conditionFunc
-                .Invoke(composedConditionNodeBuilder)
+            var composedConditionNode = conditionFunc(composedConditionNodeBuilder)
                 .Build();
 
             return composedConditionNode;
@@ -63,41 +60,12 @@ namespace Regulae.Builder
         /// <param name="condOperator">The condition operator.</param>
         /// <param name="operand">The condition operand.</param>
         /// <returns></returns>
-        /// <exception cref="NotSupportedException">
-        /// The data type is not supported: {typeof(T).FullName}.
-        /// </exception>
+        /// <exception cref="NotSupportedException">The data type is not supported: {typeof(T).FullName}.</exception>
         public static IValueConditionNode CreateValueNode<T>(
             string condition, Operators condOperator, T operand)
         {
-            switch (operand)
-            {
-                case decimal _:
-                    return new ValueConditionNode(DataTypes.Decimal, condition, condOperator, operand);
-
-                case IEnumerable<decimal> _:
-                    return new ValueConditionNode(DataTypes.ArrayDecimal, condition, condOperator, operand);
-
-                case int _:
-                    return new ValueConditionNode(DataTypes.Integer, condition, condOperator, operand);
-
-                case IEnumerable<int> _:
-                    return new ValueConditionNode(DataTypes.ArrayInteger, condition, condOperator, operand);
-
-                case bool _:
-                    return new ValueConditionNode(DataTypes.Boolean, condition, condOperator, operand);
-
-                case IEnumerable<bool> _:
-                    return new ValueConditionNode(DataTypes.ArrayBoolean, condition, condOperator, operand);
-
-                case string _:
-                    return new ValueConditionNode(DataTypes.String, condition, condOperator, operand);
-
-                case IEnumerable<string> _:
-                    return new ValueConditionNode(DataTypes.ArrayString, condition, condOperator, operand);
-
-                default:
-                    throw new NotSupportedException($"The data type is not supported: {typeof(T).FullName}.");
-            }
+            var rightOperand = new Operand(operand);
+            return new ValueConditionNode(condition, condOperator, rightOperand);
         }
     }
 }

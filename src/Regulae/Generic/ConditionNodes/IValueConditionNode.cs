@@ -15,18 +15,13 @@ namespace Regulae.Generic.ConditionNodes
         TCondition Condition { get; }
 
         /// <summary>
-        /// Gets the condition node data type.
-        /// </summary>
-        DataTypes DataType { get; }
-
-        /// <summary>
-        /// Gets the condition's operand.
-        /// </summary>
-        object Operand { get; }
-
-        /// <summary>
         /// Gets the condition node operator.
         /// </summary>
         Operators Operator { get; }
+
+        /// <summary>
+        /// Gets the condition's right operand.
+        /// </summary>
+        Operand RightOperand { get; }
     }
 }

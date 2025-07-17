@@ -20,17 +20,17 @@ namespace Regulae.WebUI
         public const string OptionMissingConditionBehaviorUseDataTypeDefaultDescription = "When a condition is missing, instructs" +
             " the rules engine to use the configured data type default for rule's condition.";
 
-        public const string OptionPriorityCriteriaBottommostRuleWinsDescription = "Rules with the highest priority number have greater" +
-            " priority than the ones with lowest.";
-
-        public const string OptionPriorityCriteriaBottommostRuleWinsName = "Bottommost rule wins";
-
         public const string OptionPriorityCriteriaDescription = "Sets the way the rules engine interprets the 'Priority' for each rule.";
 
-        public const string OptionPriorityCriteriaTopmostRuleWinsDescription = "Rules with the lowest priority number have greater" +
-            " priority than the ones with highest.";
+        public const string OptionPriorityCriteriaLargestNumberRuleWinsDescription = "Rules with the largest priority number have greater" +
+                            " priority than the ones with smallest.";
 
-        public const string OptionPriorityCriteriaTopmostRuleWinsName = "Topmost rule wins";
+        public const string OptionPriorityCriteriaLargestNumberRuleWinsName = "Largest priority number rule wins";
+
+        public const string OptionPriorityCriteriaSmallestNumberRuleWinsDescription = "Rules with the smallest priority number have greater" +
+            " priority than the ones with the largest.";
+
+        public const string OptionPriorityCriteriaSmallestNumberRuleWinsName = "Smallest priority number rule wins";
 
         public const string SelectedInstanceStorageKey = "Selected-Instance-ID";
 

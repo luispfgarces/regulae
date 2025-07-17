@@ -3,8 +3,8 @@ namespace Regulae.Rql.IntegrationTests.Scenarios.Scenario8
     using System;
     using Regulae;
     using Regulae.IntegrationTests.Common.Scenarios;
-    using Regulae.Providers.InMemory;
     using Regulae.IntegrationTests.Common.Scenarios.Scenario8;
+    using Regulae.Providers.InMemory;
 
     public class RulesEngineWithScenario8RulesFixture : IDisposable
     {
@@ -12,10 +12,7 @@ namespace Regulae.Rql.IntegrationTests.Scenarios.Scenario8
         {
             this.RulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource()
-                .Configure(options =>
-                {
-                    options.EnableCompilation = true;
-                })
+                .Configure(c => c.UseCompiledEvaluationStrategy())
                 .Build();
 
             var scenarioData = new Scenario8Data();

@@ -55,14 +55,59 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
             var rulesets = rules
                 .Select(r => new RulesetDataModel
                 {
-                    Creation = DateTime.UtcNow,
-                    Id = Guid.NewGuid(),
                     Name = r.Ruleset,
                 })
                 .Distinct()
+                .Select(r => new RulesetDataModel
+                {
+                    Creation = DateTime.UtcNow,
+                    Id = Guid.NewGuid(),
+                    Name = r.Name,
+                })
+                .ToArray();
+
+            var conditions = rules
+                .SelectMany(r =>
+                {
+                    return GetConditions(r.RootCondition);
+                    static IEnumerable<ConditionDataModel> GetConditions(ConditionNodeDataModel conditionNode)
+                    {
+                        if (conditionNode is ComposedConditionNodeDataModel composedConditionNodeDataModel)
+                        {
+                            foreach (var childCondition in composedConditionNodeDataModel.ChildConditionNodes)
+                            {
+                                foreach (var condition in GetConditions(childCondition))
+                                {
+                                    yield return condition;
+                                }
+                            }
+
+                            yield break;
+                        }
+
+                        var valueConditionNodeDataModel = (ValueConditionNodeDataModel)conditionNode;
+                        yield return new ConditionDataModel
+                        {
+                            Name = valueConditionNodeDataModel.Condition,
+                            DataType = valueConditionNodeDataModel.RightOperand.DataType.ToString(),
+                        };
+                    }
+                })
+                .Distinct()
+                .Select(c => new ConditionDataModel
+                {
+                    Creation = DateTime.UtcNow,
+                    Id = Guid.NewGuid(),
+                    Name = c.Name,
+                    DataType = c.DataType,
+                })
                 .ToArray();
 
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
+
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            var conditionsMongoCollection = mongoDatabase.GetCollection<ConditionDataModel>(this.mongoDbProviderSettings.ConditionsCollectionName);
+            conditionsMongoCollection.InsertMany(conditions);
 
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
             var rulesetsMongoCollection = mongoDatabase.GetCollection<RulesetDataModel>(this.mongoDbProviderSettings.RulesetsCollectionName);
@@ -77,12 +122,14 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
         {
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.ConditionsCollectionName);
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_RepairCostsNotWorthIt_ReturnsRefusePaymentPerFranchise(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_RepairCostsNotWorthIt_ReturnsRefusePaymentPerFranchise(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var expected = CarInsuranceAdvices.RefusePaymentPerFranchise;
@@ -96,11 +143,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy)
+                    .UseLargestNumberPriorityCriteria())
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
@@ -114,9 +158,9 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_UpdatesRuleAndAddsNewOneAndEvaluates_ReturnsPay(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_UpdatesRuleAndAddsNewOneAndEvaluates_ReturnsPay(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             const CarInsuranceRulesetNames expectedContent = CarInsuranceRulesetNames.CarInsuranceAdvice;
@@ -129,11 +173,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy)
+                    .UseLargestNumberPriorityCriteria())
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
@@ -179,11 +220,9 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario2
             rule13.Priority.Should().Be(3);
 
             // Act 2
-            var addOperationResult = await rulesEngine.AddRuleAsync(ruleToAdd, new RuleAddPriorityOption
-            {
-                PriorityOption = PriorityOptions.AtRuleName,
-                AtRuleNameOptionValue = "Car Insurance Advise on repair costs lower than franchise boundary"
-            });
+            var addOperationResult = await rulesEngine.AddRuleAsync(
+                ruleToAdd,
+                RuleAddPriorityOption.AtRuleName("Car Insurance Advise on repair costs lower than franchise boundary"));
 
             var eval2 = await genericRulesEngine.MatchOneAsync(expectedContent, expectedMatchDate, expectedConditions);
 

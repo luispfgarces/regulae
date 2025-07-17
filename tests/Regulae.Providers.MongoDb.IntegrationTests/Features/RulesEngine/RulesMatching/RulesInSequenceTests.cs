@@ -82,7 +82,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Features.RulesEngine.RulesM
                 .Until(ruleChangeDate)
                 .Build();
 
-            ruleSpecs.Add(new RuleSpecification(rule1.Rule, RuleAddPriorityOption.ByPriorityNumber(1)));
+            ruleSpecs.Add(new RuleSpecification(rule1.Rule, RuleAddPriorityOption.AtNumber(1)));
 
             var rule2 = Rule.Create<RulesetNames, ConditionNames>(rule2Name)
                 .InRuleset(testRuleset)
@@ -91,7 +91,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Features.RulesEngine.RulesM
                 .Until(rule2EndDate)
                 .Build();
 
-            ruleSpecs.Add(new RuleSpecification(rule2.Rule, RuleAddPriorityOption.ByPriorityNumber(2)));
+            ruleSpecs.Add(new RuleSpecification(rule2.Rule, RuleAddPriorityOption.AtNumber(2)));
 
             return ruleSpecs;
         }

@@ -63,36 +63,52 @@ namespace Regulae.Providers.MongoDb.Tests
             var integerConditionNodeDataModel = new ValueConditionNodeDataModel
             {
                 Condition = "SampleIntegerCondition",
-                DataType = DataTypes.Integer,
                 LogicalOperator = LogicalOperators.Eval,
-                Operand = 20,
+                RightOperand = new OperandDataModel
+                {
+                    Cardinality = Cardinalities.One,
+                    DataType = DataTypes.Integer,
+                    Value = 20,
+                },
                 Operator = Operators.GreaterThan
             };
 
             var stringConditionNodeDataModel = new ValueConditionNodeDataModel
             {
                 Condition = "SampleStringCondition",
-                DataType = DataTypes.String,
                 LogicalOperator = LogicalOperators.Eval,
-                Operand = "TEST",
+                RightOperand = new OperandDataModel
+                {
+                    Cardinality = Cardinalities.One,
+                    DataType = DataTypes.String,
+                    Value = "TEST",
+                },
                 Operator = Operators.Equal
             };
 
             var decimalConditionNodeDataModel = new ValueConditionNodeDataModel
             {
                 Condition = "SampleDecimalCondition",
-                DataType = DataTypes.Decimal,
                 LogicalOperator = LogicalOperators.Eval,
-                Operand = 50.3m,
+                RightOperand = new OperandDataModel
+                {
+                    Cardinality = Cardinalities.One,
+                    DataType = DataTypes.Decimal,
+                    Value = 50.3m,
+                },
                 Operator = Operators.LesserThanOrEqual
             };
 
             var booleanConditionNodeDataModel = new ValueConditionNodeDataModel
             {
                 Condition = "SampleBooleanCondition",
-                DataType = DataTypes.Boolean,
                 LogicalOperator = LogicalOperators.Eval,
-                Operand = true,
+                RightOperand = new OperandDataModel
+                {
+                    Cardinality = Cardinalities.One,
+                    DataType = DataTypes.Boolean,
+                    Value = true,
+                },
                 Operator = Operators.NotEqual
             };
 
@@ -141,36 +157,32 @@ namespace Regulae.Providers.MongoDb.Tests
             var valueConditionNodes = composedConditionNode.ChildConditionNodes.OfType<ValueConditionNode>();
             valueConditionNodes.Should().HaveCount(4);
 
-            var integerConditionNode = valueConditionNodes.First(x => x.DataType == DataTypes.Integer);
+            var integerConditionNode = valueConditionNodes.First(x => x.RightOperand.DataType == DataTypes.Integer);
             integerConditionNode.Should().NotBeNull();
             integerConditionNode.Condition.Should().Be(integerConditionNodeDataModel.Condition);
-            integerConditionNode.DataType.Should().Be(integerConditionNodeDataModel.DataType);
             integerConditionNode.LogicalOperator.Should().Be(integerConditionNodeDataModel.LogicalOperator);
-            integerConditionNode.Operand.Should().Match(x => Equals(x, integerConditionNodeDataModel.Operand));
+            integerConditionNode.RightOperand.Should().BeEquivalentTo(integerConditionNodeDataModel.RightOperand);
             integerConditionNode.Operator.Should().Be(integerConditionNodeDataModel.Operator);
 
-            var stringConditionNode = valueConditionNodes.First(x => x.DataType == DataTypes.String);
+            var stringConditionNode = valueConditionNodes.First(x => x.RightOperand.DataType == DataTypes.String);
             stringConditionNode.Should().NotBeNull();
             stringConditionNode.Condition.Should().Be(stringConditionNodeDataModel.Condition);
-            stringConditionNode.DataType.Should().Be(stringConditionNodeDataModel.DataType);
             stringConditionNode.LogicalOperator.Should().Be(stringConditionNodeDataModel.LogicalOperator);
-            stringConditionNode.Operand.Should().Match(x => Equals(x, stringConditionNodeDataModel.Operand));
+            stringConditionNode.RightOperand.Should().BeEquivalentTo(stringConditionNodeDataModel.RightOperand);
             stringConditionNode.Operator.Should().Be(stringConditionNodeDataModel.Operator);
 
-            var decimalConditionNode = valueConditionNodes.First(x => x.DataType == DataTypes.Decimal);
+            var decimalConditionNode = valueConditionNodes.First(x => x.RightOperand.DataType == DataTypes.Decimal);
             decimalConditionNode.Should().NotBeNull();
             decimalConditionNode.Condition.Should().Be(decimalConditionNodeDataModel.Condition);
-            decimalConditionNode.DataType.Should().Be(decimalConditionNodeDataModel.DataType);
             decimalConditionNode.LogicalOperator.Should().Be(decimalConditionNodeDataModel.LogicalOperator);
-            decimalConditionNode.Operand.Should().Match(x => Equals(x, decimalConditionNodeDataModel.Operand));
+            decimalConditionNode.RightOperand.Should().BeEquivalentTo(decimalConditionNodeDataModel.RightOperand);
             decimalConditionNode.Operator.Should().Be(decimalConditionNodeDataModel.Operator);
 
-            var booleanConditionNode = valueConditionNodes.First(x => x.DataType == DataTypes.Boolean);
+            var booleanConditionNode = valueConditionNodes.First(x => x.RightOperand.DataType == DataTypes.Boolean);
             booleanConditionNode.Should().NotBeNull();
             booleanConditionNode.Condition.Should().Be(booleanConditionNodeDataModel.Condition);
-            booleanConditionNode.DataType.Should().Be(booleanConditionNodeDataModel.DataType);
             booleanConditionNode.LogicalOperator.Should().Be(booleanConditionNodeDataModel.LogicalOperator);
-            booleanConditionNode.Operand.Should().Be(Convert.ToBoolean(booleanConditionNodeDataModel.Operand));
+            booleanConditionNode.RightOperand.Should().BeEquivalentTo(booleanConditionNodeDataModel.RightOperand);
             booleanConditionNode.Operator.Should().Be(booleanConditionNodeDataModel.Operator);
         }
 
@@ -241,36 +253,32 @@ namespace Regulae.Providers.MongoDb.Tests
             var valueConditionNodeDataModels = composedConditionNodeDataModel.ChildConditionNodes.OfType<ValueConditionNodeDataModel>();
             valueConditionNodeDataModels.Should().HaveCount(4);
 
-            var integerConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.DataType == DataTypes.Integer);
+            var integerConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.RightOperand.DataType == DataTypes.Integer);
             integerConditionNodeDataModel.Should().NotBeNull();
             integerConditionNodeDataModel.Condition.Should().Be(integerConditionNode.Condition);
-            integerConditionNodeDataModel.DataType.Should().Be(integerConditionNode.DataType);
             integerConditionNodeDataModel.LogicalOperator.Should().Be(integerConditionNode.LogicalOperator);
-            integerConditionNodeDataModel.Operand.Should().Match(x => object.Equals(x, integerConditionNode.Operand));
+            integerConditionNodeDataModel.RightOperand.Should().BeEquivalentTo(integerConditionNode.RightOperand, opt => opt.ComparingByMembers<Operand>());
             integerConditionNodeDataModel.Operator.Should().Be(integerConditionNode.Operator);
 
-            var stringConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.DataType == DataTypes.String);
+            var stringConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.RightOperand.DataType == DataTypes.String);
             stringConditionNodeDataModel.Should().NotBeNull();
             stringConditionNodeDataModel.Condition.Should().Be(stringConditionNode.Condition);
-            stringConditionNodeDataModel.DataType.Should().Be(stringConditionNode.DataType);
             stringConditionNodeDataModel.LogicalOperator.Should().Be(stringConditionNode.LogicalOperator);
-            stringConditionNodeDataModel.Operand.Should().Match(x => object.Equals(x, stringConditionNode.Operand));
+            stringConditionNodeDataModel.RightOperand.Should().BeEquivalentTo(stringConditionNode.RightOperand, opt => opt.ComparingByMembers<Operand>());
             stringConditionNodeDataModel.Operator.Should().Be(stringConditionNode.Operator);
 
-            var decimalConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.DataType == DataTypes.Decimal);
+            var decimalConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.RightOperand.DataType == DataTypes.Decimal);
             decimalConditionNodeDataModel.Should().NotBeNull();
             decimalConditionNodeDataModel.Condition.Should().Be(decimalConditionNode.Condition);
-            decimalConditionNodeDataModel.DataType.Should().Be(decimalConditionNode.DataType);
             decimalConditionNodeDataModel.LogicalOperator.Should().Be(decimalConditionNode.LogicalOperator);
-            decimalConditionNodeDataModel.Operand.Should().Match(x => object.Equals(x, decimalConditionNode.Operand));
+            decimalConditionNodeDataModel.RightOperand.Should().BeEquivalentTo(decimalConditionNode.RightOperand, opt => opt.ComparingByMembers<Operand>());
             decimalConditionNodeDataModel.Operator.Should().Be(decimalConditionNode.Operator);
 
-            var booleanConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.DataType == DataTypes.Boolean);
+            var booleanConditionNodeDataModel = valueConditionNodeDataModels.First(v => v.RightOperand.DataType == DataTypes.Boolean);
             booleanConditionNodeDataModel.Should().NotBeNull();
             booleanConditionNodeDataModel.Condition.Should().Be(booleanConditionNode.Condition);
-            booleanConditionNodeDataModel.DataType.Should().Be(booleanConditionNode.DataType);
             booleanConditionNodeDataModel.LogicalOperator.Should().Be(booleanConditionNode.LogicalOperator);
-            booleanConditionNodeDataModel.Operand.Should().Be(Convert.ToBoolean(booleanConditionNode.Operand));
+            booleanConditionNodeDataModel.RightOperand.Should().BeEquivalentTo(booleanConditionNode.RightOperand, opt => opt.ComparingByMembers<Operand>());
             booleanConditionNodeDataModel.Operator.Should().Be(booleanConditionNode.Operator);
         }
     }

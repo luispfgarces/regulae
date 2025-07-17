@@ -10,7 +10,6 @@ namespace Regulae.Tests.Evaluation.Compiled
     using Regulae.Evaluation;
     using Regulae.Evaluation.Compiled;
     using Regulae.Tests.TestStubs;
-    using Regulae.Evaluation.Compiled;
     using Xunit;
 
     public class CompiledConditionsEvalEngineTests
@@ -21,9 +20,9 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Arrange
             var ruleResult = CreateTestRule();
             var expectedRule = (Rule)ruleResult.Rule;
-            Func<EvaluationContext, bool> expectedExpression = (_) => true;
-            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledDelegateKey] = expectedExpression;
-            var conditions = new Dictionary<string, object>();
+            Func<IDictionary<string, Operand>, bool> expectedExpression = (_) => true;
+            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey] = expectedExpression;
+            var conditions = new Dictionary<string, Operand>();
             var evaluationOptions = new EvaluationOptions
             {
                 ExcludeRulesWithoutSearchConditions = true,
@@ -32,7 +31,7 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var conditionsTreeAnalyzer = Mock.Of<IConditionsTreeAnalyzer>();
             Mock.Get(conditionsTreeAnalyzer)
-                .Setup(x => x.AreAllSearchConditionsPresent(It.IsAny<IConditionNode>(), It.IsAny<IDictionary<string, object>>()))
+                .Setup(x => x.AreAllSearchConditionsPresent(It.IsAny<IConditionNode>(), It.IsAny<IDictionary<string, Operand>>()))
                 .Returns(false);
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
@@ -52,9 +51,9 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Arrange
             var ruleResult = CreateTestRule();
             var expectedRule = (Rule)ruleResult.Rule;
-            Func<EvaluationContext, bool> expectedExpression = (_) => true;
-            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledDelegateKey] = expectedExpression;
-            var conditions = new Dictionary<string, object>();
+            Func<IDictionary<string, Operand>, bool> expectedExpression = (_) => true;
+            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey] = expectedExpression;
+            var conditions = new Dictionary<string, Operand>();
             var evaluationOptions = new EvaluationOptions
             {
                 ExcludeRulesWithoutSearchConditions = true,
@@ -63,7 +62,7 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var conditionsTreeAnalyzer = Mock.Of<IConditionsTreeAnalyzer>();
             Mock.Get(conditionsTreeAnalyzer)
-                .Setup(x => x.AreAllSearchConditionsPresent(It.IsAny<IConditionNode>(), It.IsAny<IDictionary<string, object>>()))
+                .Setup(x => x.AreAllSearchConditionsPresent(It.IsAny<IConditionNode>(), It.IsAny<IDictionary<string, Operand>>()))
                 .Returns(true);
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
@@ -83,9 +82,9 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Arrange
             var ruleResult = CreateTestRule();
             var expectedRule = (Rule)ruleResult.Rule;
-            Func<EvaluationContext, bool> expectedExpression = (_) => true;
-            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledDelegateKey] = expectedExpression;
-            var conditions = new Dictionary<string, object>();
+            Func<IDictionary<string, Operand>, bool> expectedExpression = (_) => true;
+            expectedRule.RootCondition.Properties[ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey] = expectedExpression;
+            var conditions = new Dictionary<string, Operand>();
             var evaluationOptions = new EvaluationOptions
             {
                 ExcludeRulesWithoutSearchConditions = false,
@@ -111,7 +110,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Arrange
             var ruleResult = CreateTestRule();
             var expectedRule = (Rule)ruleResult.Rule;
-            var conditions = new Dictionary<string, object>();
+            var conditions = new Dictionary<string, Operand>();
             var evaluationOptions = new EvaluationOptions
             {
                 ExcludeRulesWithoutSearchConditions = false,

@@ -7,14 +7,14 @@ namespace Regulae
     public enum PriorityOptions : byte
     {
         /// <summary>
-        /// Specifies to add rule positioned at top of priority values (smallest priority value).
+        /// Specifies to add rule positioned at the smallest priority number.
         /// </summary>
-        AtTop = 1,
+        AtSmallestNumber = 1,
 
         /// <summary>
-        /// Specifies to add rule positioned at bottom of priority values (largest priority value).
+        /// Specifies to add rule positioned at the largest priority number.
         /// </summary>
-        AtBottom = 2,
+        AtLargestNumber = 2,
 
         /// <summary>
         /// Specifies to add rule positioned at existent rule's name. All subsequent rules
@@ -26,6 +26,6 @@ namespace Regulae
         /// Specifies to add rule positioned at specified priority number given. Any existent rules
         /// at priority number given or superior are increase on priority by one.
         /// </summary>
-        AtPriorityNumber = 4
+        AtNumber = 4,
     }
 }

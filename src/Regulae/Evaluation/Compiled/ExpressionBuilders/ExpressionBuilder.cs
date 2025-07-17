@@ -81,9 +81,9 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
             var implementationExpressionBuilder = this.factory.CreateExpressionBlockBuilder(
                 scopeName: string.Empty,
-                parent: null,
+                parent: null!,
                 expressionConfiguration: this.ExpressionConfiguration);
-            builder.Invoke(implementationExpressionBuilder);
+            builder(implementationExpressionBuilder);
 
             this.ExpressionConfiguration.LabelTargets = implementationExpressionBuilder.LabelTargets;
             this.ExpressionConfiguration.Variables = implementationExpressionBuilder.Variables;
@@ -108,7 +108,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
             }
 
             var expressionBuilderParametersConfiguration = this.factory.CreateExpressionParametersConfiguration();
-            parametersConfigurationAction.Invoke(expressionBuilderParametersConfiguration);
+            parametersConfigurationAction(expressionBuilderParametersConfiguration);
 
             this.ExpressionConfiguration.Parameters = expressionBuilderParametersConfiguration.Parameters;
 

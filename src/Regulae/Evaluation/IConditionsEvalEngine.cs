@@ -5,6 +5,6 @@ namespace Regulae.Evaluation
 
     internal interface IConditionsEvalEngine
     {
-        bool Eval(IConditionNode conditionNode, IDictionary<string, object> conditions, EvaluationOptions evaluationOptions);
+        bool Eval(IConditionNode conditionNode, IDictionary<string, Operand> conditions, EvaluationOptions evaluationOptions);
     }
 }

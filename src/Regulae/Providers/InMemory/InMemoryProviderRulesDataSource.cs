@@ -29,7 +29,7 @@ namespace Regulae.Providers.InMemory
         /// <param name="rule">The rule.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">rule</exception>
-        public Task AddRuleAsync(Rule rule)
+        public ValueTask AddRuleAsync(Rule rule)
         {
             if (rule is null)
             {
@@ -40,35 +40,60 @@ namespace Regulae.Providers.InMemory
 
             this.inMemoryRulesStorage.AddRule(ruleDataModel);
 
-            return Task.CompletedTask;
+            return new ValueTask();
+        }
+
+        /// <inheritdoc/>
+        public ValueTask CreateConditionAsync(string name, DataTypes dataType)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            this.inMemoryRulesStorage.CreateCondition(name, dataType);
+
+            return new ValueTask();
         }
 
         /// <summary>
         /// Creates a new ruleset on the data source.
         /// </summary>
-        /// <param name="ruleset">the ruleset name.</param>
+        /// <param name="name">the ruleset name.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">ruleset</exception>
-        /// <exception cref="InvalidOperationException">
-        /// The ruleset '{ruleset}' already exists.
-        /// </exception>
-        public Task CreateRulesetAsync(string ruleset)
+        /// <exception cref="InvalidOperationException">The ruleset '{ruleset}' already exists.</exception>
+        public ValueTask CreateRulesetAsync(string name)
         {
-            if (string.IsNullOrWhiteSpace(ruleset))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException(nameof(ruleset));
+                throw new ArgumentNullException(nameof(name));
             }
 
             var rulesets = this.inMemoryRulesStorage.GetRulesets();
 
-            if (rulesets.Any(rs => string.Equals(rs.Name, ruleset, StringComparison.Ordinal)))
+            if (rulesets.Any(rs => string.Equals(rs.Name, name, StringComparison.Ordinal)))
             {
-                throw new InvalidOperationException($"The ruleset '{ruleset}' already exists.");
+                throw new InvalidOperationException($"The ruleset '{name}' already exists.");
             }
 
-            this.inMemoryRulesStorage.CreateRuleset(ruleset);
+            this.inMemoryRulesStorage.CreateRuleset(name);
 
-            return Task.CompletedTask;
+            return new ValueTask();
+        }
+
+        /// <inheritdoc/>
+        public ValueTask<IReadOnlyDictionary<string, Condition>> GetConditionsAsync()
+        {
+            var conditionDataModels = this.inMemoryRulesStorage.GetConditions();
+            var conditions = new Dictionary<string, Condition>(conditionDataModels.Count, StringComparer.Ordinal);
+            foreach (var keyValuePair in conditionDataModels)
+            {
+                var conditionDataModel = keyValuePair.Value;
+                conditions.Add(keyValuePair.Key, new Condition(conditionDataModel.Name, conditionDataModel.Creation, conditionDataModel.DataType));
+            }
+
+            return new ValueTask<IReadOnlyDictionary<string, Condition>>(conditions);
         }
 
         /// <summary>
@@ -79,27 +104,20 @@ namespace Regulae.Providers.InMemory
         /// <param name="dateBegin">the filtering begin date.</param>
         /// <param name="dateEnd">the filtering end date.</param>
         /// <returns></returns>
-        public Task<IEnumerable<Rule>> GetRulesAsync(string ruleset, DateTime dateBegin, DateTime dateEnd)
+        public ValueTask<IReadOnlyCollection<Rule>> GetRulesAsync(string ruleset, DateTime dateBegin, DateTime dateEnd)
         {
             var filteredByRuleset = this.inMemoryRulesStorage.GetRulesBy(ruleset);
 
-            var filteredRules = new Rule[filteredByRuleset.Count];
-            var i = 0;
+            var filteredRules = new List<Rule>(filteredByRuleset.Count);
             foreach (var ruleDataModel in filteredByRuleset)
             {
                 if (ruleDataModel.DateBegin <= dateEnd && (ruleDataModel.DateEnd is null || ruleDataModel.DateEnd > dateBegin))
                 {
-                    var rule = this.ruleFactory.CreateRule(ruleDataModel);
-                    filteredRules[i++] = rule;
+                    filteredRules.Add(this.ruleFactory.CreateRule(ruleDataModel));
                 }
             }
 
-            if (filteredRules.Length > i)
-            {
-                Array.Resize(ref filteredRules, i);
-            }
-
-            return Task.FromResult<IEnumerable<Rule>>(filteredRules);
+            return new ValueTask<IReadOnlyCollection<Rule>>(filteredRules);
         }
 
         /// <summary>
@@ -108,7 +126,7 @@ namespace Regulae.Providers.InMemory
         /// <param name="rulesFilterArgs">The rules filter arguments.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">rulesFilterArgs</exception>
-        public Task<IEnumerable<Rule>> GetRulesByAsync(RulesFilterArgs rulesFilterArgs)
+        public ValueTask<IReadOnlyCollection<Rule>> GetRulesByAsync(RulesFilterArgs rulesFilterArgs)
         {
             if (rulesFilterArgs is null)
             {
@@ -148,24 +166,23 @@ namespace Regulae.Providers.InMemory
                 Array.Resize(ref filteredRules, i);
             }
 
-            return Task.FromResult<IEnumerable<Rule>>(filteredRules);
+            return new ValueTask<IReadOnlyCollection<Rule>>(filteredRules);
         }
 
         /// <summary>
         /// Gets the rulesets from the data source.
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<Ruleset>> GetRulesetsAsync()
+        public ValueTask<IReadOnlyDictionary<string, Ruleset>> GetRulesetsAsync()
         {
             var rulesetDataModels = this.inMemoryRulesStorage.GetRulesets();
-            var rulesets = new Ruleset[rulesetDataModels.Count];
-            var i = 0;
+            var rulesets = new Dictionary<string, Ruleset>(rulesetDataModels.Count, StringComparer.Ordinal);
             foreach (var rulesetDataModel in rulesetDataModels)
             {
-                rulesets[i++] = new Ruleset(rulesetDataModel.Name, rulesetDataModel.Creation);
+                rulesets.Add(rulesetDataModel.Name, new Ruleset(rulesetDataModel.Name, rulesetDataModel.Creation));
             }
 
-            return Task.FromResult<IEnumerable<Ruleset>>(rulesets);
+            return new ValueTask<IReadOnlyDictionary<string, Ruleset>>(rulesets);
         }
 
         /// <summary>
@@ -174,7 +191,7 @@ namespace Regulae.Providers.InMemory
         /// <param name="rule">The rule.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">rule</exception>
-        public Task UpdateRuleAsync(Rule rule)
+        public ValueTask UpdateRuleAsync(Rule rule)
         {
             if (rule is null)
             {
@@ -185,7 +202,7 @@ namespace Regulae.Providers.InMemory
 
             this.inMemoryRulesStorage.UpdateRule(newRuleDataModel);
 
-            return Task.CompletedTask;
+            return new ValueTask();
         }
     }
 }

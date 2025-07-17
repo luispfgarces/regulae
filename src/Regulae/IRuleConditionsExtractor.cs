@@ -12,6 +12,6 @@ namespace Regulae
         /// </summary>
         /// <param name="rules"></param>
         /// <returns>the distinct collection of conditions contained on the set of rules.</returns>
-        IEnumerable<string> GetConditions(IEnumerable<Rule> rules);
+        IReadOnlyCollection<string> GetConditions(IReadOnlyCollection<Rule> rules);
     }
 }

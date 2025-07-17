@@ -71,7 +71,7 @@ namespace Regulae.Rql.Runtime
             var i = 0;
             foreach (var ruleset in rulesets)
             {
-                rqlArrayRulesets.SetAtIndex(i++, new RqlRuleset(ruleset));
+                rqlArrayRulesets.SetAtIndex(i++, new RqlRuleset(ruleset.Value));
             }
 
             return rqlArrayRulesets;

@@ -5,6 +5,6 @@ namespace Regulae.Evaluation
 
     internal interface IConditionsTreeAnalyzer
     {
-        bool AreAllSearchConditionsPresent(IConditionNode conditionNode, IDictionary<string, object> conditions);
+        bool AreAllSearchConditionsPresent(IConditionNode conditionNode, IDictionary<string, Operand> conditions);
     }
 }

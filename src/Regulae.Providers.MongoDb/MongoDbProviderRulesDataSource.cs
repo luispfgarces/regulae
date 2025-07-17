@@ -8,17 +8,13 @@ namespace Regulae.Providers.MongoDb
     using Regulae;
     using Regulae.Providers.MongoDb.DataModel;
 
-    /// <summary>
-    /// The rules data source implementation for usage backed with a Mongo DB database.
-    /// </summary>
-    /// <seealso cref="IRulesDataSource"/>
-    public class MongoDbProviderRulesDataSource : IRulesDataSource
+    internal sealed class MongoDbProviderRulesDataSource : IRulesDataSource
     {
         private readonly IMongoDatabase mongoDatabase;
         private readonly MongoDbProviderSettings mongoDbProviderSettings;
         private readonly IRuleFactory ruleFactory;
 
-        internal MongoDbProviderRulesDataSource(
+        public MongoDbProviderRulesDataSource(
             IMongoClient mongoClient,
             MongoDbProviderSettings mongoDbProviderSettings,
             IRuleFactory ruleFactory)
@@ -33,11 +29,7 @@ namespace Regulae.Providers.MongoDb
             this.mongoDatabase = mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
         }
 
-        /// <summary>
-        /// Adds a new rule to data source.
-        /// </summary>
-        /// <param name="rule">The rule.</param>
-        public async Task AddRuleAsync(Rule rule)
+        public async ValueTask AddRuleAsync(Rule rule)
         {
             var rulesCollection = this.mongoDatabase.GetCollection<RuleDataModel>(this.mongoDbProviderSettings.RulesCollectionName);
 
@@ -46,11 +38,22 @@ namespace Regulae.Providers.MongoDb
             await rulesCollection.InsertOneAsync(ruleDataModel).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Creates a new ruleset on the data source.
-        /// </summary>
-        /// <param name="ruleset">The ruleset name.</param>
-        public async Task CreateRulesetAsync(string ruleset)
+        public async ValueTask CreateConditionAsync(string name, DataTypes dataType)
+        {
+            var conditionsCollection = this.mongoDatabase.GetCollection<ConditionDataModel>(this.mongoDbProviderSettings.ConditionsCollectionName);
+
+            var conditionDataModel = new ConditionDataModel
+            {
+                Creation = DateTime.UtcNow,
+                DataType = dataType.ToString(),
+                Id = Guid.NewGuid(),
+                Name = name,
+            };
+
+            await conditionsCollection.InsertOneAsync(conditionDataModel).ConfigureAwait(false);
+        }
+
+        public async ValueTask CreateRulesetAsync(string ruleset)
         {
             var rulesetsCollection = this.mongoDatabase.GetCollection<RulesetDataModel>(this.mongoDbProviderSettings.RulesetsCollectionName);
 
@@ -64,15 +67,26 @@ namespace Regulae.Providers.MongoDb
             await rulesetsCollection.InsertOneAsync(rulesetDataModel).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Gets the rules categorized with specified <paramref name="ruleset"/> between <paramref
-        /// name="dateBegin"/> and <paramref name="dateEnd"/>.
-        /// </summary>
-        /// <param name="ruleset">the ruleset name.</param>
-        /// <param name="dateBegin">the filtering begin date.</param>
-        /// <param name="dateEnd">the filtering end date.</param>
-        /// <returns></returns>
-        public async Task<IEnumerable<Rule>> GetRulesAsync(string ruleset, DateTime dateBegin, DateTime dateEnd)
+        public async ValueTask<IReadOnlyDictionary<string, Condition>> GetConditionsAsync()
+        {
+            var conditionsCollection = this.mongoDatabase.GetCollection<ConditionDataModel>(this.mongoDbProviderSettings.ConditionsCollectionName);
+
+            var findAllFilterDefinition = FilterDefinition<ConditionDataModel>.Empty;
+
+            var resultsCursor = await conditionsCollection.FindAsync(findAllFilterDefinition).ConfigureAwait(false);
+            var conditions = new Dictionary<string, Condition>(StringComparer.Ordinal);
+            while (await resultsCursor.MoveNextAsync().ConfigureAwait(false))
+            {
+                foreach (var conditionDataModel in resultsCursor.Current)
+                {
+                    conditions.Add(conditionDataModel.Name, new Condition(conditionDataModel.Name, conditionDataModel.Creation, Enum.Parse<DataTypes>(conditionDataModel.DataType)));
+                }
+            }
+
+            return conditions;
+        }
+
+        public async ValueTask<IReadOnlyCollection<Rule>> GetRulesAsync(string ruleset, DateTime dateBegin, DateTime dateEnd)
         {
             var getRulesByRulesetAndDatesInterval =
                 BuildFilterByRulesetAndDatesInterval(ruleset, dateBegin, dateEnd);
@@ -80,12 +94,7 @@ namespace Regulae.Providers.MongoDb
             return await this.GetRulesAsync(getRulesByRulesetAndDatesInterval).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Gets the rules filtered by specified arguments.
-        /// </summary>
-        /// <param name="rulesFilterArgs">The rules filter arguments.</param>
-        /// <returns></returns>
-        public Task<IEnumerable<Rule>> GetRulesByAsync(RulesFilterArgs rulesFilterArgs)
+        public ValueTask<IReadOnlyCollection<Rule>> GetRulesByAsync(RulesFilterArgs rulesFilterArgs)
         {
             if (rulesFilterArgs is null)
             {
@@ -98,34 +107,26 @@ namespace Regulae.Providers.MongoDb
             return this.GetRulesAsync(filterDefinition);
         }
 
-        /// <summary>
-        /// Gets the rulesets from the data source.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IEnumerable<Ruleset>> GetRulesetsAsync()
+        public async ValueTask<IReadOnlyDictionary<string, Ruleset>> GetRulesetsAsync()
         {
             var rulesetsCollection = this.mongoDatabase.GetCollection<RulesetDataModel>(this.mongoDbProviderSettings.RulesetsCollectionName);
 
             var findAllFilterDefinition = FilterDefinition<RulesetDataModel>.Empty;
 
             var resultsCursor = await rulesetsCollection.FindAsync(findAllFilterDefinition).ConfigureAwait(false);
-            var rulesets = new List<Ruleset>();
+            var rulesets = new Dictionary<string, Ruleset>(StringComparer.Ordinal);
             while (await resultsCursor.MoveNextAsync().ConfigureAwait(false))
             {
                 foreach (var rulesetDataModel in resultsCursor.Current)
                 {
-                    rulesets.Add(new Ruleset(rulesetDataModel.Name, rulesetDataModel.Creation));
+                    rulesets.Add(rulesetDataModel.Name, new Ruleset(rulesetDataModel.Name, rulesetDataModel.Creation));
                 }
             }
 
             return rulesets;
         }
 
-        /// <summary>
-        /// Updates the existent rule on data source.
-        /// </summary>
-        /// <param name="rule">The rule.</param>
-        public async Task UpdateRuleAsync(Rule rule)
+        public async ValueTask UpdateRuleAsync(Rule rule)
         {
             var rulesCollection = this.mongoDatabase.GetCollection<RuleDataModel>(this.mongoDbProviderSettings.RulesCollectionName);
 
@@ -186,11 +187,15 @@ namespace Regulae.Providers.MongoDb
             return filtersToApply.Any() ? Builders<RuleDataModel>.Filter.And(filtersToApply) : Builders<RuleDataModel>.Filter.Empty;
         }
 
-        private async Task<IEnumerable<Rule>> GetRulesAsync(FilterDefinition<RuleDataModel> getRulesByRulesetAndDatesInterval)
+        private async ValueTask<IReadOnlyCollection<Rule>> GetRulesAsync(FilterDefinition<RuleDataModel> getRulesByRulesetAndDatesInterval)
         {
             var rulesCollection = this.mongoDatabase.GetCollection<RuleDataModel>(this.mongoDbProviderSettings.RulesCollectionName);
 
-            var fetchedRulesCursor = await rulesCollection.FindAsync(getRulesByRulesetAndDatesInterval).ConfigureAwait(false);
+            var filterOptions = new FindOptions<RuleDataModel>
+            {
+                Sort = Builders<RuleDataModel>.Sort.Ascending(x => x.Priority),
+            };
+            var fetchedRulesCursor = await rulesCollection.FindAsync(getRulesByRulesetAndDatesInterval, filterOptions).ConfigureAwait(false);
 
             var fetchedRules = await fetchedRulesCursor.ToListAsync().ConfigureAwait(false);
 

@@ -10,7 +10,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
     {
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
-            if (!args.DataTypeConfiguration.Type.HasLanguageOperator(LanguageOperator.LessThan))
+            if (!args.DataTypeConfiguration.OneCardinality.Type.HasLanguageOperator(LanguageOperator.LessThan))
             {
                 throw new NotSupportedException($"The operator '{Operators.LesserThan}' is not supported for data type '{args.DataTypeConfiguration.DataType}'.");
             }

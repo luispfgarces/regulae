@@ -11,10 +11,13 @@
             "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
             "_t": "value",
             "Condition": "RepairCostsCommercialValueRate",
-            "DataType": "Decimal",
             "LogicalOperator": "Eval",
             "Operator": "LesserThan",
-            "Operand": 80
+            "RightOperand": {
+                "Cardinality": "One",
+                "DataType": "Decimal",
+                "Value": 80
+            }
         }
     },
     {
@@ -29,10 +32,13 @@
             "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
             "_t": "value",
             "Condition": "RepairCostsCommercialValueRate",
-            "DataType": "Decimal",
             "LogicalOperator": "Eval",
             "Operator": "GreaterThanOrEqual",
-            "Operand": 80
+            "RightOperand": {
+                "Cardinality": "One",
+                "DataType": "Decimal",
+                "Value": 80
+            }
         }
     },
     {
@@ -52,19 +58,25 @@
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "RepairCosts",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "LesserThan",
-                    "Operand": 1000
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 1000
+                    }
                 },
                 {
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "RepairCostsCommercialValueRate",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "LesserThan",
-                    "Operand": 80
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 80
+                    }
                 }
             ]
         }

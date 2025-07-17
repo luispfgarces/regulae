@@ -1,10 +1,10 @@
 namespace Regulae.Evaluation
 {
-    internal static class Multiplicities
+    internal enum Multiplicities : byte
     {
-        public const string ManyToMany = "many-to-many";
-        public const string ManyToOne = "many-to-one";
-        public const string OneToMany = "one-to-many";
-        public const string OneToOne = "one-to-one";
+        ManyToMany = 0b11,
+        ManyToOne = 0b10,
+        OneToMany = 0b01,
+        OneToOne = 0b00,
     }
 }

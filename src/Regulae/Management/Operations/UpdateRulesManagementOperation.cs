@@ -15,7 +15,7 @@ namespace Regulae.Management.Operations
             this.rulesSource = rulesSource;
         }
 
-        public async Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
+        public async ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
         {
             foreach (var existentRule in rules)
             {

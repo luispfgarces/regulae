@@ -8,14 +8,17 @@ namespace Regulae.IntegrationTests.Common.Scenarios.Scenario6
 
     public class Scenario6Data : IScenarioData<Rulesets, ConditionNames>
     {
-        public IDictionary<ConditionNames, object> Conditions => new Dictionary<ConditionNames, object>
+        public IEnumerable<(ConditionNames, DataTypes)> AllConditions => new[]
         {
-            { ConditionNames.StringCondition, "Let's benchmark this!" },
+            (ConditionNames.IntegerCondition, DataTypes.Integer),
+            (ConditionNames.BooleanCondition, DataTypes.Boolean),
+            (ConditionNames.DecimalCondition, DataTypes.Decimal),
+            (ConditionNames.StringCondition, DataTypes.String),
         };
 
-        public DateTime MatchDate => DateTime.Parse("2022-10-01");
+        public IEnumerable<Rule<Rulesets, ConditionNames>> AllRules => this.GetRules();
 
-        public IEnumerable<Rule<Rulesets, ConditionNames>> Rules => this.GetRules();
+        public IEnumerable<Rulesets> AllRulesets => new[] { Rulesets.Sample1 };
 
         private IEnumerable<Rule<Rulesets, ConditionNames>> GetRules()
         {

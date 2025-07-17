@@ -9,7 +9,7 @@ namespace Regulae.Tests.Generic
     using Regulae;
     using Regulae.Generic;
     using Regulae.Tests.TestStubs;
-    using Regulae.Generic;
+
     using Xunit;
 
     public class RulesEngineTests
@@ -27,11 +27,15 @@ namespace Regulae.Tests.Generic
             // Arrange
             var ruleset1 = new Ruleset("Type1", DateTime.UtcNow);
             var ruleset2 = new Ruleset("Type2", DateTime.UtcNow);
-            var rulesets = new[] { ruleset1, ruleset2, };
-            var expectedGenericRulesets = new[]
+            var rulesets = new Dictionary<string, Ruleset>
             {
-                new Ruleset<RulesetNames>(ruleset1),
-                new Ruleset<RulesetNames>(ruleset2),
+                { ruleset1.Name, ruleset1 },
+                { ruleset2.Name, ruleset2 },
+            };
+            var expectedGenericRulesets = new Dictionary<RulesetNames, Ruleset<RulesetNames>>
+            {
+                { RulesetNames.Type1, new Ruleset<RulesetNames>(ruleset1) },
+                { RulesetNames.Type2, new Ruleset<RulesetNames>(ruleset2) },
             };
             Mock.Get(this.rulesEngineMock)
                 .Setup(x => x.GetRulesetsAsync())
@@ -50,9 +54,10 @@ namespace Regulae.Tests.Generic
         public async Task GetRulesetsAsync_WithEmptyRulesetsNames_ReturnsEmptyRulesetsCollection()
         {
             // Arrange
-            var mockRulesEngineEmptyRuleset = new Mock<IRulesEngine>();
-
-            var genericRulesEngine = new RulesEngine<EmptyRulesetNames, ConditionNames>(mockRulesEngineEmptyRuleset.Object);
+            Mock.Get(this.rulesEngineMock)
+                .Setup(x => x.GetRulesetsAsync())
+                .ReturnsAsync(new Dictionary<string, Ruleset>());
+            var genericRulesEngine = new RulesEngine<EmptyRulesetNames, ConditionNames>(this.rulesEngineMock);
 
             // Act
             var genericRulesets = await genericRulesEngine.GetRulesetsAsync();
@@ -167,7 +172,7 @@ namespace Regulae.Tests.Generic
                         break;
 
                     case nameof(RulesEngine<RulesetNames, ConditionNames>.AddRuleAsync):
-                        _ = await sut.AddRuleAsync(null, RuleAddPriorityOption.AtTop);
+                        _ = await sut.AddRuleAsync(null, RuleAddPriorityOption.AtSmallestNumber);
                         break;
 
                     case nameof(RulesEngine<RulesetNames, ConditionNames>.DeactivateRuleAsync):

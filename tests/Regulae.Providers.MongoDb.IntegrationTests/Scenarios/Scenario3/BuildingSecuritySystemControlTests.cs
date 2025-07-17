@@ -56,14 +56,59 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
             var rulesets = rules
                 .Select(r => new RulesetDataModel
                 {
-                    Creation = DateTime.UtcNow,
-                    Id = Guid.NewGuid(),
                     Name = r.Ruleset,
                 })
                 .Distinct()
+                .Select(r => new RulesetDataModel
+                {
+                    Creation = DateTime.UtcNow,
+                    Id = Guid.NewGuid(),
+                    Name = r.Name,
+                })
+                .ToArray();
+
+            var conditions = rules
+                .SelectMany(r =>
+                {
+                    return GetConditions(r.RootCondition);
+                    static IEnumerable<ConditionDataModel> GetConditions(ConditionNodeDataModel conditionNode)
+                    {
+                        if (conditionNode is ComposedConditionNodeDataModel composedConditionNodeDataModel)
+                        {
+                            foreach (var childCondition in composedConditionNodeDataModel.ChildConditionNodes)
+                            {
+                                foreach (var condition in GetConditions(childCondition))
+                                {
+                                    yield return condition;
+                                }
+                            }
+
+                            yield break;
+                        }
+
+                        var valueConditionNodeDataModel = (ValueConditionNodeDataModel)conditionNode;
+                        yield return new ConditionDataModel
+                        {
+                            Name = valueConditionNodeDataModel.Condition,
+                            DataType = valueConditionNodeDataModel.RightOperand.DataType.ToString(),
+                        };
+                    }
+                })
+                .Distinct()
+                .Select(c => new ConditionDataModel
+                {
+                    Creation = DateTime.UtcNow,
+                    Id = Guid.NewGuid(),
+                    Name = c.Name,
+                    DataType = c.DataType,
+                })
                 .ToArray();
 
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
+
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            var conditionsMongoCollection = mongoDatabase.GetCollection<ConditionDataModel>(this.mongoDbProviderSettings.ConditionsCollectionName);
+            conditionsMongoCollection.InsertMany(conditions);
 
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
             var rulesetsMongoCollection = mongoDatabase.GetCollection<RulesetDataModel>(this.mongoDbProviderSettings.RulesetsCollectionName);
@@ -75,9 +120,9 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task BuildingSecuritySystem_FireScenario_ReturnsActionsToTrigger(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_FireScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.FireSystem;
@@ -92,10 +137,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
@@ -112,7 +154,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
                 .Build();
             var newRule = newRuleResult.Rule;
 
-            _ = await genericRulesEngine.AddRuleAsync(newRule, RuleAddPriorityOption.AtBottom);
+            _ = await genericRulesEngine.AddRuleAsync(newRule, RuleAddPriorityOption.AtLargestNumber);
 
             var actual = await genericRulesEngine.MatchManyAsync(securitySystemActionable, expectedMatchDate, expectedConditions);
 
@@ -129,9 +171,9 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task BuildingSecuritySystem_PowerFailureScenario_ReturnsActionsToTrigger(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_PowerFailureScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.PowerSystem;
@@ -146,10 +188,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
@@ -167,9 +206,9 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task BuildingSecuritySystem_PowerShutdownScenario_ReturnsActionsToTrigger(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_PowerShutdownScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.PowerSystem;
@@ -184,10 +223,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
@@ -208,6 +244,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario3
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesCollectionName);
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.ConditionsCollectionName);
         }
 
         private static MongoClient CreateMongoClient() => new($"mongodb://{SettingsProvider.GetMongoDbHost()}:27017");

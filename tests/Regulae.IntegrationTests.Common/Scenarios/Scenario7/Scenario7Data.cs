@@ -1,6 +1,5 @@
 namespace Regulae.IntegrationTests.Common.Scenarios.Scenario7
 {
-    using System;
     using System.Collections.Generic;
     using Regulae;
     using Regulae.Extensions;
@@ -9,16 +8,16 @@ namespace Regulae.IntegrationTests.Common.Scenarios.Scenario7
 
     public class Scenario7Data : IScenarioData<Rulesets, ConditionNames>
     {
-        public IDictionary<ConditionNames, object> Conditions => new Dictionary<ConditionNames, object>
+        public IEnumerable<(ConditionNames, DataTypes)> AllConditions => new[]
         {
-            { ConditionNames.Artist, "Queen" },
-            { ConditionNames.Lyrics, "Is this the real life?\nIs this just fantasy?\nCaught in a landside,\nNo escape from reality" },
-            { ConditionNames.ReleaseYear, 1975 },
+            (ConditionNames.ReleaseYear, DataTypes.Integer),
+            (ConditionNames.Artist, DataTypes.String),
+            (ConditionNames.Lyrics, DataTypes.String),
         };
 
-        public DateTime MatchDate => DateTime.Parse("2022-11-01");
+        public IEnumerable<Rule<Rulesets, ConditionNames>> AllRules => this.GetRules();
 
-        public IEnumerable<Rule<Rulesets, ConditionNames>> Rules => this.GetRules();
+        public IEnumerable<Rulesets> AllRulesets => new[] { Rulesets.Songs };
 
         private IEnumerable<Rule<Rulesets, ConditionNames>> GetRules()
         {

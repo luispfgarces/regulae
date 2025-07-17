@@ -30,7 +30,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Features.RulesEngine
             var rulesEngine = RulesEngineBuilder
                 .CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(c => c.PriorityCriteria = PriorityCriterias.TopmostRuleWins)
+                .Configure(c => c.UseSmallestNumberPriorityCriteria())
                 .Build();
 
             this.RulesEngine = rulesEngine.MakeGeneric<RulesetNames, ConditionNames>();
@@ -43,6 +43,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Features.RulesEngine
         {
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.ConditionsCollectionName);
         }
 
         protected void AddRules(IEnumerable<RuleSpecification> ruleSpecifications)

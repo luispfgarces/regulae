@@ -92,7 +92,7 @@ namespace Regulae.Providers.MongoDb.Tests
 
             var rulesCollection = Mock.Of<IMongoCollection<RuleDataModel>>();
             Mock.Get(rulesCollection)
-                .Setup(x => x.FindAsync<RuleDataModel>(It.IsAny<FilterDefinition<RuleDataModel>>(), null, default))
+                .Setup(x => x.FindAsync<RuleDataModel>(It.IsAny<FilterDefinition<RuleDataModel>>(), It.IsAny<FindOptions<RuleDataModel>>(), default))
                 .ReturnsAsync(fetchedRulesCursor);
 
             var mongoDatabase = Mock.Of<IMongoDatabase>();
@@ -193,7 +193,7 @@ namespace Regulae.Providers.MongoDb.Tests
             // Assert
             actual.Should().NotBeNull()
                 .And.HaveCount(1)
-                .And.Contain(r => string.Equals(r.Name, nameof(RulesetNames.RulesetSample), StringComparison.Ordinal));
+                .And.Contain(r => string.Equals(r.Value.Name, nameof(RulesetNames.RulesetSample), StringComparison.Ordinal));
         }
     }
 }

@@ -4,5 +4,5 @@ namespace Regulae.Source
     using System.Threading.Tasks;
     using Regulae;
 
-    internal delegate Task<IEnumerable<Ruleset>> GetRulesetsDelegate(GetRulesetsArgs args);
+    internal delegate ValueTask<IReadOnlyDictionary<string, Ruleset>> GetRulesetsDelegate(GetRulesetsArgs args);
 }

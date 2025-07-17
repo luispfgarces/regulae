@@ -4,8 +4,8 @@ namespace Regulae.Tests
     using System.Collections.Generic;
     using FluentAssertions;
     using Regulae;
-    using Regulae.Tests.TestStubs;
     using Regulae.ConditionNodes;
+    using Regulae.Tests.TestStubs;
     using Xunit;
 
     public class RuleConditionsExtractorTests
@@ -25,7 +25,7 @@ namespace Regulae.Tests
                 DateEnd = dateEnd,
                 Name = "Rule 1",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var rule2 = new Rule
@@ -35,7 +35,7 @@ namespace Regulae.Tests
                 DateEnd = new DateTime(2021, 01, 01),
                 Name = "Rule 2",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
             };
 
             var rule3 = new Rule
@@ -45,7 +45,7 @@ namespace Regulae.Tests
                 DateEnd = dateEnd,
                 Name = "Rule 3",
                 Priority = 1,
-                RootCondition = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCurrency.ToString(), Operators.Equal, "EUR")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "EUR")
             };
 
             var rule4 = new Rule
@@ -59,9 +59,9 @@ namespace Regulae.Tests
                 LogicalOperators.And,
                 new IConditionNode[]
                 {
-                    new ValueConditionNode(DataTypes.String,ConditionNames.IsVip.ToString(), Operators.Equal, "true"),
-                    new ValueConditionNode(DataTypes.String,ConditionNames.PluviosityRate.ToString(), Operators.Equal, "15"),
-                    new ValueConditionNode(DataTypes.String,ConditionNames.IsoCurrency.ToString(), Operators.Equal, "JPY")
+                    new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, "true"),
+                    new ValueConditionNode(ConditionNames.PluviosityRate.ToString(), Operators.Equal, "15"),
+                    new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "JPY")
                 }
                 )
             };

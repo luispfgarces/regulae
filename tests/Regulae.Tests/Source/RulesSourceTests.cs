@@ -30,7 +30,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.AddRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -60,7 +60,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.AddRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -93,7 +93,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.AddRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -125,7 +125,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.CreateRulesetAsync(It.Is<string>((val, _) => Equals(val, ruleset))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -155,7 +155,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.CreateRulesetAsync(It.Is<string>((val, _) => Equals(val, ruleset))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -188,7 +188,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.CreateRulesetAsync(It.Is<string>((val, _) => Equals(val, ruleset))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -302,10 +302,10 @@ namespace Regulae.Tests.Source
         public async Task GetRulesetsAsync_NoMiddlewares_CallsRulesDataSource()
         {
             // Arrange
-            var expected = new[]
+            var expected = new Dictionary<string, Ruleset>
             {
-                new Ruleset("Ruleset 1", DateTime.UtcNow),
-                new Ruleset("Ruleset 2", DateTime.UtcNow),
+                { "Ruleset 1", new Ruleset("Ruleset 1", DateTime.UtcNow) },
+                { "Ruleset 2", new Ruleset("Ruleset 2", DateTime.UtcNow) },
             };
 
             var getRulesetsArgs = new GetRulesetsArgs();
@@ -334,10 +334,10 @@ namespace Regulae.Tests.Source
         public async Task GetRulesetsAsync_OneMiddleware_CallsMiddlewareAndRulesDataSourceAfter()
         {
             // Arrange
-            var expected = new[]
+            var expected = new Dictionary<string, Ruleset>
             {
-                new Ruleset("Ruleset 1", DateTime.UtcNow),
-                new Ruleset("Ruleset 2", DateTime.UtcNow),
+                { "Ruleset 1", new Ruleset("Ruleset 1", DateTime.UtcNow) },
+                { "Ruleset 2", new Ruleset("Ruleset 2", DateTime.UtcNow) },
             };
 
             var getRulesetsArgs = new GetRulesetsArgs();
@@ -368,10 +368,10 @@ namespace Regulae.Tests.Source
         public async Task GetRulesetsAsync_TwoMiddlewares_CallsFirstMiddlewareSecondMiddlewareAfterAndRulesDataSourceByLast()
         {
             // Arrange
-            var expected = new[]
+            var expected = new Dictionary<string, Ruleset>
             {
-                new Ruleset("Ruleset 1", DateTime.UtcNow),
-                new Ruleset("Ruleset 2", DateTime.UtcNow),
+                { "Ruleset 1", new Ruleset("Ruleset 1", DateTime.UtcNow) },
+                { "Ruleset 2", new Ruleset("Ruleset 2", DateTime.UtcNow) },
             };
 
             var getRulesetsArgs = new GetRulesetsArgs();
@@ -520,7 +520,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.UpdateRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -550,7 +550,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.UpdateRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 
@@ -583,7 +583,7 @@ namespace Regulae.Tests.Source
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             Mock.Get(rulesDataSource)
                 .Setup(x => x.UpdateRuleAsync(It.Is<Rule>((val, _) => ReferenceEquals(val, rule))))
-                .Returns(Task.CompletedTask);
+                .Returns(new ValueTask());
 
             RulesSource rulesSource = new(rulesDataSource, rulesSourceMiddlewares);
 

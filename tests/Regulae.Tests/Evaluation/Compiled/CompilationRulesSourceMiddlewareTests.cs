@@ -10,10 +10,10 @@ namespace Regulae.Tests.Evaluation.Compiled
     using Regulae;
     using Regulae.Builder.Generic;
     using Regulae.Core;
+    using Regulae.Evaluation;
     using Regulae.Evaluation.Compiled;
     using Regulae.Source;
     using Regulae.Tests.TestStubs;
-    using Regulae.Evaluation.Compiled;
     using Xunit;
 
     public class CompilationRulesSourceMiddlewareTests
@@ -37,14 +37,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new AddRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -60,7 +60,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
         }
 
         [Fact]
@@ -79,14 +79,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new AddRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -102,7 +102,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
         }
 
         [Fact]
@@ -121,14 +121,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new AddRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -141,11 +141,13 @@ namespace Regulae.Tests.Evaluation.Compiled
             await compilationRulesSourceMiddleware.HandleAddRuleAsync(addRuleArgs, nextDelegate);
 
             // Assert
-            expectedRule.RootCondition.Properties.Should().HaveCount(2);
+            expectedRule.RootCondition.Properties.Should().HaveCount(3);
             expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.IsCompiledKey)
                 .WhoseValue.Should().Be(true);
-            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledDelegateKey)
-                .WhoseValue.Should().BeOfType<Func<EvaluationContext, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.VerifyAll(
@@ -174,14 +176,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -200,7 +202,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
             Mock.Get(rulesDataSource)
                 .Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Never());
         }
@@ -224,14 +226,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -250,7 +252,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
             Mock.Get(rulesDataSource)
                 .Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Never());
         }
@@ -274,14 +276,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -298,11 +300,13 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Assert
             actualRules.Should().HaveCount(1);
             var actualRule = actualRules.First();
-            actualRule.RootCondition.Properties.Should().HaveCount(2);
+            actualRule.RootCondition.Properties.Should().HaveCount(3);
             actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.IsCompiledKey)
                 .WhoseValue.Should().Be(true);
-            actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledDelegateKey)
-                .WhoseValue.Should().BeOfType<Func<EvaluationContext, bool>>();
+            actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.VerifyAll(
@@ -330,14 +334,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesFilteredDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -356,7 +360,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
             Mock.Get(rulesDataSource)
                 .Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Never());
         }
@@ -378,14 +382,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesFilteredDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -404,7 +408,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
             Mock.Get(rulesDataSource)
                 .Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Never());
         }
@@ -426,14 +430,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new GetRulesFilteredDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.FromResult<IEnumerable<Rule>>(expectedRules);
+                return new ValueTask<IReadOnlyCollection<Rule>>(expectedRules);
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -450,11 +454,13 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Assert
             actualRules.Should().HaveCount(1);
             var actualRule = actualRules.First();
-            actualRule.RootCondition.Properties.Should().HaveCount(2);
+            actualRule.RootCondition.Properties.Should().HaveCount(3);
             actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.IsCompiledKey)
                 .WhoseValue.Should().Be(true);
-            actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledDelegateKey)
-                .WhoseValue.Should().BeOfType<Func<EvaluationContext, bool>>();
+            actualRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.VerifyAll(
@@ -481,14 +487,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new UpdateRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -504,7 +510,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
         }
 
         [Fact]
@@ -523,14 +529,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new UpdateRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -546,7 +552,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>()), Times.Never());
+                .Verify(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()), Times.Never());
         }
 
         [Fact]
@@ -565,14 +571,14 @@ namespace Regulae.Tests.Evaluation.Compiled
             var nextDelegate = new UpdateRuleDelegate((_) =>
             {
                 nextDelegateWasInvoked = true;
-                return Task.CompletedTask;
+                return new ValueTask();
             });
 
-            Expression<Func<EvaluationContext, bool>> expectedExpression = (_) => true;
+            Expression<Func<IDictionary<string, Operand>, bool>> expectedExpression = (_) => true;
 
             var ruleConditionsExpressionBuilder = Mock.Of<IRuleConditionsExpressionBuilder>();
             Mock.Get(ruleConditionsExpressionBuilder)
-                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>()))
+                .Setup(x => x.BuildExpression(It.IsAny<IConditionNode>(), It.IsAny<MatchModes>()))
                 .Returns(expectedExpression);
 
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -585,11 +591,13 @@ namespace Regulae.Tests.Evaluation.Compiled
             await compilationRulesSourceMiddleware.HandleUpdateRuleAsync(updateRuleArgs, nextDelegate);
 
             // Assert
-            expectedRule.RootCondition.Properties.Should().HaveCount(2);
+            expectedRule.RootCondition.Properties.Should().HaveCount(3);
             expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.IsCompiledKey)
                 .WhoseValue.Should().Be(true);
-            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledDelegateKey)
-                .WhoseValue.Should().BeOfType<Func<EvaluationContext, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
+            expectedRule.RootCondition.Properties.Should().ContainKey(ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey)
+                .WhoseValue.Should().BeOfType<Func<IDictionary<string, Operand>, bool>>();
             nextDelegateWasInvoked.Should().BeTrue();
 
             Mock.VerifyAll(

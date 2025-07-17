@@ -4,9 +4,9 @@ namespace Regulae.Tests.Evaluation
     using System.Collections.Generic;
     using FluentAssertions;
     using Regulae;
-    using Regulae.Tests.TestStubs;
     using Regulae.ConditionNodes;
     using Regulae.Evaluation;
+    using Regulae.Tests.TestStubs;
     using Xunit;
 
     public class ConditionsTreeAnalyzerTests
@@ -15,15 +15,15 @@ namespace Regulae.Tests.Evaluation
         public void AreAllSearchConditionsPresent_GivenComposedConditionNodeWithAllConditionsOnDictionary_ReturnsTrue()
         {
             // Arrange
-            var condition1 = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.In, new[] { "US", "CA" });
-            var condition2 = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCurrency.ToString(), Operators.NotEqual, "SGD");
-            var condition3 = new ValueConditionNode(DataTypes.Boolean, ConditionNames.IsVip.ToString(), Operators.Equal, false);
+            var condition1 = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.In, new[] { "US", "CA" });
+            var condition2 = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.NotEqual, "SGD");
+            var condition3 = new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, false);
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Or,
                 new IConditionNode[] { condition1, condition2, condition3 });
 
-            var conditions = new Dictionary<string, object>
+            var conditions = new Dictionary<string, Operand>
             {
                 {
                     ConditionNames.IsoCurrency.ToString(),
@@ -49,13 +49,13 @@ namespace Regulae.Tests.Evaluation
         {
             // Arrange
             var condition1 = new StubConditionNode();
-            var condition2 = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCurrency.ToString(), Operators.NotEqual, "SGD");
+            var condition2 = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.NotEqual, "SGD");
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Or,
                 new IConditionNode[] { condition1, condition2 });
 
-            var conditions = new Dictionary<string, object>
+            var conditions = new Dictionary<string, Operand>
             {
                 {
                     ConditionNames.IsoCurrency.ToString(),
@@ -81,14 +81,14 @@ namespace Regulae.Tests.Evaluation
         public void AreAllSearchConditionsPresent_GivenComposedConditionNodeWithMissingConditionOnDictionary_ReturnsFalse()
         {
             // Arrange
-            var condition1 = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.In, new[] { "US", "CA" });
-            var condition3 = new ValueConditionNode(DataTypes.Boolean, ConditionNames.IsVip.ToString(), Operators.Equal, false);
+            var condition1 = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.In, new[] { "US", "CA" });
+            var condition3 = new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, false);
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Or,
                 new IConditionNode[] { condition1, condition3 });
 
-            var conditions = new Dictionary<string, object>
+            var conditions = new Dictionary<string, Operand>
             {
                 {
                     ConditionNames.IsoCurrency.ToString(),

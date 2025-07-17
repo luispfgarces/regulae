@@ -39,7 +39,7 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario5
                 },
                 "Best Server Default"
             }
-        }.SelectMany(x => new[] { false, true }.Select(c => new object[] { x[0], x[1], c }));
+        }.SelectMany(x => new[] { EvaluationStrategies.Interpreted, EvaluationStrategies.Compiled }.Select(c => new object[] { x[0], x[1], c }));
 
         private readonly MongoClient mongoClient;
         private readonly MongoDbProviderSettings mongoDbProviderSettings;
@@ -52,18 +52,20 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario5
 
         [Theory]
         [MemberData(nameof(DataTest))]
-        public async Task BestServer_InEvaluation(Dictionary<BestServerConditions, object> conditions, string expectedRuleName, bool enableCompilation)
+        public async Task BestServer_InEvaluation(Dictionary<BestServerConditions, object> conditions, string expectedRuleName, EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetMongoDbDataSource(this.mongoClient, this.mongoDbProviderSettings)
-                .Configure(opt =>
-                {
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseEvaluationStrategy(evaluationStrategy))
                 .Build();
             var genericRulesEngine = rulesEngine.MakeGeneric<BestServerConfigurations, BestServerConditions>();
             await genericRulesEngine.CreateRulesetAsync(BestServerConfigurations.BestServerEvaluation);
+            await genericRulesEngine.CreateConditionAsync(BestServerConditions.Brand, DataTypes.String);
+            await genericRulesEngine.CreateConditionAsync(BestServerConditions.Memory, DataTypes.Integer);
+            await genericRulesEngine.CreateConditionAsync(BestServerConditions.Price, DataTypes.Decimal);
+            await genericRulesEngine.CreateConditionAsync(BestServerConditions.Storage, DataTypes.Integer);
+            await genericRulesEngine.CreateConditionAsync(BestServerConditions.StoragePartionable, DataTypes.Boolean);
 
             // Act 1 - Create rule with "in" operator
             var ruleBuilderResult = Rule.Create<BestServerConfigurations, BestServerConditions>("Best Server Top5")
@@ -103,8 +105,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario5
                 $"errors have occurred while creating rule default: \n[\n- {errors}\n]");
 
             // Act 2 - Add new rule with "in" operator
-            await rulesEngine.AddRuleAsync(ruleBuilderResultDefault.Rule, RuleAddPriorityOption.ByPriorityNumber(2));
-            await rulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.ByPriorityNumber(1));
+            await rulesEngine.AddRuleAsync(ruleBuilderResultDefault.Rule, RuleAddPriorityOption.AtNumber(2));
+            await rulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.AtNumber(1));
 
             var matchDateTime = DateTime.Parse("2021-05-29T12:34:52Z");
 
@@ -119,6 +121,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario5
         {
             var mongoDatabase = this.mongoClient.GetDatabase(this.mongoDbProviderSettings.DatabaseName);
             mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.RulesetsCollectionName);
+            mongoDatabase.DropCollection(this.mongoDbProviderSettings.ConditionsCollectionName);
         }
 
         private static MongoClient CreateMongoClient() => new($"mongodb://{SettingsProvider.GetMongoDbHost()}:27017");

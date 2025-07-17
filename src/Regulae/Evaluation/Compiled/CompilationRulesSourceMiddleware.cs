@@ -19,22 +19,26 @@ namespace Regulae.Evaluation.Compiled
             this.rulesDataSource = rulesDataSource;
         }
 
-        public async Task HandleAddRuleAsync(
+        public async ValueTask HandleAddRuleAsync(
             AddRuleArgs args,
             AddRuleDelegate next)
         {
             this.TryCompile(args.Rule);
 
-            await next.Invoke(args).ConfigureAwait(false);
+            await next(args).ConfigureAwait(false);
         }
 
-        public Task HandleCreateRulesetAsync(CreateRulesetArgs args, CreateRulesetDelegate next) => next.Invoke(args);
+        public ValueTask HandleCreateConditionAsync(CreateConditionArgs args, CreateConditionDelegate next) => next(args);
 
-        public async Task<IEnumerable<Rule>> HandleGetRulesAsync(
+        public ValueTask HandleCreateRulesetAsync(CreateRulesetArgs args, CreateRulesetDelegate next) => next(args);
+
+        public ValueTask<IReadOnlyDictionary<string, Condition>> HandleGetConditionsAsync(GetConditionsArgs args, GetConditionsDelegate next) => next(args);
+
+        public async ValueTask<IReadOnlyCollection<Rule>> HandleGetRulesAsync(
             GetRulesArgs args,
             GetRulesDelegate next)
         {
-            var rules = await next.Invoke(args).ConfigureAwait(false);
+            var rules = await next(args).ConfigureAwait(false);
 
             foreach (var rule in rules)
             {
@@ -50,13 +54,13 @@ namespace Regulae.Evaluation.Compiled
             return rules;
         }
 
-        public Task<IEnumerable<Ruleset>> HandleGetRulesetsAsync(GetRulesetsArgs args, GetRulesetsDelegate next) => next.Invoke(args);
+        public ValueTask<IReadOnlyDictionary<string, Ruleset>> HandleGetRulesetsAsync(GetRulesetsArgs args, GetRulesetsDelegate next) => next(args);
 
-        public async Task<IEnumerable<Rule>> HandleGetRulesFilteredAsync(
+        public async ValueTask<IReadOnlyCollection<Rule>> HandleGetRulesFilteredAsync(
             GetRulesFilteredArgs args,
             GetRulesFilteredDelegate next)
         {
-            var rules = await next.Invoke(args).ConfigureAwait(false);
+            var rules = await next(args).ConfigureAwait(false);
 
             foreach (var rule in rules)
             {
@@ -72,13 +76,13 @@ namespace Regulae.Evaluation.Compiled
             return rules;
         }
 
-        public async Task HandleUpdateRuleAsync(
+        public async ValueTask HandleUpdateRuleAsync(
             UpdateRuleArgs args,
             UpdateRuleDelegate next)
         {
             this.TryCompile(args.Rule);
 
-            await next.Invoke(args).ConfigureAwait(false);
+            await next(args).ConfigureAwait(false);
         }
 
         private bool TryCompile(Rule rule)
@@ -87,9 +91,12 @@ namespace Regulae.Evaluation.Compiled
 
             if (conditionNode is { } && (!conditionNode.Properties.TryGetValue(ConditionNodeProperties.CompilationProperties.IsCompiledKey, out var compiledFlag) || !(bool)compiledFlag))
             {
-                var expression = this.ruleConditionsExpressionBuilder.BuildExpression(conditionNode);
-                var compiledExpression = expression.Compile();
-                conditionNode.Properties[ConditionNodeProperties.CompilationProperties.CompiledDelegateKey] = compiledExpression;
+                var matchExpression = this.ruleConditionsExpressionBuilder.BuildExpression(conditionNode, MatchModes.Exact);
+                var compiledMatchExpression = matchExpression.Compile();
+                conditionNode.Properties[ConditionNodeProperties.CompilationProperties.CompiledMatchDelegateKey] = compiledMatchExpression;
+                var searchExpression = this.ruleConditionsExpressionBuilder.BuildExpression(conditionNode, MatchModes.Search);
+                var compiledSearchExpression = searchExpression.Compile();
+                conditionNode.Properties[ConditionNodeProperties.CompilationProperties.CompiledSearchDelegateKey] = compiledSearchExpression;
                 conditionNode.Properties[ConditionNodeProperties.CompilationProperties.IsCompiledKey] = true;
                 return true;
             }

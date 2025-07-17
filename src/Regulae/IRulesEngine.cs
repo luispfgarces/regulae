@@ -38,6 +38,14 @@ namespace Regulae
         Task<OperationResult> AddRuleAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption);
 
         /// <summary>
+        /// Creates a condition.
+        /// </summary>
+        /// <param name="name">The condition name.</param>
+        /// <param name="dataType">Type of the data.</param>
+        /// <returns></returns>
+        Task<OperationResult> CreateConditionAsync(string name, DataTypes dataType);
+
+        /// <summary>
         /// Creates a ruleset.
         /// </summary>
         /// <param name="ruleset">the ruleset name.</param>
@@ -59,10 +67,16 @@ namespace Regulae
         Task<OperationResult> DeactivateRuleAsync(Rule rule);
 
         /// <summary>
+        /// Gets the conditions.
+        /// </summary>
+        /// <returns>a collection of all conditions, including respective metadata.</returns>
+        Task<IReadOnlyDictionary<string, Condition>> GetConditionsAsync();
+
+        /// <summary>
         /// Gets the rulesets.
         /// </summary>
         /// <returns>a collection of all rulesets, including respective metadata.</returns>
-        Task<IEnumerable<Ruleset>> GetRulesetsAsync();
+        Task<IReadOnlyDictionary<string, Ruleset>> GetRulesetsAsync();
 
         /// <summary>
         /// Get the unique conditions associated with rules of a specific ruleset.
@@ -79,7 +93,7 @@ namespace Regulae
         /// <returns>
         /// the distinct collection of all conditions present on the rules of the provided ruleset.
         /// </returns>
-        Task<IEnumerable<string>> GetUniqueConditionsAsync(string ruleset, DateTime dateBegin, DateTime dateEnd);
+        Task<IReadOnlyCollection<string>> GetUniqueConditionsAsync(string ruleset, DateTime dateBegin, DateTime dateEnd);
 
         /// <summary>
         /// Provides all rule matches (if any) to the given <paramref name="ruleset"/> at the
@@ -96,7 +110,7 @@ namespace Regulae
         /// <para>All rules matching supplied conditions are returned.</para>
         /// </remarks>
         /// <returns>the matched rule; otherwise, null.</returns>
-        Task<IEnumerable<Rule>> MatchManyAsync(string ruleset, DateTime matchDateTime, IDictionary<string, object> conditions);
+        Task<IReadOnlyCollection<Rule>> MatchManyAsync(string ruleset, DateTime matchDateTime, IDictionary<string, object> conditions);
 
         /// <summary>
         /// Provides a rule match (if any) to the given <paramref name="ruleset"/> at the specified
@@ -129,7 +143,7 @@ namespace Regulae
         /// </para>
         /// </remarks>
         /// <returns>the set of rules matching the conditions.</returns>
-        Task<IEnumerable<Rule>> SearchAsync(SearchArgs<string, string> searchArgs);
+        Task<IReadOnlyCollection<Rule>> SearchAsync(SearchArgs<string, string> searchArgs);
 
         /// <summary>
         /// Updates an existing rule.

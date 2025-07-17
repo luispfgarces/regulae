@@ -4,8 +4,8 @@ namespace Regulae.Tests
     using FluentAssertions;
     using Moq;
     using Regulae;
-    using Regulae.Tests.TestStubs;
     using Regulae.ConditionNodes;
+    using Regulae.Tests.TestStubs;
     using Xunit;
 
     public class RuleTests
@@ -42,7 +42,7 @@ namespace Regulae.Tests
                 DateEnd = DateTime.UtcNow.AddDays(1),
                 Priority = 1,
                 Name = "Name",
-                RootCondition = new ValueConditionNode(DataTypes.Decimal, ConditionNames.PluviosityRate.ToString(), Operators.GreaterThanOrEqual, 80.0d),
+                RootCondition = new ValueConditionNode(ConditionNames.PluviosityRate.ToString(), Operators.GreaterThanOrEqual, 80.0m),
             };
             rule.RootCondition.Properties["key1"] = "value1";
             rule.RootCondition.Properties["key2"] = new object();

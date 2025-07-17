@@ -10,154 +10,172 @@ namespace Regulae.Tests.Evaluation.Compiled
     using FluentAssertions;
     using Moq;
     using Regulae;
+    using Regulae.ConditionNodes;
     using Regulae.Evaluation;
     using Regulae.Evaluation.Compiled;
     using Regulae.Evaluation.Compiled.ExpressionBuilders;
     using Regulae.Tests.Evaluation;
     using Regulae.Tests.TestStubs;
-    using Regulae.ConditionNodes;
     using Xunit;
 
     public class RuleConditionsExpressionBuilderTests
     {
-        internal static IEnumerable<(string, EvaluationContext, bool)> AndComposedConditionNodeScenarios => new[]
+        public static IEnumerable<object[]> AndComposedConditionNodeScenarios => new[]
         {
-            (
+            new object[]
+            {
                 "Scenario 1 - MissingConditionsBehavior = 'Discard', MatchMode = 'Exact', and only contains condition for 'NumberOfSales'",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.Discard),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.Discard,
                 false
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 2 - MissingConditionsBehavior = 'Discard', MatchMode = 'Exact', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.Discard),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.Discard,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 3 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Exact', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 4 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Search', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Search,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Search,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 5 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Search', and only contains condition for 'NumberOfSales'",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                    },
-                    MatchModes.Search,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                },
+                MatchModes.Search,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            )
+            }
         };
 
-        internal static IEnumerable<(string, EvaluationContext, bool)> OrComposedConditionNodeScenarios => new[]
+        public static IEnumerable<object[]> OrComposedConditionNodeScenarios => new[]
         {
-            (
+            new object[]
+            {
                 "Scenario 1 - MissingConditionsBehavior = 'Discard', MatchMode = 'Exact', and only contains condition for 'NumberOfSales'",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.Discard),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.Discard,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 2 - MissingConditionsBehavior = 'Discard', MatchMode = 'Exact', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.Discard),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.Discard,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 3 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Exact', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Exact,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Exact,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 4 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Search', and both needed conditions",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                        { ConditionNames.IsoCountryCode.ToString(), "PT" },
-                    },
-                    MatchModes.Search,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                    { ConditionNames.IsoCountryCode.ToString(), "PT" },
+                },
+                MatchModes.Search,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            ),
-            (
+            },
+            new object[]
+            {
                 "Scenario 5 - MissingConditionsBehavior = 'UseDataTypeDefault', MatchMode = 'Search', and only contains condition for 'NumberOfSales'",
-                new EvaluationContext(
-                    new Dictionary<string, object>
-                    {
-                        { ConditionNames.NumberOfSales.ToString(), 500 },
-                    },
-                    MatchModes.Search,
-                    MissingConditionBehaviors.UseDataTypeDefault),
+                new Dictionary<string, Operand>
+                {
+                    { ConditionNames.NumberOfSales.ToString(), 500 },
+                },
+                MatchModes.Search,
+                MissingConditionBehaviors.UseDataTypeDefault,
                 true
-            )
+            }
         };
 
-        [Fact]
-        public void BuildExpression_GivenAndComposedConditionNodeWith2ChildValueConditionNodes_BuildsLambdaExpression()
+        [Theory]
+        [MemberData(nameof(AndComposedConditionNodeScenarios))]
+        public void BuildExpression_GivenAndComposedConditionNodeWith2ChildValueConditionNodes_BuildsLambdaExpression(
+            string scenarioName,
+            object evaluationContext,
+            string matchModeName,
+            string missingConditionBehaviorName,
+            bool expectedResult)
         {
             // Arrange
             string expectedScript;
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile1.csx"))
+            var matchMode = Enum.Parse<MatchModes>(matchModeName);
+            var missingConditionBehavior = Enum.Parse<MissingConditionBehaviors>(missingConditionBehaviorName);
+            var resourceName = matchMode switch
+            {
+                MatchModes.Exact when missingConditionBehavior == MissingConditionBehaviors.UseDataTypeDefault =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.And.ExactUseDataTypeDefault.csx",
+                MatchModes.Exact when missingConditionBehavior == MissingConditionBehaviors.Discard =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.And.ExactDiscard.csx",
+                MatchModes.Search =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.And.Search.csx",
+                _ => ""
+            };
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             using (var streamReader = new StreamReader(stream))
             {
                 expectedScript = streamReader.ReadToEnd();
             }
             var valueConditionNode1
-                = new ValueConditionNode(DataTypes.Integer, ConditionNames.NumberOfSales.ToString(), Operators.Equal, 100);
+                = new ValueConditionNode(ConditionNames.NumberOfSales.ToString(), Operators.Equal, 100);
             var valueConditionNode2
-                = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "GB");
+                = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "GB");
 
             var composedConditionNode
                 = new ComposedConditionNode(LogicalOperators.And, new[] { valueConditionNode1, valueConditionNode2 });
@@ -174,7 +192,7 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var valueConditionNodeExpressionBuilderProvider = Mock.Of<IValueConditionNodeExpressionBuilderProvider>();
             Mock.Get(valueConditionNodeExpressionBuilderProvider)
-                .Setup(x => x.GetExpressionBuilder(It.Is(Multiplicities.OneToOne, StringComparer.Ordinal)))
+                .Setup(x => x.GetExpressionBuilder(It.Is(Multiplicities.OneToOne, EqualityComparer<Multiplicities>.Default)))
                 .Returns(valueConditionNodeExpressionBuilder);
 
             var dataTypeConfigurationProvider = Mock.Of<IDataTypesConfigurationProvider>();
@@ -185,12 +203,16 @@ namespace Regulae.Tests.Evaluation.Compiled
                 .Setup(x => x.GetDataTypeConfiguration(DataTypes.Integer))
                 .Returns(DataTypeConfiguration.Create(DataTypes.Integer, typeof(int), 0));
 
+            var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
+            rulesEngineOptions.MissingConditionBehavior = missingConditionBehavior;
+
             var conditionsTreeCompiler = new RuleConditionsExpressionBuilder(
                 valueConditionNodeExpressionBuilderProvider,
-                dataTypeConfigurationProvider);
+                dataTypeConfigurationProvider,
+                rulesEngineOptions);
 
             // Act
-            var expression = conditionsTreeCompiler.BuildExpression(composedConditionNode);
+            var expression = conditionsTreeCompiler.BuildExpression(composedConditionNode, matchMode);
 
             // Assert
             expression.Should().NotBeNull();
@@ -198,7 +220,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             var diffResult = SideBySideDiffBuilder.Diff(expectedScript, actualScript, ignoreWhiteSpace: true);
             diffResult.NewText.HasDifferences.Should().BeFalse();
 
-            Func<EvaluationContext, bool> compiledLambdaExpression = null;
+            Func<IDictionary<string, Operand>, bool> compiledLambdaExpression = null;
             FluentActions.Invoking(() => compiledLambdaExpression = expression.Compile())
                 .Should()
                 .NotThrow("expression should be compilable");
@@ -206,28 +228,46 @@ namespace Regulae.Tests.Evaluation.Compiled
             foreach (var scenario in AndComposedConditionNodeScenarios)
             {
                 bool? result = null;
-                FluentActions.Invoking(() => result = compiledLambdaExpression.Invoke(scenario.Item2))
+                FluentActions.Invoking(() => result = compiledLambdaExpression.Invoke((IDictionary<string, Operand>)evaluationContext))
                     .Should()
-                    .NotThrow($"compiled expression should be executable under scenario: {scenario.Item1}");
+                    .NotThrow($"compiled expression should be executable under scenario: {scenarioName}");
 
-                result.Should().Be(scenario.Item3);
+                result.Should().Be(expectedResult);
             }
         }
 
-        [Fact]
-        public void BuildExpression_GivenOrComposedConditionNodeWith2ChildValueConditionNodes_BuildsLambdaExpression()
+        [Theory]
+        [MemberData(nameof(OrComposedConditionNodeScenarios))]
+        public void BuildExpression_GivenOrComposedConditionNodeWith2ChildValueConditionNodes_BuildsLambdaExpression(
+            string scenarioName,
+            object evaluationContext,
+            string matchModeName,
+            string missingConditionBehaviorName,
+            bool expectedResult)
         {
             // Arrange
             string expectedScript;
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile2.csx"))
+            var matchMode = Enum.Parse<MatchModes>(matchModeName);
+            var missingConditionBehavior = Enum.Parse<MissingConditionBehaviors>(missingConditionBehaviorName);
+            var resourceName = matchMode switch
+            {
+                MatchModes.Exact when missingConditionBehavior == MissingConditionBehaviors.UseDataTypeDefault =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.Or.ExactUseDataTypeDefault.csx",
+                MatchModes.Exact when missingConditionBehavior == MissingConditionBehaviors.Discard =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.Or.ExactDiscard.csx",
+                MatchModes.Search =>
+                    "Regulae.Tests.Evaluation.Compiled.RuleConditionsExpressionBuilderTests.GoldenFile.Or.Search.csx",
+                _ => ""
+            };
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             using (var streamReader = new StreamReader(stream))
             {
                 expectedScript = streamReader.ReadToEnd();
             }
             var valueConditionNode1
-                = new ValueConditionNode(DataTypes.Integer, ConditionNames.NumberOfSales.ToString(), Operators.Equal, 100);
+                = new ValueConditionNode(ConditionNames.NumberOfSales.ToString(), Operators.Equal, 100);
             var valueConditionNode2
-                = new ValueConditionNode(DataTypes.String, ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "GB");
+                = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "GB");
 
             var composedConditionNode
                 = new ComposedConditionNode(LogicalOperators.Or, new[] { valueConditionNode1, valueConditionNode2 });
@@ -244,7 +284,7 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var valueConditionNodeExpressionBuilderProvider = Mock.Of<IValueConditionNodeExpressionBuilderProvider>();
             Mock.Get(valueConditionNodeExpressionBuilderProvider)
-                .Setup(x => x.GetExpressionBuilder(It.Is(Multiplicities.OneToOne, StringComparer.Ordinal)))
+                .Setup(x => x.GetExpressionBuilder(It.Is(Multiplicities.OneToOne, EqualityComparer<Multiplicities>.Default)))
                 .Returns(valueConditionNodeExpressionBuilder);
 
             var dataTypeConfigurationProvider = Mock.Of<IDataTypesConfigurationProvider>();
@@ -255,12 +295,16 @@ namespace Regulae.Tests.Evaluation.Compiled
                 .Setup(x => x.GetDataTypeConfiguration(DataTypes.Integer))
                 .Returns(DataTypeConfiguration.Create(DataTypes.Integer, typeof(int), 0));
 
+            var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
+            rulesEngineOptions.MissingConditionBehavior = missingConditionBehavior;
+
             var conditionsTreeCompiler = new RuleConditionsExpressionBuilder(
                 valueConditionNodeExpressionBuilderProvider,
-                dataTypeConfigurationProvider);
+                dataTypeConfigurationProvider,
+                rulesEngineOptions);
 
             // Act
-            var expression = conditionsTreeCompiler.BuildExpression(composedConditionNode);
+            var expression = conditionsTreeCompiler.BuildExpression(composedConditionNode, matchMode);
 
             // Assert
             expression.Should().NotBeNull();
@@ -268,7 +312,7 @@ namespace Regulae.Tests.Evaluation.Compiled
             var diffResult = SideBySideDiffBuilder.Diff(expectedScript, actualScript, ignoreWhiteSpace: true);
             diffResult.NewText.HasDifferences.Should().BeFalse();
 
-            Func<EvaluationContext, bool> compiledLambdaExpression = null;
+            Func<IDictionary<string, Operand>, bool> compiledLambdaExpression = null;
             FluentActions.Invoking(() => compiledLambdaExpression = expression.Compile())
                 .Should()
                 .NotThrow("expression should be compilable");
@@ -276,11 +320,11 @@ namespace Regulae.Tests.Evaluation.Compiled
             foreach (var scenario in OrComposedConditionNodeScenarios)
             {
                 bool? result = null;
-                FluentActions.Invoking(() => result = compiledLambdaExpression.Invoke(scenario.Item2))
+                FluentActions.Invoking(() => result = compiledLambdaExpression.Invoke((IDictionary<string, Operand>)evaluationContext))
                     .Should()
-                    .NotThrow($"compiled expression should be executable under scenario: {scenario.Item1}");
+                    .NotThrow($"compiled expression should be executable under scenario: {scenarioName}");
 
-                result.Should().Be(scenario.Item3);
+                result.Should().Be(expectedResult);
             }
         }
 
@@ -292,13 +336,15 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var valueConditionNodeExpressionBuilderProvider = Mock.Of<IValueConditionNodeExpressionBuilderProvider>();
             var dataTypeConfigurationProvider = Mock.Of<IDataTypesConfigurationProvider>();
+            var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
             var ruleConditionsExpressionBuilder = new RuleConditionsExpressionBuilder(
                 valueConditionNodeExpressionBuilderProvider,
-                dataTypeConfigurationProvider);
+                dataTypeConfigurationProvider,
+                rulesEngineOptions);
 
             // Act
-            var notSupportedException = Assert.Throws<NotSupportedException>(() => ruleConditionsExpressionBuilder.BuildExpression(stubConditionNode));
+            var notSupportedException = Assert.Throws<NotSupportedException>(() => ruleConditionsExpressionBuilder.BuildExpression(stubConditionNode, MatchModes.Exact));
 
             // Assert
             notSupportedException.Should().NotBeNull();
@@ -313,13 +359,15 @@ namespace Regulae.Tests.Evaluation.Compiled
 
             var valueConditionNodeExpressionBuilderProvider = Mock.Of<IValueConditionNodeExpressionBuilderProvider>();
             var dataTypeConfigurationProvider = Mock.Of<IDataTypesConfigurationProvider>();
+            var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
             var ruleConditionsExpressionBuilder = new RuleConditionsExpressionBuilder(
                 valueConditionNodeExpressionBuilderProvider,
-                dataTypeConfigurationProvider);
+                dataTypeConfigurationProvider,
+                rulesEngineOptions);
 
             // Act
-            var notSupportedException = Assert.Throws<NotSupportedException>(() => ruleConditionsExpressionBuilder.BuildExpression(composedConditionNode));
+            var notSupportedException = Assert.Throws<NotSupportedException>(() => ruleConditionsExpressionBuilder.BuildExpression(composedConditionNode, MatchModes.Exact));
 
             // Assert
             notSupportedException.Should().NotBeNull();

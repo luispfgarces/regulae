@@ -6,11 +6,8 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
     {
         public bool Eval(object leftOperand, object rightOperand)
         {
-            if (leftOperand is string && rightOperand is string)
+            if (leftOperand is string leftOperandAsString && rightOperand is string rightOperandAsString)
             {
-                var leftOperandAsString = leftOperand as string;
-                var rightOperandAsString = rightOperand as string;
-
                 return leftOperandAsString.StartsWith(rightOperandAsString, StringComparison.Ordinal);
             }
 

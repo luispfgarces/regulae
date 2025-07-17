@@ -18,7 +18,7 @@ namespace Regulae.Builder.RulesBuilder
         private readonly RuleValidator ruleValidator = RuleValidator.Instance;
 
         private bool? active;
-        private ContentContainer? contentContainer;
+        private IContentContainer? contentContainer;
         private DateTime dateBegin;
         private DateTime? dateEnd;
         private IConditionNode? rootCondition;
@@ -38,7 +38,7 @@ namespace Regulae.Builder.RulesBuilder
         public IRuleBuilder ApplyWhen(Func<IRootConditionNodeBuilder, IConditionNode> conditionFunc)
         {
             var rootConditionNodeBuilder = new RootConditionNodeBuilder();
-            var condition = conditionFunc.Invoke(rootConditionNodeBuilder);
+            var condition = conditionFunc(rootConditionNodeBuilder);
             return this.ApplyWhen(condition);
         }
 
@@ -80,7 +80,7 @@ namespace Regulae.Builder.RulesBuilder
 
         public IRuleConfigureDateBegin SetContent(object content)
         {
-            this.contentContainer = new ContentContainer(_ => content);
+            this.contentContainer = new ObjectContentContainer(content);
             return this;
         }
 

@@ -4,6 +4,6 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
 
     internal interface IConditionExpressionBuilderProvider
     {
-        IConditionExpressionBuilder GetConditionExpressionBuilderFor(Operators @operator, string multiplicity);
+        IConditionExpressionBuilder GetConditionExpressionBuilderFor(Operators @operator, Multiplicities multiplicity);
     }
 }

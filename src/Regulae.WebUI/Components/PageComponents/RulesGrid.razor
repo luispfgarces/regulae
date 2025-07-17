@@ -107,7 +107,7 @@
 
     private async Task<GridDataProviderResult<RuleViewModel>> LoadRulesAsync(GridDataProviderRequest<RuleViewModel> request)
     {
-        var rules = await this.DataProvider.Invoke();
+        var rules = await this.DataProvider();
         var result = request.ApplyTo(rules);
         this.CurrentItemsCount = result.TotalCount;
         return result;

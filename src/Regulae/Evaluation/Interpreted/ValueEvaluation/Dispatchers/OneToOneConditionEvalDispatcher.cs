@@ -16,13 +16,14 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers
             this.operatorEvalStrategyFactory = operatorEvalStrategyFactory;
         }
 
-        public bool EvalDispatch(DataTypes dataType, object leftOperand, Operators @operator, object rightOperand)
+        public bool EvalDispatch(Operand leftOperand, Operators @operator, Operand rightOperand)
         {
-            var dataTypeConfiguration = this.GetDataTypeConfiguration(dataType);
-            var leftOperandConverted = ConvertToDataType(leftOperand, nameof(leftOperand), dataTypeConfiguration);
-            var rightOperandConverted = ConvertToDataType(rightOperand, nameof(rightOperand), dataTypeConfiguration);
+            var dataTypeConfiguration = this.GetDataTypeConfiguration(rightOperand.DataType);
 
-            return this.operatorEvalStrategyFactory.GetOneToOneOperatorEvalStrategy(@operator).Eval(leftOperandConverted, rightOperandConverted);
+            return this.operatorEvalStrategyFactory.GetOneToOneOperatorEvalStrategy(@operator)
+                .Eval(
+                    CoalesceOne(leftOperand.Value!, dataTypeConfiguration),
+                    rightOperand.Value!);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         public ExpressionSwitchBuilder(IExpressionBlockBuilder implementationExpressionBuilder)
         {
-            this.defaultBody = null;
+            this.defaultBody = null!;
             this.implementationExpressionBuilder = implementationExpressionBuilder;
             this.switchCases = new List<SwitchCase>();
         }
@@ -47,7 +47,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
                 throw new ArgumentNullException(nameof(caseBodyExpressionBuilder));
             }
 
-            var expression = caseBodyExpressionBuilder.Invoke(this.implementationExpressionBuilder);
+            var expression = caseBodyExpressionBuilder(this.implementationExpressionBuilder);
             var switchCaseExpression = Expression.SwitchCase(expression, caseExpressions);
             this.switchCases.Add(switchCaseExpression);
             return this;
@@ -60,7 +60,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
                 throw new ArgumentNullException(nameof(defaultBodyExpressionBuilder));
             }
 
-            defaultBody = defaultBodyExpressionBuilder.Invoke(this.implementationExpressionBuilder);
+            defaultBody = defaultBodyExpressionBuilder(this.implementationExpressionBuilder);
         }
     }
 }

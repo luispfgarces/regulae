@@ -15,7 +15,7 @@ namespace Regulae.Management.Operations
             this.priorityMoveFactor = priorityMoveFactor;
         }
 
-        public Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
+        public ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
         {
             IEnumerable<Rule> updatedPrioritiesRules = rules.Select(r =>
             {
@@ -23,7 +23,7 @@ namespace Regulae.Management.Operations
                 return r;
             }).ToList();
 
-            return Task.FromResult(updatedPrioritiesRules);
+            return new ValueTask<IEnumerable<Rule>>(updatedPrioritiesRules);
         }
     }
 }

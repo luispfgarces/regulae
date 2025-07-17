@@ -23,10 +23,13 @@ namespace Regulae.Tests.Extensions
                     new
                     {
                         Condition = ConditionNames.IsVip,
-                        DataType = DataTypes.Boolean,
                         LogicalOperator = LogicalOperators.Eval,
-                        Operand = true,
-                        Operator = Operators.Equal
+                        Operator = Operators.Equal,
+                        RightOperand = new
+                        {
+                            DataType = DataTypes.Boolean,
+                            Value = true,
+                        },
                     },
                     new
                     {
@@ -35,18 +38,24 @@ namespace Regulae.Tests.Extensions
                             new
                             {
                                 Condition = ConditionNames.IsoCurrency,
-                                DataType = DataTypes.String,
                                 LogicalOperator = LogicalOperators.Eval,
-                                Operand = "EUR",
-                                Operator = Operators.Equal
+                                Operator = Operators.Equal,
+                                RightOperand = new
+                                {
+                                    DataType = DataTypes.String,
+                                    Value = "EUR",
+                                },
                             },
                             new
                             {
                                 Condition = ConditionNames.IsoCurrency,
-                                DataType = DataTypes.String,
                                 LogicalOperator = LogicalOperators.Eval,
-                                Operand = "USD",
-                                Operator = Operators.Equal
+                                Operator = Operators.Equal,
+                                RightOperand = new
+                                {
+                                    DataType = DataTypes.String,
+                                    Value = "USD",
+                                },
                             }
                         },
                         LogicalOperator = LogicalOperators.Or
@@ -86,7 +95,9 @@ namespace Regulae.Tests.Extensions
             genericRule.RootCondition.Should().BeOfType<ComposedConditionNode<ConditionNames>>();
 
             var genericComposedRootCondition = genericRule.RootCondition as ComposedConditionNode<ConditionNames>;
-            genericComposedRootCondition.Should().BeEquivalentTo(expectedRootCondition, config => config.IncludingAllRuntimeProperties());
+            genericComposedRootCondition.Should().BeEquivalentTo(
+                expectedRootCondition,
+                config => config.IncludingAllRuntimeProperties().IncludingFields());
         }
 
         [Fact]
@@ -152,9 +163,9 @@ namespace Regulae.Tests.Extensions
 
             var genericValueRootCondition = genericRule.RootCondition as ValueConditionNode<ConditionNames>;
             genericValueRootCondition.Condition.Should().Be(expectedRootCondition.Condition);
-            genericValueRootCondition.DataType.Should().Be(expectedRootCondition.DataType);
+            genericValueRootCondition.RightOperand.DataType.Should().Be(expectedRootCondition.DataType);
             genericValueRootCondition.LogicalOperator.Should().Be(expectedRootCondition.LogicalOperator);
-            genericValueRootCondition.Operand.Should().Be(expectedRootCondition.Operand);
+            genericValueRootCondition.RightOperand.Value.Should().Be(expectedRootCondition.Operand);
             genericValueRootCondition.Operator.Should().Be(expectedRootCondition.Operator);
         }
     }

@@ -17,7 +17,7 @@ namespace Regulae.InMemory.Sample.Engine
                 var rulesEngine = RulesEngineBuilder
                     .CreateRulesEngine()
                     .SetInMemoryDataSource()
-                    .Configure(opt => opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins)
+                    .Configure(c => c.UseLargestNumberPriorityCriteria())
                     .Build();
 
                 await rulesBuilder.BuildAsync(rulesEngine).ConfigureAwait(false);

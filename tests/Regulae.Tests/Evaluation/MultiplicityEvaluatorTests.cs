@@ -1,6 +1,5 @@
 namespace Regulae.Tests.Evaluation
 {
-    using System;
     using System.Collections.Generic;
     using FluentAssertions;
     using Regulae;
@@ -11,46 +10,27 @@ namespace Regulae.Tests.Evaluation
     {
         public static IEnumerable<object[]> SuccessCombinations => new[]
         {
-            new object[] { 1, Operators.Equal, 2, Multiplicities.OneToOne },
-            new object[] { 1, Operators.Equal, new[] { 1, 2 }, Multiplicities.OneToMany },
-            new object[] { new[] { 1, 2 }, Operators.Equal, new[] { 1, 2 }, Multiplicities.ManyToMany },
-            new object[] { new[] { 1, 2 }, Operators.Equal, 2 , Multiplicities.ManyToOne },
-            new object[] { null, Operators.Equal, new[] { 1, 2 } , Multiplicities.OneToMany },
-            new object[] { null, Operators.Equal, 2 , Multiplicities.OneToOne },
+            new object[] { Cardinalities.One, Cardinalities.One, Multiplicities.OneToOne },
+            new object[] { Cardinalities.One, Cardinalities.Many, Multiplicities.OneToMany },
+            new object[] { Cardinalities.Many, Cardinalities.Many, Multiplicities.ManyToMany },
+            new object[] { Cardinalities.Many, Cardinalities.One, Multiplicities.ManyToOne },
         };
 
         [Theory]
         [MemberData(nameof(SuccessCombinations))]
         public void EvaluateMultiplicity_GivenLeftOperandOperatorAndRightOperand_ReturnsMultiplicity(
-            object leftOperand,
-            Operators @operator,
-            object rightOperand,
-            string expectedMultiplicity)
+            object leftOperandCardinality,
+            object rightOperandCardinality,
+            object expectedMultiplicity)
         {
             // Arrange
             var multiplicityEvaluator = new MultiplicityEvaluator();
 
             // Act
-            var multiplicity = multiplicityEvaluator.EvaluateMultiplicity(leftOperand, @operator, rightOperand);
+            var multiplicity = multiplicityEvaluator.EvaluateMultiplicity((Cardinalities)leftOperandCardinality, (Cardinalities)rightOperandCardinality);
 
             // Assert
-            multiplicity.Should().NotBeNullOrWhiteSpace().And.Be(expectedMultiplicity);
-        }
-
-        [Fact]
-        public void EvaluateMultiplicity_GivenLeftOperandUnknownOperatorAndRightOperand_ThrowsNotSupportedException()
-        {
-            // Arrange
-            object leftOperand = null;
-            const Operators @operator = 0;
-            const int rightOperand = 1;
-            var multiplicityEvaluator = new MultiplicityEvaluator();
-
-            // Act
-            var notSupportedException = Assert.Throws<NotSupportedException>(() => multiplicityEvaluator.EvaluateMultiplicity(leftOperand, @operator, rightOperand));
-
-            // Assert
-            notSupportedException.Should().NotBeNull();
+            multiplicity.Should().Be((Multiplicities)expectedMultiplicity);
         }
     }
 }

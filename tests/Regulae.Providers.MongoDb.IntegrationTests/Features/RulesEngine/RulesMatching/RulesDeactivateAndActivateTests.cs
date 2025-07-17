@@ -71,8 +71,8 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Features.RulesEngine.RulesM
         {
             var ruleSpecs = new List<RuleSpecification>
             {
-                new(rule1, RuleAddPriorityOption.ByPriorityNumber(1)),
-                new(rule2, RuleAddPriorityOption.ByPriorityNumber(2))
+                new(rule1, RuleAddPriorityOption.AtNumber(1)),
+                new(rule2, RuleAddPriorityOption.AtNumber(2))
             };
 
             return ruleSpecs;

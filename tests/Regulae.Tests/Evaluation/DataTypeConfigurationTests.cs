@@ -21,9 +21,9 @@ namespace Regulae.Tests.Evaluation
 
             // Assert
             dataTypeConfiguration.Should().NotBeNull();
-            dataTypeConfiguration.Default.Should().Be(@default);
+            dataTypeConfiguration.OneCardinality.Default.Should().Be(@default);
             dataTypeConfiguration.DataType.Should().Be(dataType);
-            dataTypeConfiguration.Type.Should().Be(type);
+            dataTypeConfiguration.OneCardinality.Type.Should().Be(type);
         }
 
         [Fact]

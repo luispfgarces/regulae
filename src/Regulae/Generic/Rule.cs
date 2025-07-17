@@ -39,7 +39,7 @@ namespace Regulae.Generic
         /// <summary>
         /// Gets the content container which contains the rule content.
         /// </summary>
-        public ContentContainer ContentContainer => this.wrappedRule.ContentContainer;
+        public IContentContainer ContentContainer => this.wrappedRule.ContentContainer;
 
         /// <summary>
         /// Gets the date from which the rule begins being applicable.

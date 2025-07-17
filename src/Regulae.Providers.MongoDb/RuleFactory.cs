@@ -111,8 +111,12 @@ namespace Regulae.Providers.MongoDb
             {
                 Condition = Convert.ToString(valueConditionNode.Condition, CultureInfo.InvariantCulture),
                 LogicalOperator = LogicalOperators.Eval,
-                DataType = valueConditionNode.DataType,
-                Operand = valueConditionNode.Operand,
+                RightOperand = new OperandDataModel
+                {
+                    Cardinality = valueConditionNode.RightOperand.Cardinality,
+                    DataType = valueConditionNode.RightOperand.DataType,
+                    Value = valueConditionNode.RightOperand.Value,
+                },
                 Operator = valueConditionNode.Operator,
                 Properties = properties,
             };
@@ -120,21 +124,24 @@ namespace Regulae.Providers.MongoDb
 
         private static ValueConditionNode CreateValueConditionNode(ValueConditionNodeDataModel conditionNodeDataModel)
         {
-            var operand = conditionNodeDataModel.DataType switch
+            var rightOperandValue = conditionNodeDataModel.RightOperand.DataType switch
             {
-                DataTypes.Integer => Convert.ToInt32(conditionNodeDataModel.Operand, CultureInfo.InvariantCulture),
-                DataTypes.Decimal => Convert.ToDecimal(conditionNodeDataModel.Operand, CultureInfo.InvariantCulture),
-                DataTypes.String => Convert.ToString(conditionNodeDataModel.Operand, CultureInfo.InvariantCulture),
-                DataTypes.Boolean => Convert.ToBoolean(conditionNodeDataModel.Operand, CultureInfo.InvariantCulture),
-                DataTypes.ArrayInteger or DataTypes.ArrayDecimal or DataTypes.ArrayString or DataTypes.ArrayBoolean => conditionNodeDataModel.Operand,
-                _ => throw new NotSupportedException($"Unsupported data type: {conditionNodeDataModel.DataType}."),
+                DataTypes.Integer when conditionNodeDataModel.RightOperand.Cardinality == Cardinalities.One => Convert.ToInt32(conditionNodeDataModel.RightOperand.Value, CultureInfo.InvariantCulture),
+                DataTypes.Decimal when conditionNodeDataModel.RightOperand.Cardinality == Cardinalities.One => Convert.ToDecimal(conditionNodeDataModel.RightOperand.Value, CultureInfo.InvariantCulture),
+                DataTypes.String when conditionNodeDataModel.RightOperand.Cardinality == Cardinalities.One => Convert.ToString(conditionNodeDataModel.RightOperand.Value, CultureInfo.InvariantCulture),
+                DataTypes.Boolean when conditionNodeDataModel.RightOperand.Cardinality == Cardinalities.One => Convert.ToBoolean(conditionNodeDataModel.RightOperand.Value, CultureInfo.InvariantCulture),
+                DataTypes.Integer or DataTypes.Decimal or DataTypes.String or DataTypes.Boolean => conditionNodeDataModel.RightOperand.Value,
+                _ => throw new NotSupportedException($"Unsupported data type: {conditionNodeDataModel.RightOperand.DataType}."),
             };
+            var rightOperand = new Operand(
+                rightOperandValue,
+                conditionNodeDataModel.RightOperand.DataType,
+                conditionNodeDataModel.RightOperand.Cardinality);
 
             var valueConditionNode = new ValueConditionNode(
-                conditionNodeDataModel.DataType,
                 conditionNodeDataModel.Condition,
                 conditionNodeDataModel.Operator,
-                operand);
+                rightOperand);
 
             foreach (var property in conditionNodeDataModel.Properties)
             {

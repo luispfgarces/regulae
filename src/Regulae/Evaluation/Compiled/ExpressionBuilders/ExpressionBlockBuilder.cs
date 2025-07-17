@@ -39,6 +39,9 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         public IReadOnlyDictionary<string, ParameterExpression> Variables => this.variables;
 
+        public Expression AccessField(Expression instance, FieldInfo field)
+            => Expression.Field(instance, field);
+
         public void AddExpression(Expression expression)
         {
             if (expression is null)
@@ -47,6 +50,26 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
             }
 
             this.expressions.Add(expression);
+        }
+
+        public Expression And(Expression left, Expression right)
+            => Expression.And(left, right);
+
+        public Expression And(IEnumerable<Expression> expressions)
+        {
+            if (expressions is null)
+            {
+                throw new ArgumentNullException(nameof(expressions));
+            }
+
+            if (!expressions.Any())
+            {
+                throw new ArgumentException(
+                    "A empty enumeration of expressions was provided and it should contain at least one expression",
+                    nameof(expressions));
+            }
+
+            return expressions.Aggregate((left, right) => this.And(left, right));
         }
 
         public Expression AndAlso(Expression left, Expression right)
@@ -87,7 +110,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
             var actualScopeName = scopeName ?? string.Empty;
             var expressionBlockBuilder = this.factory.CreateExpressionBlockBuilder(actualScopeName, this, this.expressionConfiguration);
-            implementationBuilder.Invoke(expressionBlockBuilder);
+            implementationBuilder(expressionBlockBuilder);
 
             if (expressionBlockBuilder.Expressions.Count == 0)
             {
@@ -105,8 +128,14 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         public Expression Call(Expression instance, MethodInfo method)
             => Expression.Call(instance, method);
 
+        public Expression Coalesce(Expression left, Expression right)
+            => Expression.Coalesce(left, right);
+
+        public Expression Condition(Expression evaluation, Expression ifTrue, Expression ifFalse)
+            => Expression.Condition(evaluation, ifTrue, ifFalse);
+
         public Expression Constant<T>(T value)
-            => this.Constant(value, typeof(T));
+            => this.Constant(value!, typeof(T));
 
         public Expression Constant(object value, Type type)
             => Expression.Constant(value, type);
@@ -209,6 +238,11 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
                 return variable;
             }
 
+            if (this.Parent is not null)
+            {
+                return this.Parent.GetVariable(name);
+            }
+
             throw new KeyNotFoundException($"A variable with name '{name}' was not found.");
         }
 
@@ -227,7 +261,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         public void If(
             Func<IExpressionBlockBuilder, Expression> evaluationExpressionBuilder,
             Func<IExpressionBlockBuilder, Expression> thenExpressionBuilder)
-            => this.If(evaluationExpressionBuilder, thenExpressionBuilder, elseExpressionBuilder: null);
+            => this.If(evaluationExpressionBuilder, thenExpressionBuilder, elseExpressionBuilder: null!);
 
         public void If(
             Func<IExpressionBlockBuilder, Expression> evaluationExpressionBuilder,
@@ -244,13 +278,13 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
                 throw new ArgumentNullException(nameof(thenExpressionBuilder));
             }
 
-            var testExpression = evaluationExpressionBuilder.Invoke(this);
-            var thenExpression = thenExpressionBuilder.Invoke(this);
+            var testExpression = evaluationExpressionBuilder(this);
+            var thenExpression = thenExpressionBuilder(this);
 
             Expression expression;
             if (elseExpressionBuilder is not null)
             {
-                var elseExpression = elseExpressionBuilder.Invoke(this);
+                var elseExpression = elseExpressionBuilder(this);
                 expression = Expression.IfThenElse(testExpression, thenExpression, elseExpression);
             }
             else
@@ -278,6 +312,26 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         public Expression NotEqual(Expression left, Expression right)
             => Expression.NotEqual(left, right);
+
+        public Expression Or(Expression left, Expression right)
+            => Expression.Or(left, right);
+
+        public Expression Or(IEnumerable<Expression> expressions)
+        {
+            if (expressions is null)
+            {
+                throw new ArgumentNullException(nameof(expressions));
+            }
+
+            if (!expressions.Any())
+            {
+                throw new ArgumentException(
+                    "A empty enumeration of expressions was provided and it should contain at least one expression",
+                    nameof(expressions));
+            }
+
+            return expressions.Aggregate((left, right) => this.Or(left, right));
+        }
 
         public Expression OrElse(Expression left, Expression right)
             => Expression.OrElse(left, right);
@@ -325,12 +379,15 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
             }
 
             var expressionSwitchBuilder = this.factory.CreateExpressionSwitchBuilder(this);
-            expressionSwitchBuilderAction.Invoke(expressionSwitchBuilder);
+            expressionSwitchBuilderAction(expressionSwitchBuilder);
             var expression = Expression.Switch(
                 switchValueExpression,
                 expressionSwitchBuilder.DefaultBody,
                 expressionSwitchBuilder.SwitchCases.ToArray());
             this.AddExpression(expression);
         }
+
+        public Expression Unbox(Expression expression, Type type)
+            => Expression.Unbox(expression, type);
     }
 }

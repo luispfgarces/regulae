@@ -13,5 +13,13 @@ namespace Regulae.Providers.MongoDb.DataModel
 
         [BsonElement("name", Order = 2)]
         public string Name { get; set; }
+
+        public override bool Equals(object obj)
+            => obj is RulesetDataModel model
+                && this.Creation == model.Creation
+            && this.Id.Equals(model.Id)
+            && string.Equals(this.Name, model.Name, StringComparison.Ordinal);
+
+        public override int GetHashCode() => HashCode.Combine(this.Creation, this.Id, this.Name);
     }
 }

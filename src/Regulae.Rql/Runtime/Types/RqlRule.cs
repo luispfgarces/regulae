@@ -123,9 +123,14 @@ namespace Regulae.Rql.Runtime.Types
                     var valueConditionProperties = new Dictionary<string, RqlAny>(StringComparer.Ordinal)
                     {
                         { "Condition", new RqlString(vcn.Condition) },
-                        { "DataType", new RqlString(vcn.DataType.ToString()) },
                         { "LogicalOperator", new RqlString(vcn.LogicalOperator.ToString()) },
-                        { "Operand", ConvertValue(vcn.Operand) },
+                        { "Operand", new RqlReadOnlyObject(new Dictionary<string, RqlAny>(StringComparer.Ordinal)
+                            {
+                                { "Cardinality", new RqlString(vcn.RightOperand.Cardinality.ToString()) },
+                                { "DataType", new RqlString(vcn.RightOperand.DataType.ToString()) },
+                                { "Value", ConvertValue(vcn.RightOperand.Value) },
+                            })
+                        },
                         { "Operator", new RqlString(vcn.Operator.ToString()) },
                     };
                     return new RqlReadOnlyObject(valueConditionProperties);

@@ -25,7 +25,7 @@ namespace Regulae.Management
         public ManagementOperationsController DecreasePriority()
             => this.AddOperation(new MovePriorityManagementOperation(-1));
 
-        public async Task ExecuteOperationsAsync()
+        public async ValueTask ExecuteOperationsAsync()
         {
             var rulesIntermediateResult = rules;
 

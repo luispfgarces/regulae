@@ -4,7 +4,6 @@ namespace Regulae.Providers.MongoDb
     using MongoDB.Driver;
     using Regulae.Builder;
     using Regulae.Providers.MongoDb.Serialization;
-    using Regulae.Serialization;
 
     /// <summary>
     /// Rules data source selector extensions from Mongo DB provider.
@@ -41,9 +40,14 @@ namespace Regulae.Providers.MongoDb
                 throw new ArgumentNullException(nameof(mongoDbProviderSettings));
             }
 
+            if (string.IsNullOrWhiteSpace(mongoDbProviderSettings.DatabaseName))
+            {
+                throw new ArgumentException("Database name must be set.", nameof(mongoDbProviderSettings));
+            }
+
             MongoDbRulesDataSourceInitializer.InitializeAsync(mongoClient, mongoDbProviderSettings).GetAwaiter().GetResult();
-            IContentSerializationProvider contentSerializationProvider = new DynamicToStrongTypeContentSerializationProvider();
-            IRuleFactory ruleFactory = new RuleFactory(contentSerializationProvider);
+            var contentSerializationProvider = new DynamicToStrongTypeContentSerializationProvider();
+            var ruleFactory = new RuleFactory(contentSerializationProvider);
             var mongoDbProviderRulesDataSource
                 = new MongoDbProviderRulesDataSource(
                     mongoClient,

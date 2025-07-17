@@ -14,11 +14,12 @@ namespace Regulae.Tests.ConditionNodes
             // Arrange
             var expectedCondition = ConditionNames.IsoCountryCode.ToString();
             var expectedOperator = Operators.NotEqual;
-            var expectedOperand = false;
+            var expectedOperandValue = false;
             var expectedLogicalOperator = LogicalOperators.Eval;
-            var expectedDataType = DataTypes.Boolean;
+            var expectedOperandDataType = DataTypes.Boolean;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(DataTypes.Boolean, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, new Operand(expectedOperandValue));
             sut.Properties["test"] = "test";
 
             // Act
@@ -31,10 +32,11 @@ namespace Regulae.Tests.ConditionNodes
                 .BeOfType<ValueConditionNode>();
             var valueConditionNode = actual.As<ValueConditionNode>();
             valueConditionNode.Condition.Should().Be(expectedCondition);
-            valueConditionNode.DataType.Should().Be(expectedDataType);
             valueConditionNode.LogicalOperator.Should().Be(expectedLogicalOperator);
             valueConditionNode.Operator.Should().Be(expectedOperator);
-            valueConditionNode.Operand.Should().Be(expectedOperand);
+            valueConditionNode.RightOperand.Cardinality.Should().Be(expectedOperandCardinality);
+            valueConditionNode.RightOperand.DataType.Should().Be(expectedOperandDataType);
+            valueConditionNode.RightOperand.Value.Should().Be(expectedOperandValue);
             valueConditionNode.Properties.Should().BeEquivalentTo(sut.Properties);
         }
 
@@ -47,8 +49,9 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = 5682.2654m;
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.Decimal;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
             sut.Properties["test"] = "test";
 
             // Act
@@ -61,10 +64,11 @@ namespace Regulae.Tests.ConditionNodes
                 .BeOfType<ValueConditionNode>();
             var valueConditionNode = actual.As<ValueConditionNode>();
             valueConditionNode.Condition.Should().Be(expectedCondition);
-            valueConditionNode.DataType.Should().Be(expectedDataType);
             valueConditionNode.LogicalOperator.Should().Be(expectedLogicalOperator);
             valueConditionNode.Operator.Should().Be(expectedOperator);
-            valueConditionNode.Operand.Should().Be(expectedOperand);
+            valueConditionNode.RightOperand.Cardinality.Should().Be(expectedOperandCardinality);
+            valueConditionNode.RightOperand.DataType.Should().Be(expectedDataType);
+            valueConditionNode.RightOperand.Value.Should().Be(expectedOperand);
             valueConditionNode.Properties.Should().BeEquivalentTo(sut.Properties);
         }
 
@@ -77,8 +81,9 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = 1616;
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.Integer;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
             sut.Properties["test"] = "test";
 
             // Act
@@ -91,10 +96,11 @@ namespace Regulae.Tests.ConditionNodes
                 .BeOfType<ValueConditionNode>();
             var valueConditionNode = actual.As<ValueConditionNode>();
             valueConditionNode.Condition.Should().Be(expectedCondition);
-            valueConditionNode.DataType.Should().Be(expectedDataType);
             valueConditionNode.LogicalOperator.Should().Be(expectedLogicalOperator);
             valueConditionNode.Operator.Should().Be(expectedOperator);
-            valueConditionNode.Operand.Should().Be(expectedOperand);
+            valueConditionNode.RightOperand.Cardinality.Should().Be(expectedOperandCardinality);
+            valueConditionNode.RightOperand.DataType.Should().Be(expectedDataType);
+            valueConditionNode.RightOperand.Value.Should().Be(expectedOperand);
             valueConditionNode.Properties.Should().BeEquivalentTo(sut.Properties);
         }
 
@@ -107,8 +113,9 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = "Such operand, much wow.";
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.String;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
             sut.Properties["test"] = "test";
 
             // Act
@@ -121,10 +128,11 @@ namespace Regulae.Tests.ConditionNodes
                 .BeOfType<ValueConditionNode>();
             var valueConditionNode = actual.As<ValueConditionNode>();
             valueConditionNode.Condition.Should().Be(expectedCondition);
-            valueConditionNode.DataType.Should().Be(expectedDataType);
             valueConditionNode.LogicalOperator.Should().Be(expectedLogicalOperator);
             valueConditionNode.Operator.Should().Be(expectedOperator);
-            valueConditionNode.Operand.Should().Be(expectedOperand);
+            valueConditionNode.RightOperand.Cardinality.Should().Be(expectedOperandCardinality);
+            valueConditionNode.RightOperand.DataType.Should().Be(expectedDataType);
+            valueConditionNode.RightOperand.Value.Should().Be(expectedOperand);
             valueConditionNode.Properties.Should().BeEquivalentTo(sut.Properties);
         }
 
@@ -137,15 +145,17 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = false;
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.Boolean;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
 
             // Act
             var actualCondition = sut.Condition;
             var actualOperator = sut.Operator;
-            var actualDataType = sut.DataType;
             var actualLogicalOperator = sut.LogicalOperator;
-            var actualOperand = sut.Operand;
+            var actualCardinality = sut.RightOperand.Cardinality;
+            var actualDataType = sut.RightOperand.DataType;
+            var actualOperand = sut.RightOperand.Value;
 
             // Assert
             actualCondition.Should().Be(expectedCondition);
@@ -153,6 +163,7 @@ namespace Regulae.Tests.ConditionNodes
             actualOperand.Should().Be(expectedOperand);
             actualLogicalOperator.Should().Be(expectedLogicalOperator);
             actualDataType.Should().Be(expectedDataType);
+            actualCardinality.Should().Be(expectedOperandCardinality);
         }
 
         [Fact]
@@ -164,15 +175,17 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = 5682.2654m;
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.Decimal;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(DataTypes.Decimal, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
 
             // Act
             var actualCondition = sut.Condition;
             var actualOperator = sut.Operator;
-            var actualDataType = sut.DataType;
+            var actualCardinality = sut.RightOperand.Cardinality;
+            var actualDataType = sut.RightOperand.DataType;
             var actualLogicalOperator = sut.LogicalOperator;
-            var actualOperand = sut.Operand;
+            var actualOperand = sut.RightOperand.Value;
 
             // Assert
             actualCondition.Should().Be(expectedCondition);
@@ -180,6 +193,7 @@ namespace Regulae.Tests.ConditionNodes
             actualOperand.Should().Be(expectedOperand);
             actualLogicalOperator.Should().Be(expectedLogicalOperator);
             actualDataType.Should().Be(expectedDataType);
+            actualCardinality.Should().Be(expectedOperandCardinality);
         }
 
         [Fact]
@@ -191,15 +205,17 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = 1616;
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.Integer;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
 
             // Act
             var actualCondition = sut.Condition;
             var actualOperator = sut.Operator;
-            var actualDataType = sut.DataType;
+            var actualCardinality = sut.RightOperand.Cardinality;
+            var actualDataType = sut.RightOperand.DataType;
             var actualLogicalOperator = sut.LogicalOperator;
-            var actualOperand = sut.Operand;
+            var actualOperand = sut.RightOperand.Value;
 
             // Assert
             actualCondition.Should().Be(expectedCondition);
@@ -207,6 +223,7 @@ namespace Regulae.Tests.ConditionNodes
             actualOperand.Should().Be(expectedOperand);
             actualLogicalOperator.Should().Be(expectedLogicalOperator);
             actualDataType.Should().Be(expectedDataType);
+            actualCardinality.Should().Be(expectedOperandCardinality);
         }
 
         [Fact]
@@ -218,15 +235,17 @@ namespace Regulae.Tests.ConditionNodes
             var expectedOperand = "Such operand, much wow.";
             var expectedLogicalOperator = LogicalOperators.Eval;
             var expectedDataType = DataTypes.String;
+            var expectedOperandCardinality = Cardinalities.One;
 
-            var sut = new ValueConditionNode(expectedDataType, expectedCondition, expectedOperator, expectedOperand);
+            var sut = new ValueConditionNode(expectedCondition, expectedOperator, expectedOperand);
 
             // Act
             var actualCondition = sut.Condition;
             var actualOperator = sut.Operator;
-            var actualDataType = sut.DataType;
+            var actualCardinality = sut.RightOperand.Cardinality;
+            var actualDataType = sut.RightOperand.DataType;
             var actualLogicalOperator = sut.LogicalOperator;
-            var actualOperand = sut.Operand;
+            var actualOperand = sut.RightOperand.Value;
 
             // Assert
             actualCondition.Should().Be(expectedCondition);
@@ -234,6 +253,7 @@ namespace Regulae.Tests.ConditionNodes
             actualOperand.Should().Be(expectedOperand);
             actualLogicalOperator.Should().Be(expectedLogicalOperator);
             actualDataType.Should().Be(expectedDataType);
+            actualCardinality.Should().Be(expectedOperandCardinality);
         }
     }
 }

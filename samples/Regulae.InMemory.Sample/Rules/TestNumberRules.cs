@@ -20,9 +20,9 @@ namespace Regulae.InMemory.Sample.Rules
 
         public IEnumerable<RuleSpecification> GetRulesSpecifications()
         {
-            Add(CreateRuleForCoolNumbers(), RuleAddPriorityOption.ByPriorityNumber(3));
-            Add(CreateRuleForSosoNumbers(), RuleAddPriorityOption.ByPriorityNumber(2));
-            Add(CreateDefaultRule(), RuleAddPriorityOption.ByPriorityNumber(1));
+            Add(CreateRuleForCoolNumbers(), RuleAddPriorityOption.AtNumber(3));
+            Add(CreateRuleForSosoNumbers(), RuleAddPriorityOption.AtNumber(2));
+            Add(CreateDefaultRule(), RuleAddPriorityOption.AtNumber(1));
 
             return this.rulesSpecifications;
         }

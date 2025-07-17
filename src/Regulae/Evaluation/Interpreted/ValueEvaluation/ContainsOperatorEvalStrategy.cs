@@ -8,11 +8,8 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
     {
         public bool Eval(object leftOperand, object rightOperand)
         {
-            if (leftOperand is string)
+            if (leftOperand is string leftOperandAsString && rightOperand is string rightOperandAsString)
             {
-                var leftOperandAsString = leftOperand as string;
-                var rightOperandAsString = rightOperand as string;
-
 #if NETSTANDARD2_1_OR_GREATER
                 return leftOperandAsString!.Contains(rightOperandAsString, StringComparison.Ordinal);
 #else

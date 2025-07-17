@@ -17,7 +17,7 @@ namespace Regulae.Management.Operations
             this.rule = rule;
         }
 
-        public async Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
+        public async ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
         {
             var addRuleArgs = new AddRuleArgs
             {

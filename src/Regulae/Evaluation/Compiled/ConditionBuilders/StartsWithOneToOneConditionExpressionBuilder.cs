@@ -20,12 +20,10 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
                 throw new NotSupportedException($"The operator '{Operators.StartsWith}' is not supported for data type '{args.DataTypeConfiguration.DataType}'.");
             }
 
-            return builder.AndAlso(
-                builder.NotEqual(args.LeftHandOperand, builder.Constant<object>(value: null)),
-                builder.Call(
-                    args.LeftHandOperand,
-                    startsWithMethodInfo,
-                    new Expression[] { args.RightHandOperand, builder.Constant(StringComparison.InvariantCulture) }));
+            return builder.Call(
+                args.LeftHandOperand,
+                startsWithMethodInfo,
+                new Expression[] { args.RightHandOperand, builder.Constant(StringComparison.InvariantCulture) });
         }
     }
 }

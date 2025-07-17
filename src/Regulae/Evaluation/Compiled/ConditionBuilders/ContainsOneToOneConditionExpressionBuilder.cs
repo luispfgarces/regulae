@@ -19,12 +19,10 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
                     $"The operator '{nameof(Operators.Contains)}' is not supported for data type '{args.DataTypeConfiguration.DataType}' on a one to one scenario.");
             }
 
-            return builder.AndAlso(
-                builder.NotEqual(args.LeftHandOperand, builder.Constant<object>(value: null!)),
-                builder.Call(
-                    args.LeftHandOperand,
-                    stringContainsMethodInfo,
-                    new Expression[] { args.RightHandOperand }));
+            return builder.Call(
+                args.LeftHandOperand,
+                stringContainsMethodInfo,
+                new Expression[] { args.RightHandOperand });
         }
     }
 }

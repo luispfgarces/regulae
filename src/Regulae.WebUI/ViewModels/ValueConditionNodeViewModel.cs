@@ -26,15 +26,15 @@ namespace Regulae.WebUI.ViewModels
         public string DataType { get; internal set; }
 
         /// <summary>
-        /// Gets the operand.
-        /// </summary>
-        /// <value>The operand.</value>
-        public dynamic Operand { get; internal set; }
-
-        /// <summary>
         /// Gets the operator.
         /// </summary>
         /// <value>The operator.</value>
         public string Operator { get; internal set; }
+
+        /// <summary>
+        /// Gets the right operand.
+        /// </summary>
+        /// <value>The operand.</value>
+        public dynamic RightOperand { get; internal set; }
     }
 }

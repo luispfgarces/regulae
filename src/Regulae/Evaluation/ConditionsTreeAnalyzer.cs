@@ -8,7 +8,7 @@ namespace Regulae.Evaluation
 
     internal sealed class ConditionsTreeAnalyzer : IConditionsTreeAnalyzer
     {
-        public bool AreAllSearchConditionsPresent(IConditionNode conditionNode, IDictionary<string, object> conditions)
+        public bool AreAllSearchConditionsPresent(IConditionNode conditionNode, IDictionary<string, Operand> conditions)
         {
             // Conditions checklist is a mere control construct to avoid a full sweep of the
             // condition nodes tree when we already found all conditions.

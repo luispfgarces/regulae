@@ -1,12 +1,13 @@
 namespace Regulae.Evaluation.Interpreted.ValueEvaluation
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using Regulae;
 
     internal sealed class OperatorEvalStrategyFactory : IOperatorEvalStrategyFactory
     {
-        private readonly IDictionary<Operators, object> strategies;
+        private readonly FrozenDictionary<Operators, object> strategies;
 
         public OperatorEvalStrategyFactory()
         {
@@ -28,14 +29,14 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
                 { Operators.CaseInsensitiveEndsWith, new CaseInsensitiveEndsWithOperatorEvalStrategy() },
                 { Operators.NotStartsWith, new NotStartsWithOperatorEvalStrategy() },
                 { Operators.NotEndsWith, new NotEndsWithOperatorEvalStrategy() }
-            };
+            }.ToFrozenDictionary();
         }
 
         public IManyToManyOperatorEvalStrategy GetManyToManyOperatorEvalStrategy(Operators @operator)
         {
-            if (this.strategies.TryGetValue(@operator, out var operatorEvalStrategy) && operatorEvalStrategy is IManyToManyOperatorEvalStrategy casted)
+            if (this.strategies.TryGetValue(@operator, out var strategy) && strategy is IManyToManyOperatorEvalStrategy operatorEvalStrategy)
             {
-                return casted;
+                return operatorEvalStrategy;
             }
 
             throw new NotSupportedException($"Operator evaluation is not supported for operator '{@operator}' on the context of {nameof(IManyToManyOperatorEvalStrategy)}.");
@@ -43,9 +44,9 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
 
         public IManyToOneOperatorEvalStrategy GetManyToOneOperatorEvalStrategy(Operators @operator)
         {
-            if (this.strategies.TryGetValue(@operator, out var operatorEvalStrategy) && operatorEvalStrategy is IManyToOneOperatorEvalStrategy casted)
+            if (this.strategies.TryGetValue(@operator, out var strategy) && strategy is IManyToOneOperatorEvalStrategy operatorEvalStrategy)
             {
-                return casted;
+                return operatorEvalStrategy;
             }
 
             throw new NotSupportedException($"Operator evaluation is not supported for operator '{@operator}' on the context of {nameof(IManyToOneOperatorEvalStrategy)}.");
@@ -53,9 +54,9 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
 
         public IOneToManyOperatorEvalStrategy GetOneToManyOperatorEvalStrategy(Operators @operator)
         {
-            if (this.strategies.TryGetValue(@operator, out var operatorEvalStrategy) && operatorEvalStrategy is IOneToManyOperatorEvalStrategy casted)
+            if (this.strategies.TryGetValue(@operator, out var strategy) && strategy is IOneToManyOperatorEvalStrategy operatorEvalStrategy)
             {
-                return casted;
+                return operatorEvalStrategy;
             }
 
             throw new NotSupportedException($"Operator evaluation is not supported for operator '{@operator}' on the context of {nameof(IOneToManyOperatorEvalStrategy)}.");
@@ -63,9 +64,9 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation
 
         public IOneToOneOperatorEvalStrategy GetOneToOneOperatorEvalStrategy(Operators @operator)
         {
-            if (this.strategies.TryGetValue(@operator, out var operatorEvalStrategy) && operatorEvalStrategy is IOneToOneOperatorEvalStrategy casted)
+            if (this.strategies.TryGetValue(@operator, out var strategy) && strategy is IOneToOneOperatorEvalStrategy operatorEvalStrategy)
             {
-                return casted;
+                return operatorEvalStrategy;
             }
 
             throw new NotSupportedException($"Operator evaluation is not supported for operator '{@operator}' on the context of {nameof(IOneToOneOperatorEvalStrategy)}.");

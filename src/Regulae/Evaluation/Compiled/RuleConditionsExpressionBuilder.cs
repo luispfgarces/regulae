@@ -6,7 +6,6 @@ namespace Regulae.Evaluation.Compiled
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
-    using System.Text.RegularExpressions;
     using Regulae;
     using Regulae.ConditionNodes;
     using Regulae.Evaluation;
@@ -14,79 +13,199 @@ namespace Regulae.Evaluation.Compiled
 
     internal sealed class RuleConditionsExpressionBuilder : RuleConditionsExpressionBuilderBase, IRuleConditionsExpressionBuilder
     {
-        private static readonly MethodInfo conditionsGetterMethod = typeof(EvaluationContext)
-            .GetProperty("Conditions")
-            .GetGetMethod();
+        private static readonly FieldInfo operandCardinalityField = typeof(Operand).GetField("Cardinality");
+        private static readonly FieldInfo operandValueField = typeof(Operand).GetField("Value");
 
-        private static readonly MethodInfo evaluationContextMatchModeGetterMethod = typeof(EvaluationContext).GetProperty("MatchMode").GetGetMethod();
-        private static readonly MethodInfo evaluationContextMissingConditionsBehaviorGetterMethod = typeof(EvaluationContext).GetProperty("MissingConditionBehavior").GetGetMethod();
-
-        private static readonly MethodInfo getValueOrDefaultMethod = typeof(ConditionsValueLookupExtension)
-            .GetMethod(nameof(ConditionsValueLookupExtension.GetValueOrDefault));
+        private static readonly MethodInfo tryGetValueMethod = typeof(IDictionary<string, Operand>)
+            .GetMethod(nameof(IDictionary<string, Operand>.TryGetValue));
 
         private readonly IDataTypesConfigurationProvider dataTypesConfigurationProvider;
+        private readonly RulesEngineOptions rulesEngineOptions;
         private readonly IValueConditionNodeExpressionBuilderProvider valueConditionNodeExpressionBuilderProvider;
 
         public RuleConditionsExpressionBuilder(
             IValueConditionNodeExpressionBuilderProvider valueConditionNodeExpressionBuilderProvider,
-            IDataTypesConfigurationProvider dataTypesConfigurationProvider)
+            IDataTypesConfigurationProvider dataTypesConfigurationProvider,
+            RulesEngineOptions rulesEngineOptions)
         {
             this.valueConditionNodeExpressionBuilderProvider = valueConditionNodeExpressionBuilderProvider;
             this.dataTypesConfigurationProvider = dataTypesConfigurationProvider;
+            this.rulesEngineOptions = rulesEngineOptions;
         }
 
-        public Expression<Func<EvaluationContext, bool>> BuildExpression(IConditionNode rootConditionNode)
+        public Expression<Func<IDictionary<string, Operand>, bool>> BuildExpression(IConditionNode rootConditionNode, MatchModes matchMode)
         {
             var expressionResult = ExpressionBuilder.NewExpression("EvaluateConditions")
                 .WithParameters(p =>
                 {
-                    p.CreateParameter<EvaluationContext>("evaluationContext");
+                    p.CreateParameter<IDictionary<string, Operand>>("conditions");
                 })
                 .HavingReturn<bool>(defaultValue: false)
                 .SetImplementation(x =>
                 {
+                    var parameterExpression = x.GetParameter("conditions");
+                    var leftOperandVariableExpression = x.CreateVariable<Operand>("leftOperand");
                     var resultVariableExpression = x.CreateVariable<bool>("Result");
 
-                    this.BuildExpression(rootConditionNode, x);
+                    this.BuildExpression(x, rootConditionNode, parameterExpression, matchMode);
 
                     x.Return(resultVariableExpression);
                 })
                 .Build();
 
-            return Expression.Lambda<Func<EvaluationContext, bool>>(
+            return Expression.Lambda<Func<IDictionary<string, Operand>, bool>>(
                 body: expressionResult.Implementation,
                 parameters: expressionResult.Parameters);
         }
 
-        private static void BuildExpressionForBehaviorOnNullLeftOperand(IExpressionBlockBuilder builder)
+        private static void BuildBehaviorWhenLeftOperandMissing(
+            IExpressionBlockBuilder builder,
+            ParameterExpression leftOperandVariableExpression,
+            Expression leftOperandValueFieldAccessExpression,
+            MissingConditionBehaviors missingConditionBehavior)
         {
-            var leftOperandVariableExpression = builder.GetVariable("LeftOperand");
             var resultVariableExpression = builder.GetVariable("Result");
-            var jumpToLabelTarget = builder.GetLabelTarget("LabelEndValueConditionNode");
-            var parameterExpression = builder.GetParameter("evaluationContext");
-
+            var jumpToLabelTarget = builder.CreateLabelTarget("LabelEndValueConditionNode");
             builder.If(
-                test => test.Equal(leftOperandVariableExpression, test.Constant<object>(value: null!)),
-                then => then.Block(block1 =>
+                test => builder.OrElse(
+                    builder.Equal(leftOperandVariableExpression, builder.Constant<object>(value: null!)),
+                    builder.Equal(leftOperandValueFieldAccessExpression, builder.Constant<object>(value: null!))),
+                then => then.Block(block =>
                 {
-                    block1.If(
-                        test => test.Equal(test.Call(parameterExpression, evaluationContextMissingConditionsBehaviorGetterMethod), test.Constant(MissingConditionBehaviors.Discard)),
-                        then => then.Block(block2 =>
-                        {
-                            block2.Assign(resultVariableExpression, block2.Constant(value: false));
-                            block2.Goto(jumpToLabelTarget);
-                        }));
-                    block1.If(
-                        test => test.Equal(test.Call(parameterExpression, evaluationContextMatchModeGetterMethod), test.Constant(MatchModes.Search)),
-                        then => then.Block(block3 =>
-                        {
-                            block3.Assign(resultVariableExpression, then.Constant(value: true));
-                            block3.Goto(jumpToLabelTarget);
-                        }));
+                    block.Assign(resultVariableExpression, block.Constant(value: missingConditionBehavior != MissingConditionBehaviors.Discard));
+                    block.Goto(jumpToLabelTarget);
                 }));
         }
 
-        private void BuildExpression(IConditionNode conditionNode, IExpressionBlockBuilder builder)
+        private void BuildBehaviorForManyMultiplicities(
+            IExpressionBlockBuilder builder,
+            ValueConditionNode valueConditionNode,
+            OperatorMetadata operatorMetadata,
+            Expression leftOperandValueFieldAccessExpression,
+            Expression testPresentLeftOperand)
+        {
+            var leftOperandVariableExpression = builder.GetVariable("leftOperand");
+            var resultVariableExpression = builder.GetVariable("Result");
+            var dataTypeConfiguration = this.dataTypesConfigurationProvider.GetDataTypeConfiguration(valueConditionNode.RightOperand.DataType);
+            var multiplicityVariableExpression = builder.CreateVariable<Multiplicities>("Multiplicity");
+            builder.Assign(multiplicityVariableExpression, builder.Call(
+                instance: null!,
+                multiplicityEvaluateMethod,
+                new Expression[]
+                {
+                    builder.AccessField(leftOperandVariableExpression, operandCardinalityField),
+                    builder.Constant(valueConditionNode.RightOperand.Cardinality),
+                }));
+
+            builder.Switch(multiplicityVariableExpression, @switch =>
+            {
+                foreach (var multiplicity in operatorMetadata.SupportedMultiplicities)
+                {
+                    var multiplicityTransformed = multiplicity.ToString();
+                    var scopeName = new StringBuilder(builder.ScopeName)
+                        .Append(valueConditionNode.Condition)
+                        .Append(multiplicityTransformed)
+                        .ToString();
+                    @switch.Case(
+                        builder.Constant(multiplicity),
+                        caseBuilder => caseBuilder.Block(scopeName, block =>
+                        {
+                            var valueConditionNodeExpressionBuilder = this.valueConditionNodeExpressionBuilderProvider
+                                .GetExpressionBuilder(multiplicity);
+                            var args = new BuildValueConditionNodeExpressionArgs
+                            {
+                                DataTypeConfiguration = dataTypeConfiguration,
+                                LeftOperandExpression = leftOperandValueFieldAccessExpression,
+                                Operator = operatorMetadata.Operator,
+                                ResultVariableExpression = resultVariableExpression,
+                                RightOperandExpression = builder.Constant(valueConditionNode.RightOperand.Value),
+                                TestLeftOperand = testPresentLeftOperand,
+                            };
+                            valueConditionNodeExpressionBuilder.Build(
+                                block,
+                                args);
+                        }));
+                }
+                @switch.Default(defaultBuilder => defaultBuilder.Empty());
+            });
+        }
+
+        private void BuildBehaviorForSingleMultiplicity(
+            IExpressionBlockBuilder builder,
+            ValueConditionNode valueConditionNode,
+            OperatorMetadata operatorMetadata,
+            Expression leftOperandValueFieldAccessExpression,
+            Expression testPresentLeftOperand)
+        {
+            var resultVariableExpression = builder.GetVariable("Result");
+            var dataTypeConfiguration = this.dataTypesConfigurationProvider.GetDataTypeConfiguration(valueConditionNode.RightOperand.DataType);
+            var multiplicity = operatorMetadata.SupportedMultiplicities.First();
+            var valueConditionNodeExpressionBuilder = this.valueConditionNodeExpressionBuilderProvider
+                                .GetExpressionBuilder(multiplicity);
+            var args = new BuildValueConditionNodeExpressionArgs
+            {
+                DataTypeConfiguration = dataTypeConfiguration,
+                LeftOperandExpression = leftOperandValueFieldAccessExpression,
+                Operator = operatorMetadata.Operator,
+                ResultVariableExpression = resultVariableExpression,
+                RightOperandExpression = builder.Constant(valueConditionNode.RightOperand.Value),
+                TestLeftOperand = testPresentLeftOperand,
+            };
+            valueConditionNodeExpressionBuilder.Build(
+                builder,
+                args);
+        }
+
+        private void BuildBehaviorForValueConditionNode(
+            IExpressionBlockBuilder builder,
+            ValueConditionNode valueConditionNode,
+            ParameterExpression conditionsVariableExpression,
+            MatchModes matchMode)
+        {
+            // Variables, constants, and labels.
+            var leftOperandVariableExpression = builder.GetVariable("leftOperand");
+            var jumpLabelNeeded = false;
+
+            // Line 1.
+            builder.AddExpression(
+                builder.Call(
+                    instance: conditionsVariableExpression,
+                    tryGetValueMethod,
+                    new Expression[] { builder.Constant(valueConditionNode.Condition), leftOperandVariableExpression }));
+
+            var leftOperandValueFieldAccessExpression = builder.AccessField(leftOperandVariableExpression, operandValueField);
+            if (this.rulesEngineOptions.MissingConditionBehavior == MissingConditionBehaviors.Discard || matchMode == MatchModes.Search)
+            {
+                jumpLabelNeeded = true;
+                BuildBehaviorWhenLeftOperandMissing(builder, leftOperandVariableExpression, leftOperandValueFieldAccessExpression, this.rulesEngineOptions.MissingConditionBehavior);
+            }
+
+            // Line 4.
+            var testPresentLeftOperand = builder.AndAlso(
+                builder.NotEqual(leftOperandVariableExpression, builder.Constant<object>(value: null!)),
+                builder.NotEqual(leftOperandValueFieldAccessExpression, builder.Constant<object>(value: null!)));
+            var operatorMetadata = OperatorsMetadata.AllByOperator[valueConditionNode.Operator];
+            if (operatorMetadata.SupportedMultiplicities.Count == 1)
+            {
+                this.BuildBehaviorForSingleMultiplicity(builder, valueConditionNode, operatorMetadata, leftOperandValueFieldAccessExpression, testPresentLeftOperand);
+            }
+            else
+            {
+                this.BuildBehaviorForManyMultiplicities(builder, valueConditionNode, operatorMetadata, leftOperandValueFieldAccessExpression, testPresentLeftOperand);
+            }
+
+            // Line 6.
+            if (jumpLabelNeeded)
+            {
+                builder.Label(builder.GetLabelTarget("LabelEndValueConditionNode"));
+            }
+        }
+
+        private void BuildExpression(
+                    IExpressionBlockBuilder builder,
+            IConditionNode conditionNode,
+            ParameterExpression conditionsVariableExpression,
+            MatchModes matchMode)
         {
             switch (conditionNode)
             {
@@ -101,7 +220,7 @@ namespace Regulae.Evaluation.Compiled
                         var blockExpression = builder.Block(scopeName, x =>
                         {
                             var childResultVariableExpression = x.CreateVariable<bool>("Result");
-                            this.BuildExpression(childConditionNode, x);
+                            this.BuildExpression(x, childConditionNode, conditionsVariableExpression, matchMode);
                             conditionExpressions.Add(childResultVariableExpression);
                         });
                         builder.AddExpression(blockExpression);
@@ -114,89 +233,16 @@ namespace Regulae.Evaluation.Compiled
                         LogicalOperators.Or => builder.OrElse(conditionExpressions),
                         _ => throw new NotSupportedException($"Unsupported logical operator on composed condition node: '{conditionNode.LogicalOperator}'.")
                     };
-                    var composedResultVariableExpression = builder.GetVariable("Result");
-                    builder.Assign(composedResultVariableExpression, conditionExpression);
+                    builder.Assign(builder.GetVariable("Result"), conditionExpression);
                     break;
 
                 case ValueConditionNode valueConditionNode:
-                    // Variables, constants, and labels.
-                    var leftOperandVariableExpression = builder.CreateVariable<object>("LeftOperand");
-                    var rightOperandVariableExpression = builder.CreateVariable<object>("RightOperand");
-                    var jumpToLabelTarget = builder.CreateLabelTarget("LabelEndValueConditionNode");
-                    var parameterExpression = builder.GetParameter("evaluationContext");
-
-                    // Line 1.
-                    var getConditionsCallExpression = builder.Call(parameterExpression, conditionsGetterMethod);
-                    var getConditionValueCallExpression = builder
-                        .Call(instance: null!, getValueOrDefaultMethod, new Expression[] { getConditionsCallExpression, builder.Constant(valueConditionNode.Condition) });
-                    builder.Assign(leftOperandVariableExpression, getConditionValueCallExpression);
-                    // Line 2.
-                    builder.Assign(rightOperandVariableExpression, builder.Constant(valueConditionNode.Operand));
-                    // Line 3.
-                    BuildExpressionForBehaviorOnNullLeftOperand(builder);
-                    // Lines 4 and 5.
-                    this.BuildFetchAndSwitchOverMultiplicity(builder, valueConditionNode);
-                    // Line 6.
-                    builder.Label(jumpToLabelTarget);
+                    this.BuildBehaviorForValueConditionNode(builder, valueConditionNode, conditionsVariableExpression, matchMode);
                     break;
 
                 default:
                     throw new NotSupportedException($"Unsupported condition node: '{conditionNode.GetType().Name}'.");
             }
-        }
-
-        private void BuildFetchAndSwitchOverMultiplicity(
-            IExpressionBlockBuilder builder,
-            ValueConditionNode valueConditionNode)
-        {
-            var operatorConstantExpression = builder.Constant(valueConditionNode.Operator);
-            var multiplicityVariableExpression = builder.CreateVariable("Multiplicity", typeof(string));
-            var leftOperandVariableExpression = builder.GetVariable("LeftOperand");
-            var rightOperandVariableExpression = builder.GetVariable("RightOperand");
-            var resultVariableExpression = builder.GetVariable("Result");
-            // Line 4.
-            builder.Assign(multiplicityVariableExpression, builder.Call(
-                instance: null!,
-                multiplicityEvaluateMethod,
-                new Expression[] { leftOperandVariableExpression, operatorConstantExpression, rightOperandVariableExpression }));
-            // Line 5.
-            builder.Switch(multiplicityVariableExpression, @switch =>
-            {
-                var dataTypeConfiguration = this.dataTypesConfigurationProvider.GetDataTypeConfiguration(valueConditionNode.DataType);
-                var operatorMetadata = OperatorsMetadata.AllByOperator[valueConditionNode.Operator];
-
-                foreach (var multiplicity in operatorMetadata.SupportedMultiplicities)
-                {
-#if NETSTANDARD2_0
-                    var multiplicityTransformed = Regex.Replace(multiplicity, "\\b\\p{Ll}", match => match.Value.ToUpperInvariant(), RegexOptions.None, TimeSpan.FromSeconds(1)).Replace("-", string.Empty);
-#else
-                    var multiplicityTransformed = Regex.Replace(multiplicity, "\\b\\p{Ll}", match => match.Value.ToUpperInvariant(), RegexOptions.None, TimeSpan.FromSeconds(1)).Replace("-", string.Empty, StringComparison.Ordinal);
-#endif
-                    var scopeName = new StringBuilder(builder.ScopeName)
-                        .Append(valueConditionNode.Condition)
-                        .Append(multiplicityTransformed)
-                        .ToString();
-                    @switch.Case(
-                        builder.Constant(multiplicity),
-                        caseBuilder => caseBuilder.Block(scopeName, block =>
-                        {
-                            var valueConditionNodeExpressionBuilder = this.valueConditionNodeExpressionBuilderProvider
-                                .GetExpressionBuilder(multiplicity);
-                            var args = new BuildValueConditionNodeExpressionArgs
-                            {
-                                DataTypeConfiguration = dataTypeConfiguration,
-                                LeftOperandVariableExpression = leftOperandVariableExpression,
-                                Operator = operatorMetadata.Operator,
-                                ResultVariableExpression = resultVariableExpression,
-                                RightOperandVariableExpression = rightOperandVariableExpression,
-                            };
-                            valueConditionNodeExpressionBuilder.Build(
-                                block,
-                                args);
-                        }));
-                }
-                @switch.Default(defaultBuilder => defaultBuilder.Empty());
-            });
         }
     }
 }

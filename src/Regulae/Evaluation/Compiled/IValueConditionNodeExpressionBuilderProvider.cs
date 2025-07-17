@@ -2,6 +2,6 @@ namespace Regulae.Evaluation.Compiled
 {
     internal interface IValueConditionNodeExpressionBuilderProvider
     {
-        IValueConditionNodeExpressionBuilder GetExpressionBuilder(string multiplicity);
+        IValueConditionNodeExpressionBuilder GetExpressionBuilder(Multiplicities multiplicity);
     }
 }

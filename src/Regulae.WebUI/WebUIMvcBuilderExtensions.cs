@@ -44,7 +44,7 @@ namespace Regulae.WebUI
         private static void AddRegulaeWebUIServices(this IServiceCollection services, Action<IRulesEngineInstancesRegistrar> instancesRegistrationAction)
         {
             var rulesEngineInstanceProvider = new RulesEngineInstanceProvider();
-            instancesRegistrationAction.Invoke(rulesEngineInstanceProvider);
+            instancesRegistrationAction(rulesEngineInstanceProvider);
             services.AddSingleton(rulesEngineInstanceProvider);
             services.AddSingleton<IRulesEngineInstanceProvider>(rulesEngineInstanceProvider);
             services.AddSingleton<WebUIOptionsRegistry>();

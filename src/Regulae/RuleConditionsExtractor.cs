@@ -11,11 +11,11 @@ namespace Regulae
     public class RuleConditionsExtractor : IRuleConditionsExtractor
     {
         /// <inheritdoc/>
-        public IEnumerable<string> GetConditions(IEnumerable<Rule> matchedRules)
+        public IReadOnlyCollection<string> GetConditions(IReadOnlyCollection<Rule> matchedRules)
         {
             var conditions = new HashSet<string>(StringComparer.Ordinal);
 
-            if (!matchedRules.Any())
+            if (matchedRules.Count == 0)
             {
                 return conditions;
             }

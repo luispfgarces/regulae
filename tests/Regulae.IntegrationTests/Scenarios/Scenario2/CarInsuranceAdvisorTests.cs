@@ -8,19 +8,17 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
     using Microsoft.Extensions.DependencyInjection;
     using Regulae;
     using Regulae.Extensions;
-    using Regulae.IntegrationTests;
+    using Regulae.IntegrationTests.Common.Scenarios;
     using Regulae.IntegrationTests.Common.Scenarios.Scenario2;
     using Regulae.Providers.InMemory;
     using Xunit;
 
     public class CarInsuranceAdvisorTests
     {
-        private static string DataSourceFilePath => $@"{Environment.CurrentDirectory}/Scenarios/Scenario2/regulae-tests.car-insurance-advisor.json";
-
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_ClaimDescriptionContionsAlcoholOrDrugs_ReturnsPerformInvestigation(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_ClaimDescriptionContionsAlcoholOrDrugs_ReturnsPerformInvestigation(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var expected = CarInsuranceAdvices.PerformInvestigation;
@@ -39,16 +37,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(opt =>
-                {
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(CarInsuranceAdvices), serializedContent: false);
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
             var ruleBuilderResult = Rule.Create<CarInsuranceRulesetNames, CarInsuranceConditionNames>("Car Insurance Advise on on accident under the effect of drugs or alcohol")
                 .InRuleset(expectedRuleset)
@@ -63,7 +57,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
                 .Build();
 
             // Act
-            await genericRulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.AtBottom);
+            await genericRulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.AtLargestNumber);
 
             var actual = await genericRulesEngine.MatchOneAsync(expectedRuleset, expectedMatchDate, expectedConditions);
 
@@ -74,9 +68,42 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_RepairCostsNotWorthIt_ReturnsRefusePaymentPerFranchise(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_RepairCostsNotWorthIt_ReturnsPayOldCar(EvaluationStrategies evaluationStrategy)
+        {
+            // Arrange
+            var expected = CarInsuranceAdvices.PayOldCar;
+            const CarInsuranceRulesetNames expectedRuleset = CarInsuranceRulesetNames.CarInsuranceAdvice;
+            var expectedMatchDate = new DateTime(2016, 06, 01, 20, 23, 23);
+            var expectedConditions = new Dictionary<CarInsuranceConditionNames, object>
+            {
+                { CarInsuranceConditionNames.RepairCosts, 0.0m },
+                { CarInsuranceConditionNames.RepairCostsCommercialValueRate, 0.0m },
+            };
+
+            var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
+                .SetInMemoryDataSource()
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
+                .Build();
+
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
+
+            // Act
+            var actual = await genericRulesEngine.MatchOneAsync(expectedRuleset, expectedMatchDate, expectedConditions);
+
+            // Assert
+            actual.Should().NotBeNull();
+            var actualContent = actual.ContentContainer.GetContentAs<CarInsuranceAdvices>();
+            actualContent.Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_RepairCostsNotWorthIt_ReturnsRefusePaymentPerFranchise(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var expected = CarInsuranceAdvices.RefusePaymentPerFranchise;
@@ -94,16 +121,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(opt =>
-                {
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(CarInsuranceAdvices), serializedContent: false);
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
             // Act
             var actual = await genericRulesEngine.MatchOneAsync(expectedContent, expectedMatchDate, expectedConditions);
@@ -115,9 +138,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_SearchForRulesExcludingRulesWithoutSearchConditions_ReturnsNoRules(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_SearchForRulesExcludingRulesWithoutSearchConditions_ReturnsNoRules(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             const CarInsuranceRulesetNames expectedContent = CarInsuranceRulesetNames.CarInsuranceAdvice;
@@ -138,16 +161,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(opt =>
-                {
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(CarInsuranceAdvices), serializedContent: false);
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
             // Act
             var actual = await genericRulesEngine.SearchAsync(searchArgs);
@@ -158,9 +177,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_SearchForRulesWithRepairCostsGreaterThan1000_Returns2Rules(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_SearchForRulesWithRepairCostsGreaterThan1000_Returns2Rules(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             const CarInsuranceRulesetNames expectedContent = CarInsuranceRulesetNames.CarInsuranceAdvice;
@@ -180,16 +199,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(opt =>
-                {
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(CarInsuranceAdvices), serializedContent: false);
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
             // Act
             var actual = await genericRulesEngine.SearchAsync(searchArgs);
@@ -202,9 +217,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetCarInsuranceAdvice_UpdatesRuleAndAddsNewOneAndEvaluates_ReturnsPay(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task GetCarInsuranceAdvice_UpdatesRuleAndAddsNewOneAndEvaluates_ReturnsPay(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             const CarInsuranceRulesetNames expectedContent = CarInsuranceRulesetNames.CarInsuranceAdvice;
@@ -221,16 +236,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(opt =>
-                {
-                    opt.PriorityCriteria = PriorityCriterias.BottommostRuleWins;
-                    opt.EnableCompilation = enableCompilation;
-                })
+                .Configure(opt => opt.UseLargestNumberPriorityCriteria()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(CarInsuranceAdvices), serializedContent: false);
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario2Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<CarInsuranceRulesetNames, CarInsuranceConditionNames>();
 
             var ruleBuilderResult = Rule.Create<CarInsuranceRulesetNames, CarInsuranceConditionNames>("Car Insurance Advise on self damage coverage")
                 .InRuleset(expectedContent)
@@ -277,11 +288,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario2
             rule13.Priority.Should().Be(3);
 
             // Act 2
-            var addOperationResult = await genericRulesEngine.AddRuleAsync(ruleToAdd, new RuleAddPriorityOption
-            {
-                PriorityOption = PriorityOptions.AtRuleName,
-                AtRuleNameOptionValue = "Car Insurance Advise on repair costs lower than franchise boundary"
-            });
+            var addOperationResult = await genericRulesEngine.AddRuleAsync(
+                ruleToAdd,
+                RuleAddPriorityOption.AtRuleName("Car Insurance Advise on repair costs lower than franchise boundary"));
 
             var eval2 = await genericRulesEngine.MatchOneAsync(expectedContent, expectedMatchDate, expectedConditions);
 

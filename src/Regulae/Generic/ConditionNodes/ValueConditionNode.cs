@@ -11,7 +11,7 @@ namespace Regulae.Generic.ConditionNodes
     /// </summary>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     /// <seealso cref="IValueConditionNode{TCondition}"/>
-    [DebuggerDisplay("{DataType.ToString(),nq} condition: <{Condition.ToString(),nq}> {Operator} {Operand}")]
+    [DebuggerDisplay("{RightOperand.DataType.ToString(),nq} condition: <{Condition.ToString(),nq}> {Operator} {RightOperand.Value}")]
     public class ValueConditionNode<TCondition> : IValueConditionNode<TCondition>
     {
         private readonly ValueConditionNode valueConditionNode;
@@ -29,19 +29,16 @@ namespace Regulae.Generic.ConditionNodes
         public TCondition Condition => GenericConversions.Convert<TCondition>(valueConditionNode.Condition);
 
         /// <inheritdoc/>
-        public DataTypes DataType => this.valueConditionNode.DataType;
-
-        /// <inheritdoc/>
         public LogicalOperators LogicalOperator => LogicalOperators.Eval;
-
-        /// <inheritdoc/>
-        public object Operand => this.valueConditionNode.Operand;
 
         /// <inheritdoc/>
         public Operators Operator => this.valueConditionNode.Operator;
 
         /// <inheritdoc/>
         public IDictionary<string, object> Properties => this.valueConditionNode.Properties;
+
+        /// <inheritdoc/>
+        public Operand RightOperand => this.valueConditionNode.RightOperand;
 
         /// <inheritdoc/>
         public IConditionNode<TCondition> Clone()

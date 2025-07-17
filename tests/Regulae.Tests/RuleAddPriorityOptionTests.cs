@@ -7,72 +7,72 @@ namespace Regulae.Tests
     public class RuleAddPriorityOptionTests
     {
         [Fact]
-        public void AtBottom_NoConditions_ReturnsNewObjectSettedAtBottomPriority()
+        public void AtLargestNumber_NoConditions_ReturnsNewObjectSettedAtLargestNumberPriority()
         {
             // Arrange
-            var priorityOption = PriorityOptions.AtBottom;
+            var priorityOption = PriorityOptions.AtLargestNumber;
 
             // Act
-            var actual = RuleAddPriorityOption.AtBottom;
+            var actual = RuleAddPriorityOption.AtLargestNumber;
 
             // Assert
 
             actual.Should().NotBeNull();
-            actual.AtPriorityNumberOptionValue.Should().Be(0);
+            actual.AtNumberOptionValue.Should().Be(0);
             actual.AtRuleNameOptionValue.Should().BeNull();
             actual.PriorityOption.Should().Be(priorityOption);
         }
 
         [Fact]
-        public void AtTop_NoConditions_ReturnsNewObjectSettedAtTopPriority()
-        {
-            // Arrange
-            var priorityOption = PriorityOptions.AtTop;
-
-            // Act
-            var actual = RuleAddPriorityOption.AtTop;
-
-            // Assert
-
-            actual.Should().NotBeNull();
-            actual.AtPriorityNumberOptionValue.Should().Be(0);
-            actual.AtRuleNameOptionValue.Should().BeNull();
-            actual.PriorityOption.Should().Be(priorityOption);
-        }
-
-        [Fact]
-        public void ByPriorityNumber_GivenPriority1_ReturnsNewObjectSettedByPriorityNumberAndAtPriority1()
+        public void AtNumber_GivenPriority1_ReturnsNewObjectSettedAtNumber1()
         {
             // Arrange
             var priorityNumber = 1;
-            var priorityOption = PriorityOptions.AtPriorityNumber;
+            var priorityOption = PriorityOptions.AtNumber;
 
             // Act
-            var actual = RuleAddPriorityOption.ByPriorityNumber(priorityNumber);
+            var actual = RuleAddPriorityOption.AtNumber(priorityNumber);
 
             // Assert
 
             actual.Should().NotBeNull();
-            actual.AtPriorityNumberOptionValue.Should().Be(priorityNumber);
+            actual.AtNumberOptionValue.Should().Be(priorityNumber);
             actual.AtRuleNameOptionValue.Should().BeNull();
             actual.PriorityOption.Should().Be(priorityOption);
         }
 
         [Fact]
-        public void ByRuleName_GivenRuleNameSample_ReturnsNewObjectSettedByRuleNamePriorityAndAtNameSample()
+        public void AtRuleName_GivenRuleNameSample_ReturnsNewObjectSettedAtRuleNamePriorityAndAtNameSample()
         {
             // Arrange
             var ruleName = "Sample";
             var priorityOption = PriorityOptions.AtRuleName;
 
             // Act
-            var actual = RuleAddPriorityOption.ByRuleName(ruleName);
+            var actual = RuleAddPriorityOption.AtRuleName(ruleName);
 
             // Assert
 
             actual.Should().NotBeNull();
-            actual.AtPriorityNumberOptionValue.Should().Be(0);
+            actual.AtNumberOptionValue.Should().Be(0);
             actual.AtRuleNameOptionValue.Should().Be(ruleName);
+            actual.PriorityOption.Should().Be(priorityOption);
+        }
+
+        [Fact]
+        public void AtSmallestNumber_NoConditions_ReturnsNewObjectSettedAtSmallestNumberPriority()
+        {
+            // Arrange
+            var priorityOption = PriorityOptions.AtSmallestNumber;
+
+            // Act
+            var actual = RuleAddPriorityOption.AtSmallestNumber;
+
+            // Assert
+
+            actual.Should().NotBeNull();
+            actual.AtNumberOptionValue.Should().Be(0);
+            actual.AtRuleNameOptionValue.Should().BeNull();
             actual.PriorityOption.Should().Be(priorityOption);
         }
     }

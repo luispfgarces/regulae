@@ -7,9 +7,13 @@ namespace Regulae.Providers.InMemory
     {
         void AddRule(RuleDataModel ruleDataModel);
 
-        void CreateRuleset(string ruleset);
+        void CreateCondition(string name, DataTypes dataType);
+
+        void CreateRuleset(string name);
 
         IReadOnlyCollection<RuleDataModel> GetAllRules();
+
+        IReadOnlyDictionary<string, ConditionDataModel> GetConditions();
 
         IReadOnlyCollection<RuleDataModel> GetRulesBy(string ruleset);
 

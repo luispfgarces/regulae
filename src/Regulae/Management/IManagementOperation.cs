@@ -6,6 +6,6 @@ namespace Regulae.Management
 
     internal interface IManagementOperation
     {
-        Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules);
+        ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules);
     }
 }

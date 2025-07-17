@@ -1,16 +1,13 @@
 namespace Regulae.Evaluation
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Linq;
     using Regulae;
 
     internal static class OperatorsMetadata
     {
-        private static readonly IDictionary<Operators, OperatorMetadata> allOperatorsMetadata;
-
-        private static readonly IDictionary<string, OperatorMetadata> allOperatorsMetadataBySupportedCombination;
+        private static readonly FrozenDictionary<Operators, OperatorMetadata> allOperatorsMetadata;
 
         private static readonly IEnumerable<OperatorMetadata> operatorsMetadata = new[]
         {
@@ -34,127 +31,51 @@ namespace Regulae.Evaluation
 
         static OperatorsMetadata()
         {
-            allOperatorsMetadata = new Dictionary<Operators, OperatorMetadata>();
+            var operatorsMetadataByOperator = new Dictionary<Operators, OperatorMetadata>();
             var allOperatorsMetadataBySupportedCombinationAux = new Dictionary<string, OperatorMetadata>(StringComparer.Ordinal);
 
             foreach (var operatorMetadata in operatorsMetadata)
             {
-                allOperatorsMetadata.Add(operatorMetadata.Operator, operatorMetadata);
-
-                var supportedCombinations = operatorMetadata.GetAllCombinations();
-
-                foreach (var combination in supportedCombinations)
-                {
-                    allOperatorsMetadataBySupportedCombinationAux.Add(combination, operatorMetadata);
-                }
+                operatorsMetadataByOperator.Add(operatorMetadata.Operator, operatorMetadata);
             }
 
-            allOperatorsMetadataBySupportedCombination
-                = new ReadOnlyDictionary<string, OperatorMetadata>(allOperatorsMetadataBySupportedCombinationAux);
+            allOperatorsMetadata = operatorsMetadataByOperator.ToFrozenDictionary();
         }
 
         public static IEnumerable<OperatorMetadata> All => allOperatorsMetadata.Values;
 
         public static IDictionary<Operators, OperatorMetadata> AllByOperator => allOperatorsMetadata;
 
-        public static IDictionary<string, OperatorMetadata> AllBySupportedCombination => allOperatorsMetadataBySupportedCombination;
+        public static OperatorMetadata CaseInsensitiveEndsWith => new(Operators.CaseInsensitiveEndsWith, Multiplicities.OneToOne);
 
-        public static IEnumerable<string> AllSupportedCombinations => All.SelectMany(x => x.GetAllCombinations());
+        public static OperatorMetadata CaseInsensitiveStartsWith => new(Operators.CaseInsensitiveStartsWith, Multiplicities.OneToOne);
 
-        public static OperatorMetadata CaseInsensitiveEndsWith => new()
-        {
-            Operator = Operators.CaseInsensitiveEndsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata Contains => new(Operators.Contains, Multiplicities.OneToOne, Multiplicities.ManyToOne);
 
-        public static OperatorMetadata CaseInsensitiveStartsWith => new()
-        {
-            Operator = Operators.CaseInsensitiveStartsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata EndsWith => new(Operators.EndsWith, Multiplicities.OneToOne);
 
-        public static OperatorMetadata Contains => new()
-        {
-            Operator = Operators.Contains,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne, Multiplicities.ManyToOne },
-        };
+        public static OperatorMetadata Equal => new(Operators.Equal, Multiplicities.OneToOne);
 
-        public static OperatorMetadata EndsWith => new()
-        {
-            Operator = Operators.EndsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata GreaterThan => new(Operators.GreaterThan, Multiplicities.OneToOne);
 
-        public static OperatorMetadata Equal => new()
-        {
-            Operator = Operators.Equal,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata GreaterThanOrEqual => new(Operators.GreaterThanOrEqual, Multiplicities.OneToOne);
 
-        public static OperatorMetadata GreaterThan => new()
-        {
-            Operator = Operators.GreaterThan,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata In => new(Operators.In, Multiplicities.OneToMany);
 
-        public static OperatorMetadata GreaterThanOrEqual => new()
-        {
-            Operator = Operators.GreaterThanOrEqual,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata LesserThan => new(Operators.LesserThan, Multiplicities.OneToOne);
 
-        public static OperatorMetadata In => new()
-        {
-            Operator = Operators.In,
-            SupportedMultiplicities = new[] { Multiplicities.OneToMany },
-        };
+        public static OperatorMetadata LesserThanOrEqual => new(Operators.LesserThanOrEqual, Multiplicities.OneToOne);
 
-        public static OperatorMetadata LesserThan => new()
-        {
-            Operator = Operators.LesserThan,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata NotContains => new(Operators.NotContains, Multiplicities.OneToOne);
 
-        public static OperatorMetadata LesserThanOrEqual => new()
-        {
-            Operator = Operators.LesserThanOrEqual,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata NotEndsWith => new(Operators.NotEndsWith, Multiplicities.OneToOne);
 
-        public static OperatorMetadata NotContains => new()
-        {
-            Operator = Operators.NotContains,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata NotEqual => new(Operators.NotEqual, Multiplicities.OneToOne);
 
-        public static OperatorMetadata NotEndsWith => new()
-        {
-            Operator = Operators.NotEndsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata NotIn => new(Operators.NotIn, Multiplicities.OneToMany);
 
-        public static OperatorMetadata NotEqual => new()
-        {
-            Operator = Operators.NotEqual,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata NotStartsWith => new(Operators.NotStartsWith, Multiplicities.OneToOne);
 
-        public static OperatorMetadata NotIn => new()
-        {
-            Operator = Operators.NotIn,
-            SupportedMultiplicities = new[] { Multiplicities.OneToMany },
-        };
-
-        public static OperatorMetadata NotStartsWith => new()
-        {
-            Operator = Operators.NotStartsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
-
-        public static OperatorMetadata StartsWith => new()
-        {
-            Operator = Operators.StartsWith,
-            SupportedMultiplicities = new[] { Multiplicities.OneToOne },
-        };
+        public static OperatorMetadata StartsWith => new(Operators.StartsWith, Multiplicities.OneToOne);
     }
 }

@@ -7,8 +7,8 @@ namespace Regulae.Core
 
     internal sealed class DictionarySlim<TKey, TValue> : IDictionary<TKey, TValue>
     {
+        private static readonly EqualityComparer<TValue> valuesComparer = EqualityComparer<TValue>.Default;
         private readonly IEqualityComparer<TKey> keysComparer;
-        private readonly IEqualityComparer<TValue> valuesComparer;
         private KeyValuePair<TKey, TValue>[] entries;
         private int lastUsedIndex;
 
@@ -27,7 +27,7 @@ namespace Regulae.Core
             {
                 this.keysComparer = EqualityComparer<TKey>.Default;
             }
-            this.valuesComparer = EqualityComparer<TValue>.Default;
+
             this.lastUsedIndex = -1;
             this.entries = new KeyValuePair<TKey, TValue>[size];
         }
@@ -126,7 +126,7 @@ namespace Regulae.Core
             while (--i >= 0)
             {
                 var entry = this.entries[i];
-                if (this.AreKeysEqual(item.Key, entry.Key) && this.AreValuesEqual(item.Value, entry.Value))
+                if (this.AreKeysEqual(item.Key, entry.Key) && DictionarySlim<TKey, TValue>.AreValuesEqual(item.Value, entry.Value))
                 {
                     return true;
                 }
@@ -201,7 +201,7 @@ namespace Regulae.Core
             for (var i = 0; i < initialCount; i++)
             {
                 var entry = this.entries[i];
-                if (this.AreKeysEqual(item.Key, entry.Key) && this.AreValuesEqual(item.Value, entry.Value))
+                if (this.AreKeysEqual(item.Key, entry.Key) && DictionarySlim<TKey, TValue>.AreValuesEqual(item.Value, entry.Value))
                 {
                     keyAtIndex = i;
                     break;
@@ -240,12 +240,16 @@ namespace Regulae.Core
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool AreValuesEqual(TValue left, TValue right)
+            => valuesComparer.Equals(left, right);
+
         private static P[] GetProjectedArrayPortion<T, P>(T[] array, int startIndex, int length, Func<T, P> projectionFunc)
         {
             var newArray = new P[length];
             for (var i = 0; i < length; i++)
             {
-                newArray[i] = projectionFunc.Invoke(array[startIndex + i]);
+                newArray[i] = projectionFunc(array[startIndex + i]);
             }
 
             return newArray;
@@ -280,10 +284,6 @@ namespace Regulae.Core
 
             return this.keysComparer.Equals(left, right);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool AreValuesEqual(TValue left, TValue right)
-            => this.valuesComparer.Equals(left, right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int FindIndex(TKey key)

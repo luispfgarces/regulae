@@ -4,57 +4,63 @@ namespace Regulae.Builder
     using System.Collections.Generic;
     using System.Linq;
     using Regulae;
+    using Regulae.Cache;
+    using Regulae.Core;
     using Regulae.Evaluation;
     using Regulae.Evaluation.Compiled;
     using Regulae.Evaluation.Compiled.ConditionBuilders;
     using Regulae.Evaluation.Interpreted;
     using Regulae.Evaluation.Interpreted.ValueEvaluation;
     using Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers;
+    using Regulae.Management;
     using Regulae.Source;
     using Regulae.Validation;
 
     internal sealed class ConfiguredRulesEngineBuilder : IConfiguredRulesEngineBuilder
     {
         private readonly IRulesDataSource rulesDataSource;
-        private readonly RulesEngineOptions rulesEngineOptions;
+        private readonly RulesEngineOptionsBuilder rulesEngineOptionsBuilder;
 
         public ConfiguredRulesEngineBuilder(IRulesDataSource rulesDataSource)
         {
             this.rulesDataSource = rulesDataSource;
-            this.rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
+            this.rulesEngineOptionsBuilder = new RulesEngineOptionsBuilder();
         }
 
         public IRulesEngine Build()
         {
+            var rulesEngineOptions = this.rulesEngineOptionsBuilder.Build();
             var rulesSourceMiddlewares = new List<IRulesSourceMiddleware>();
-            var dataTypesConfigurationProvider = new DataTypesConfigurationProvider(this.rulesEngineOptions);
+            var dataTypesConfigurationProvider = new DataTypesConfigurationProvider(rulesEngineOptions);
             var multiplicityEvaluator = new MultiplicityEvaluator();
             var conditionsTreeAnalyzer = new ConditionsTreeAnalyzer();
 
             IConditionsEvalEngine conditionsEvalEngine;
-
-            if (this.rulesEngineOptions.EnableCompilation)
+            switch (rulesEngineOptions.EvaluationStrategy)
             {
-                // Use specific conditions eval engine to use compiled parts of conditions tree.
-                var conditionExpressionBuilderProvider = new ConditionExpressionBuilderProvider();
-                var valueConditionNodeCompilerProvider = new ValueConditionNodeExpressionBuilderProvider(conditionExpressionBuilderProvider);
-                var ruleConditionsExpressionBuilder = new RuleConditionsExpressionBuilder(valueConditionNodeCompilerProvider, dataTypesConfigurationProvider);
-                conditionsEvalEngine = new CompiledConditionsEvalEngine(conditionsTreeAnalyzer, this.rulesEngineOptions);
+                case EvaluationStrategies.Interpreted:
+                    var operatorEvalStrategyFactory = new OperatorEvalStrategyFactory();
+                    var conditionEvalDispatchProvider = new ConditionEvalDispatchProvider(operatorEvalStrategyFactory, multiplicityEvaluator, dataTypesConfigurationProvider);
+                    conditionsEvalEngine = new InterpretedConditionsEvalEngine(conditionEvalDispatchProvider, conditionsTreeAnalyzer, rulesEngineOptions);
+                    break;
 
-                // Add conditions compiler middleware to ensure compilation occurs before rules
-                // engine uses the rules, while also ensuring that the compilation result is kept on
-                // data source (avoiding future re-compilation).
-                var compilationRulesSourceMiddleware = new CompilationRulesSourceMiddleware(ruleConditionsExpressionBuilder, this.rulesDataSource);
-                rulesSourceMiddlewares.Add(compilationRulesSourceMiddleware);
+                case EvaluationStrategies.Compiled:
+                    var conditionExpressionBuilderProvider = new ConditionExpressionBuilderProvider();
+                    var valueConditionNodeCompilerProvider = new ValueConditionNodeExpressionBuilderProvider(conditionExpressionBuilderProvider);
+                    var ruleConditionsExpressionBuilder = new RuleConditionsExpressionBuilder(valueConditionNodeCompilerProvider, dataTypesConfigurationProvider, rulesEngineOptions);
+                    conditionsEvalEngine = new CompiledConditionsEvalEngine(conditionsTreeAnalyzer, rulesEngineOptions);
+                    var compilationRulesSourceMiddleware = new CompilationRulesSourceMiddleware(ruleConditionsExpressionBuilder, this.rulesDataSource);
+                    rulesSourceMiddlewares.Add(compilationRulesSourceMiddleware);
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Specified a evaluation strategy is not supported: {rulesEngineOptions.EvaluationStrategy}");
             }
-            else
+
+            if (rulesEngineOptions.Cache is not null)
             {
-                // Use interpreted conditions eval engine that runs throught all conditions and
-                // interprets them at each evaluation.
-                var operatorEvalStrategyFactory = new OperatorEvalStrategyFactory();
-                var conditionEvalDispatchProvider = new ConditionEvalDispatchProvider(operatorEvalStrategyFactory, multiplicityEvaluator, dataTypesConfigurationProvider);
-                var deferredEval = new DeferredEval(conditionEvalDispatchProvider, this.rulesEngineOptions);
-                conditionsEvalEngine = new InterpretedConditionsEvalEngine(deferredEval, conditionsTreeAnalyzer);
+                var cacheRulesSourceMiddleware = new CacheRulesSourceMiddleware(rulesEngineOptions.Cache);
+                rulesSourceMiddlewares.Add(cacheRulesSourceMiddleware);
             }
 
             var ruleConditionsExtractor = new RuleConditionsExtractor();
@@ -65,15 +71,25 @@ namespace Regulae.Builder
             var orderedMiddlewares = rulesSourceMiddlewares
                 .Reverse<IRulesSourceMiddleware>();
             var rulesSource = new RulesSource(this.rulesDataSource, orderedMiddlewares);
+            var ruleSanitizer = new RuleSanitizer(rulesSource, dataTypesConfigurationProvider);
+            var conditionsConverter = new ConditionsConverter(rulesSource);
+            var rulesEngineArgs = new RulesEngineArgs
+            {
+                ConditionsConverter = conditionsConverter,
+                ConditionsEvalEngine = conditionsEvalEngine,
+                RuleConditionsExtractor = ruleConditionsExtractor,
+                RuleSanitizer = ruleSanitizer,
+                RulesEngineOptions = rulesEngineOptions,
+                RulesSource = rulesSource,
+                ValidatorProvider = validationProvider,
+            };
 
-            return new RulesEngine(conditionsEvalEngine, rulesSource, validationProvider, this.rulesEngineOptions, ruleConditionsExtractor);
+            return new RulesEngine(rulesEngineArgs);
         }
 
-        public IConfiguredRulesEngineBuilder Configure(Action<RulesEngineOptions> configurationAction)
+        public IConfiguredRulesEngineBuilder Configure(Action<IRulesEngineConfiguration> configurationAction)
         {
-            configurationAction.Invoke(this.rulesEngineOptions);
-            RulesEngineOptionsValidator.Validate(this.rulesEngineOptions);
-
+            configurationAction(this.rulesEngineOptionsBuilder);
             return this;
         }
     }

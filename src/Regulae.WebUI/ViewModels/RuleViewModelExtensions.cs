@@ -52,7 +52,7 @@ namespace Regulae.WebUI.ViewModels
                     Condition = condition.Condition,
                     DataType = condition.DataType.ToString(),
                     LogicalOperator = condition.LogicalOperator,
-                    Operand = condition.Operand,
+                    Operand = condition.RightOperand,
                     Operator = condition.Operator.ToString(),
                 };
             }
@@ -83,9 +83,9 @@ namespace Regulae.WebUI.ViewModels
                 return new ValueConditionNodeViewModel
                 {
                     Condition = condition.Condition,
-                    DataType = condition.DataType.ToString(),
+                    DataType = condition.RightOperand.DataType.ToString(),
                     LogicalOperator = condition.LogicalOperator.ToString(),
-                    Operand = condition.Operand,
+                    RightOperand = condition.RightOperand.Value,
                     Operator = condition.Operator.ToString(),
                 };
             }

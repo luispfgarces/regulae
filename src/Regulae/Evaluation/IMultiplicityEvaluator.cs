@@ -4,6 +4,6 @@ namespace Regulae.Evaluation
 
     internal interface IMultiplicityEvaluator
     {
-        string EvaluateMultiplicity(object leftOperand, Operators @operator, object rightOperand);
+        Multiplicities EvaluateMultiplicity(Cardinalities leftOperandCardinality, Cardinalities rightOperandCardinality);
     }
 }

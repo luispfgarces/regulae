@@ -22,6 +22,12 @@ namespace Regulae
         public IDictionary<DataTypes, object> DataTypeDefaults { get; }
 
         /// <summary>
+        /// Gets the rules' conditions evaluation strategy.
+        /// </summary>
+        /// <value>The evaluation strategy.</value>
+        EvaluationStrategies EvaluationStrategy { get; }
+
+        /// <summary>
         /// <para>
         /// Gets or sets the rules engine behavior when no condition with a specific name is
         /// provided to rules engine to match with a rule's condition with the same name.

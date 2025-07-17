@@ -4,6 +4,6 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers
 
     internal interface IConditionEvalDispatcher
     {
-        bool EvalDispatch(DataTypes dataType, object leftOperand, Operators @operator, object rightOperand);
+        bool EvalDispatch(Operand leftOperand, Operators @operator, Operand rightOperand);
     }
 }

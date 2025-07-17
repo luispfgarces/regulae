@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
@@ -34,8 +33,6 @@ internal static class Program
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 manualConfig.AddHardwareCounters(HardwareCounter.BranchInstructions, HardwareCounter.BranchMispredictions);
-                var etwProfilerConfig = new EtwProfilerConfig(cpuSampleIntervalInMilliseconds: 0.125f, performExtraBenchmarksRun: false);
-                manualConfig.AddDiagnoser(new EtwProfiler(etwProfilerConfig));
             }
 
             manualConfig.AddExporter(HtmlExporter.Default);

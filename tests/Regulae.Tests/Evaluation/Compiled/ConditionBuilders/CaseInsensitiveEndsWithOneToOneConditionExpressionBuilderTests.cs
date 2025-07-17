@@ -6,8 +6,8 @@ namespace Regulae.Tests.Evaluation.Compiled.ConditionBuilders
     using Moq;
     using Regulae;
     using Regulae.Evaluation;
-    using Regulae.Evaluation.Compiled.ExpressionBuilders;
     using Regulae.Evaluation.Compiled.ConditionBuilders;
+    using Regulae.Evaluation.Compiled.ExpressionBuilders;
     using Xunit;
 
     public class CaseInsensitiveEndsWithOneToOneConditionExpressionBuilderTests
@@ -77,11 +77,9 @@ namespace Regulae.Tests.Evaluation.Compiled.ConditionBuilders
             var compiledExpression = Expression.Lambda<Func<string, bool>>(actualExpression, expressionResult.Parameters).Compile(true);
             var notNullLeftHandValueResult1 = compiledExpression.Invoke("The quick brown fox");
             var notNullLeftHandValueResult2 = compiledExpression.Invoke("The quick brown Fox");
-            var nullLeftHandValueResult = compiledExpression.Invoke(null);
 
             notNullLeftHandValueResult1.Should().BeTrue();
             notNullLeftHandValueResult2.Should().BeTrue();
-            nullLeftHandValueResult.Should().BeFalse();
         }
     }
 }

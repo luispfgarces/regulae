@@ -3,15 +3,18 @@ namespace Regulae.Providers.InMemory
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Linq;
     using Regulae.Providers.InMemory.DataModel;
 
     internal sealed class InMemoryRulesStorage : IInMemoryRulesStorage
     {
+        private readonly ConcurrentDictionary<string, ConditionDataModel> conditions;
         private readonly ConcurrentDictionary<string, RulesetDataModel> rulesets;
 
         public InMemoryRulesStorage()
         {
+            this.conditions = new ConcurrentDictionary<string, ConditionDataModel>(StringComparer.Ordinal);
             this.rulesets = new ConcurrentDictionary<string, RulesetDataModel>(StringComparer.Ordinal);
         }
 
@@ -26,7 +29,22 @@ namespace Regulae.Providers.InMemory
                     throw new InvalidOperationException($"Rule with name '{ruleDataModel.Name}' already exists.");
                 }
 
-                rulesetRules.Add(ruleDataModel);
+                AddRuleInternal(rulesetRules, ruleDataModel);
+            }
+        }
+
+        public void CreateCondition(string condition, DataTypes dataType)
+        {
+            var conditionModel = new ConditionDataModel
+            {
+                Creation = DateTime.UtcNow,
+                DataType = dataType,
+                Name = condition,
+            };
+
+            if (!this.conditions.TryAdd(condition, conditionModel))
+            {
+                throw new InvalidOperationException($"Condition with name '{condition}' already exists.");
             }
         }
 
@@ -41,17 +59,19 @@ namespace Regulae.Providers.InMemory
         }
 
         public IReadOnlyCollection<RuleDataModel> GetAllRules()
-            => this.rulesets.SelectMany(kvp => kvp.Value.Rules).ToList().AsReadOnly();
+            => this.rulesets.SelectMany(kvp => kvp.Value.Rules).ToArray();
+
+        public IReadOnlyDictionary<string, ConditionDataModel> GetConditions() => this.conditions;
 
         public IReadOnlyCollection<RuleDataModel> GetRulesBy(string ruleset)
         {
             var rules = this.GetRulesCollectionByRuleset(ruleset);
 
-            return rules.AsReadOnly();
+            return rules;
         }
 
         public IReadOnlyCollection<RulesetDataModel> GetRulesets()
-            => this.rulesets.Values.ToList().AsReadOnly();
+            => this.rulesets.Values.ToImmutableArray();
 
         public void UpdateRule(RuleDataModel ruleDataModel)
         {
@@ -66,8 +86,19 @@ namespace Regulae.Providers.InMemory
                 }
 
                 rulesetRules.Remove(existent);
-                rulesetRules.Add(ruleDataModel);
+                AddRuleInternal(rulesetRules, ruleDataModel);
             }
+        }
+
+        private static void AddRuleInternal(List<RuleDataModel> rulesetRules, RuleDataModel ruleDataModel)
+        {
+            var i = 0;
+            while (i < rulesetRules.Count && rulesetRules[i].Priority < ruleDataModel.Priority)
+            {
+                i++;
+            }
+
+            rulesetRules.Insert(i, ruleDataModel);
         }
 
         private List<RuleDataModel> GetRulesCollectionByRuleset(string ruleset)

@@ -3,6 +3,7 @@ namespace Regulae.Providers.MongoDb
     using System;
     using System.Globalization;
     using System.Threading.Tasks;
+    using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Regulae.Providers.MongoDb.DataModel;
 
@@ -26,6 +27,13 @@ namespace Regulae.Providers.MongoDb
             {
                 throw new ArgumentNullException(nameof(mongoDbProviderSettings));
             }
+
+            _ = BsonClassMap.TryRegisterClassMap<RuleDataModel>();
+            _ = BsonClassMap.TryRegisterClassMap<RulesetDataModel>();
+            _ = BsonClassMap.TryRegisterClassMap<ComposedConditionNodeDataModel>();
+            _ = BsonClassMap.TryRegisterClassMap<ValueConditionNodeDataModel>();
+            _ = BsonClassMap.TryRegisterClassMap<OperandDataModel>();
+            _ = BsonClassMap.TryRegisterClassMap<ConditionDataModel>();
 
             var mongoDatabase = mongoClient.GetDatabase(mongoDbProviderSettings.DatabaseName, new MongoDatabaseSettings
             {

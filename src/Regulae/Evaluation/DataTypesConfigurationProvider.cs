@@ -1,31 +1,33 @@
 namespace Regulae.Evaluation
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using Regulae;
 
     internal sealed class DataTypesConfigurationProvider : IDataTypesConfigurationProvider
     {
-        private readonly IDictionary<DataTypes, DataTypeConfiguration> dataTypeConfigurations;
+        private readonly FrozenDictionary<DataTypes, DataTypeConfiguration> dataTypeConfigurations;
 
         public DataTypesConfigurationProvider(RulesEngineOptions rulesEngineOptions)
         {
             this.dataTypeConfigurations = new Dictionary<DataTypes, DataTypeConfiguration>
             {
-                { DataTypes.Integer, DataTypeConfiguration.Create(DataTypes.Integer, typeof(int), rulesEngineOptions.DataTypeDefaults[DataTypes.Integer]) },
-                { DataTypes.String, DataTypeConfiguration.Create(DataTypes.String, typeof(string), rulesEngineOptions.DataTypeDefaults[DataTypes.String]) },
-                { DataTypes.Decimal, DataTypeConfiguration.Create(DataTypes.Decimal, typeof(decimal), rulesEngineOptions.DataTypeDefaults[DataTypes.Decimal]) },
-                { DataTypes.Boolean, DataTypeConfiguration.Create(DataTypes.Boolean, typeof(bool), rulesEngineOptions.DataTypeDefaults[DataTypes.Boolean]) },
-                { DataTypes.ArrayInteger, DataTypeConfiguration.Create(DataTypes.ArrayInteger, typeof(int), rulesEngineOptions.DataTypeDefaults[DataTypes.ArrayInteger]) },
-                { DataTypes.ArrayString, DataTypeConfiguration.Create(DataTypes.ArrayString, typeof(string), rulesEngineOptions.DataTypeDefaults[DataTypes.ArrayString]) },
-                { DataTypes.ArrayDecimal, DataTypeConfiguration.Create(DataTypes.ArrayDecimal, typeof(decimal), rulesEngineOptions.DataTypeDefaults[DataTypes.ArrayDecimal]) },
-                { DataTypes.ArrayBoolean, DataTypeConfiguration.Create(DataTypes.ArrayBoolean, typeof(bool), rulesEngineOptions.DataTypeDefaults[DataTypes.ArrayBoolean]) },
-            };
+                { DataTypes.Integer, CreateDataTypeConfiguration<int>(DataTypes.Integer, rulesEngineOptions) },
+                { DataTypes.String, CreateDataTypeConfiguration<string>(DataTypes.String, rulesEngineOptions) },
+                { DataTypes.Decimal, CreateDataTypeConfiguration<decimal>(DataTypes.Decimal, rulesEngineOptions) },
+                { DataTypes.Boolean, CreateDataTypeConfiguration<bool>(DataTypes.Boolean, rulesEngineOptions) },
+            }.ToFrozenDictionary();
         }
 
         public DataTypeConfiguration GetDataTypeConfiguration(DataTypes dataType)
             => this.dataTypeConfigurations.TryGetValue(dataType, out var dataTypeConfiguration)
             ? dataTypeConfiguration
             : throw new NotSupportedException($"Data type '{dataType}' is not supported.");
+
+        private static DataTypeConfiguration CreateDataTypeConfiguration<TRuntimeType>(DataTypes dataType, RulesEngineOptions rulesEngineOptions)
+        {
+            return DataTypeConfiguration.Create(dataType, typeof(TRuntimeType), rulesEngineOptions.DataTypeDefaults[dataType]);
+        }
     }
 }

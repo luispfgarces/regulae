@@ -5,20 +5,19 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
     using System.Linq;
     using System.Threading.Tasks;
     using FluentAssertions;
-    using Microsoft.Extensions.DependencyInjection;
     using Regulae;
     using Regulae.Extensions;
-    using Regulae.IntegrationTests;
+    using Regulae.IntegrationTests.Common.Scenarios;
     using Regulae.IntegrationTests.Common.Scenarios.Scenario3;
     using Regulae.Providers.InMemory;
     using Xunit;
 
     public class BuildingSecuritySystemControlTests
     {
-        private static string DataSourceFilePath => $@"{Environment.CurrentDirectory}/Scenarios/Scenario3/regulae-tests.security-system-actionables.json";
-
-        [Fact]
-        public async Task BuildingSecuritySystem_FireScenario_ReturnsActionsToTrigger()
+        [Theory]
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_FireScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.FireSystem;
@@ -27,21 +26,20 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             var expectedConditions = new Dictionary<SecuritySystemConditions, object>
             {
                 { SecuritySystemConditions.TemperatureCelsius, 100.0m },
-                { SecuritySystemConditions.SmokeRate, 55 },
+                { SecuritySystemConditions.SmokeRate, 55.0m },
                 { SecuritySystemConditions.PowerStatus, "Online" },
             };
 
-            var serviceProvider = new ServiceCollection()
-                .AddInMemoryRulesDataSource(ServiceLifetime.Singleton)
-                .BuildServiceProvider();
-
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
-                .SetInMemoryDataSource(serviceProvider)
+                .SetInMemoryDataSource()
+                .Configure(options =>
+                {
+                    options.UseEvaluationStrategy(evaluationStrategy);
+                })
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(SecuritySystemAction));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario3Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
             // Act
             var actual = await genericRulesEngine.MatchManyAsync(securitySystemActionable, expectedMatchDate, expectedConditions);
@@ -49,15 +47,18 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             // Assert
             actual.Should().NotBeNull();
 
-            actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList()
-                .Should().Contain(ssa => ssa.ActionName == "CallFireBrigade")
+            IEnumerable<SecuritySystemAction> securitySystemActions = actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList();
+
+            securitySystemActions.Should().Contain(ssa => ssa.ActionName == "CallFireBrigade")
                 .And.Contain(ssa => ssa.ActionName == "CallPolice")
                 .And.Contain(ssa => ssa.ActionName == "ActivateSprinklers")
                 .And.HaveCount(3);
         }
 
-        [Fact]
-        public async Task BuildingSecuritySystem_PowerFailureScenario_ReturnsActionsToTrigger()
+        [Theory]
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_PowerFailureScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.PowerSystem;
@@ -66,21 +67,20 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             var expectedConditions = new Dictionary<SecuritySystemConditions, object>
             {
                 { SecuritySystemConditions.TemperatureCelsius, 100.0m },
-                { SecuritySystemConditions.SmokeRate, 55 },
+                { SecuritySystemConditions.SmokeRate, 55.0m },
                 { SecuritySystemConditions.PowerStatus, "Offline" },
             };
 
-            var serviceProvider = new ServiceCollection()
-                .AddInMemoryRulesDataSource(ServiceLifetime.Singleton)
-                .BuildServiceProvider();
-
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
-                .SetInMemoryDataSource(serviceProvider)
+                .SetInMemoryDataSource()
+                .Configure(options =>
+                {
+                    options.UseEvaluationStrategy(evaluationStrategy);
+                })
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(SecuritySystemAction));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario3Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
             // Act
             var actual = await genericRulesEngine.MatchManyAsync(securitySystemActionable, expectedMatchDate, expectedConditions);
@@ -88,14 +88,17 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             // Assert
             actual.Should().NotBeNull();
 
-            actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList()
-                .Should().Contain(ssa => ssa.ActionName == "EnableEmergencyLights")
+            IEnumerable<SecuritySystemAction> securitySystemActions = actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList();
+
+            securitySystemActions.Should().Contain(ssa => ssa.ActionName == "EnableEmergencyLights")
                 .And.Contain(ssa => ssa.ActionName == "EnableEmergencyPower")
                 .And.Contain(ssa => ssa.ActionName == "CallPowerGridPicket");
         }
 
-        [Fact]
-        public async Task BuildingSecuritySystem_PowerShutdownScenario_ReturnsActionsToTrigger()
+        [Theory]
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task BuildingSecuritySystem_PowerShutdownScenario_ReturnsActionsToTrigger(EvaluationStrategies evaluationStrategy)
         {
             // Assert
             const SecuritySystemActionables securitySystemActionable = SecuritySystemActionables.PowerSystem;
@@ -103,22 +106,21 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             var expectedMatchDate = new DateTime(2018, 06, 01);
             var expectedConditions = new Dictionary<SecuritySystemConditions, object>
             {
-                { SecuritySystemConditions.TemperatureCelsius,100.0m },
-                { SecuritySystemConditions.SmokeRate,55 },
-                { SecuritySystemConditions.PowerStatus,"Shutdown" },
+                { SecuritySystemConditions.TemperatureCelsius, 100.0m },
+                { SecuritySystemConditions.SmokeRate, 55.0m },
+                { SecuritySystemConditions.PowerStatus, "Shutdown" },
             };
 
-            var serviceProvider = new ServiceCollection()
-                .AddInMemoryRulesDataSource(ServiceLifetime.Singleton)
-                .BuildServiceProvider();
-
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
-                .SetInMemoryDataSource(serviceProvider)
+                .SetInMemoryDataSource()
+                .Configure(options =>
+                {
+                    options.UseEvaluationStrategy(evaluationStrategy);
+                })
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
-            await RulesFromJsonFile.Load
-                .FromJsonFileAsync(genericRulesEngine, DataSourceFilePath, typeof(SecuritySystemAction));
+            await ScenarioLoader.LoadScenarioAsync(rulesEngine, new Scenario3Data());
+            var genericRulesEngine = rulesEngine.MakeGeneric<SecuritySystemActionables, SecuritySystemConditions>();
 
             // Act
             var actual = await genericRulesEngine.MatchManyAsync(securitySystemActionable, expectedMatchDate, expectedConditions);
@@ -126,8 +128,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario3
             // Assert
             actual.Should().NotBeNull();
 
-            actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList()
-                .Should().Contain(ssa => ssa.ActionName == "EnableEmergencyLights")
+            IEnumerable<SecuritySystemAction> securitySystemActions = actual.Select(r => r.ContentContainer.GetContentAs<SecuritySystemAction>()).ToList();
+
+            securitySystemActions.Should().Contain(ssa => ssa.ActionName == "EnableEmergencyLights")
                 .And.HaveCount(1);
         }
     }

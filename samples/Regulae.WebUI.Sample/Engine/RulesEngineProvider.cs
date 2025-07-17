@@ -17,7 +17,7 @@ namespace Regulae.WebUI.Sample.Engine
                 var rulesEngine = RulesEngineBuilder
                     .CreateRulesEngine()
                     .SetInMemoryDataSource()
-                    .Configure(c => c.PriorityCriteria = PriorityCriterias.TopmostRuleWins)
+                    .Configure(c => c.UseSmallestNumberPriorityCriteria())
                     .Build();
 
                 await rulesBuilder.BuildAsync(rulesEngine).ConfigureAwait(false);

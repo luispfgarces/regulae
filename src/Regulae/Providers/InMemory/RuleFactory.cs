@@ -17,7 +17,7 @@ namespace Regulae.Providers.InMemory
                 throw new ArgumentNullException(nameof(ruleDataModel));
             }
 
-            var contentContainer = new ContentContainer((_) => ruleDataModel.Content);
+            var contentContainer = new ObjectContentContainer(ruleDataModel.Content);
 
             var rule = new Rule
             {
@@ -41,7 +41,7 @@ namespace Regulae.Providers.InMemory
                 throw new ArgumentNullException(nameof(rule));
             }
 
-            var content = rule.ContentContainer.GetContentAs<dynamic>();
+            var content = rule.ContentContainer.GetContentAs<object>();
 
             var ruleDataModel = new RuleDataModel
             {
@@ -66,12 +66,11 @@ namespace Regulae.Providers.InMemory
             }
 
             var composedConditionNodeDataModel = (ComposedConditionNodeDataModel)conditionNodeDataModel;
-            var count = composedConditionNodeDataModel.ChildConditionNodes.Length;
             var childConditionNodeDataModels = composedConditionNodeDataModel.ChildConditionNodes;
+            var count = childConditionNodeDataModels.Length;
             var childConditionNodes = new IConditionNode[count];
-            var i = -1;
 
-            while (++i < count)
+            for (var i = 0; i < count; i++)
             {
                 childConditionNodes[i] = ConvertConditionNode(childConditionNodeDataModels[i]);
             }
@@ -89,8 +88,7 @@ namespace Regulae.Providers.InMemory
             {
                 Condition = valueConditionNode.Condition,
                 LogicalOperator = LogicalOperators.Eval,
-                DataType = valueConditionNode.DataType,
-                Operand = valueConditionNode.Operand,
+                RightOperand = valueConditionNode.RightOperand,
                 Operator = valueConditionNode.Operator,
                 Properties = new PropertiesDictionary(valueConditionNode.Properties),
             };
@@ -100,10 +98,9 @@ namespace Regulae.Providers.InMemory
         private static IConditionNode CreateValueConditionNode(ValueConditionNodeDataModel conditionNodeDataModel)
         {
             return new ValueConditionNode(
-                conditionNodeDataModel.DataType,
                 conditionNodeDataModel.Condition,
                 conditionNodeDataModel.Operator,
-                conditionNodeDataModel.Operand,
+                conditionNodeDataModel.RightOperand,
                 new PropertiesDictionary(conditionNodeDataModel.Properties));
         }
 

@@ -16,8 +16,8 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
             return builder.Call(
-                instance: null,
-                enumerableGenericContains.MakeGenericMethod(args.DataTypeConfiguration.Type),
+                instance: null!,
+                enumerableGenericContains.MakeGenericMethod(args.DataTypeConfiguration.OneCardinality.Type),
                 new Expression[] { args.RightHandOperand, args.LeftHandOperand });
         }
     }

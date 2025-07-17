@@ -3,8 +3,10 @@ namespace Regulae.Providers.MongoDb
     /// <summary>
     /// The settings for usage of Mongo DB as rules data source.
     /// </summary>
-    public class MongoDbProviderSettings
+    public sealed class MongoDbProviderSettings
     {
+        private const string DefaultConditionsCollectionName = "conditions";
+        private const string DefaultRulesCollectionName = "rules";
         private const string DefaultRulesetsCollectionName = "rulesets";
 
         /// <summary>
@@ -12,8 +14,16 @@ namespace Regulae.Providers.MongoDb
         /// </summary>
         public MongoDbProviderSettings()
         {
+            this.ConditionsCollectionName = DefaultConditionsCollectionName;
+            this.RulesCollectionName = DefaultRulesCollectionName;
             this.RulesetsCollectionName = DefaultRulesetsCollectionName;
         }
+
+        /// <summary>
+        /// Gets or sets the name of the conditions collection.
+        /// </summary>
+        /// <value>The name of the conditions collection.</value>
+        public string ConditionsCollectionName { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the database.

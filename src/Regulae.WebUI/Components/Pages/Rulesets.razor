@@ -84,10 +84,10 @@
         var instance = this.RulesEngineInstanceProvider.GetInstance(instanceId);
         var rulesets = await instance.RulesEngine.GetRulesetsAsync();
         var number = 1;
-        var rulesetViewModels = rulesets.OrderBy(r => r.Name).Select(r => new RulesetViewModel
+        var rulesetViewModels = rulesets.OrderBy(r => r.Key).Select(r => new RulesetViewModel
         {
-            Id = GuidGenerator.GenerateFromString(r.Name),
-            Name = r.Name,
+            Id = GuidGenerator.GenerateFromString(r.Value.Name),
+            Name = r.Value.Name,
             Number = number++,
         }).ToList();
 

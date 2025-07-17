@@ -1,6 +1,6 @@
 namespace Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers
 {
-    using System.Collections.Generic;
+    using System.Collections;
     using System.Linq;
     using Regulae;
     using Regulae.Evaluation;
@@ -18,15 +18,14 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers
             this.operatorEvalStrategyFactory = operatorEvalStrategyFactory;
         }
 
-        public bool EvalDispatch(DataTypes dataType, object leftOperand, Operators @operator, object rightOperand)
+        public bool EvalDispatch(Operand leftOperand, Operators @operator, Operand rightOperand)
         {
-            var dataTypeConfiguration = this.GetDataTypeConfiguration(dataType);
+            var dataTypeConfiguration = this.GetDataTypeConfiguration(rightOperand.DataType);
 
-            var leftOperandConverted = ConvertToDataType(leftOperand, nameof(leftOperand), dataTypeConfiguration);
-            var rightOperandAux = ConvertToTypedEnumerable(rightOperand, nameof(rightOperand));
-            var rightOperandConverted = rightOperandAux.Select(x => ConvertToDataType(x, nameof(rightOperand), dataTypeConfiguration));
-
-            return this.operatorEvalStrategyFactory.GetOneToManyOperatorEvalStrategy(@operator).Eval(leftOperandConverted, rightOperandConverted);
+            return this.operatorEvalStrategyFactory.GetOneToManyOperatorEvalStrategy(@operator)
+                .Eval(
+                    CoalesceOne(leftOperand.Value!, dataTypeConfiguration),
+                    ((IEnumerable)rightOperand.Value!).Cast<object>());
         }
     }
 }

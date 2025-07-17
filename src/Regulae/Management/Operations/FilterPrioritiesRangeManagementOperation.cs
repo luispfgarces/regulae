@@ -17,7 +17,7 @@ namespace Regulae.Management.Operations
             this.bottomPriorityThreshold = bottomPriorityThreshold;
         }
 
-        public Task<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
+        public ValueTask<IEnumerable<Rule>> ApplyAsync(IEnumerable<Rule> rules)
         {
             var filteredRules = rules;
 
@@ -31,7 +31,7 @@ namespace Regulae.Management.Operations
                 filteredRules = filteredRules.Where(r => r.Priority <= this.bottomPriorityThreshold);
             }
 
-            return Task.FromResult(filteredRules);
+            return new ValueTask<IEnumerable<Rule>>(filteredRules);
         }
     }
 }

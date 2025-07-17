@@ -17,12 +17,10 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
                 throw new NotSupportedException($"The operator '{Operators.NotContains}' is not supported for data type '{args.DataTypeConfiguration.DataType}'.");
             }
 
-            return builder.AndAlso(
-                builder.NotEqual(args.LeftHandOperand, builder.Constant<object>(value: null)),
-                builder.Not(builder.Call(
-                    args.LeftHandOperand,
-                    stringContainsMethodInfo,
-                    new Expression[] { args.RightHandOperand })));
+            return builder.Not(builder.Call(
+                args.LeftHandOperand,
+                stringContainsMethodInfo,
+                new Expression[] { args.RightHandOperand }));
         }
     }
 }

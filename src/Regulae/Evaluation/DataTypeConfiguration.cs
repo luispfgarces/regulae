@@ -1,25 +1,26 @@
 namespace Regulae.Evaluation
 {
     using System;
+    using System.Collections.Generic;
     using Regulae;
 
     internal sealed class DataTypeConfiguration
     {
         private DataTypeConfiguration(
             DataTypes dataType,
-            Type type,
-            object @default)
+            DataTypeCardinalityConfiguration oneCardinality,
+            DataTypeCardinalityConfiguration manyCardinality)
         {
             this.DataType = dataType;
-            this.Type = type;
-            this.Default = @default;
+            this.OneCardinality = oneCardinality;
+            this.ManyCardinality = manyCardinality;
         }
 
         public DataTypes DataType { get; private set; }
 
-        public object Default { get; private set; }
+        public DataTypeCardinalityConfiguration ManyCardinality { get; private set; }
 
-        public Type Type { get; private set; }
+        public DataTypeCardinalityConfiguration OneCardinality { get; private set; }
 
         public static DataTypeConfiguration Create(DataTypes dataType, Type type, object @default)
         {
@@ -28,7 +29,10 @@ namespace Regulae.Evaluation
                 throw new ArgumentNullException(nameof(type));
             }
 
-            return new DataTypeConfiguration(dataType, type, @default);
+            var oneCardinality = new DataTypeCardinalityConfiguration(type, @default);
+            var manyType = typeof(IEnumerable<>).MakeGenericType(type);
+            var manyCardinality = new DataTypeCardinalityConfiguration(manyType, Array.CreateInstance(type, 0));
+            return new DataTypeConfiguration(dataType, oneCardinality, manyCardinality);
         }
     }
 }

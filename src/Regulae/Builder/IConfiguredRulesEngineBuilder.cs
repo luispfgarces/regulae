@@ -16,12 +16,12 @@ namespace Regulae.Builder
         IRulesEngine Build();
 
         /// <summary>
-        /// Allows configuration of rules engine options.
+        /// Allows configuration of the rules engine.
         /// </summary>
         /// <param name="configurationAction">
-        /// the action with configuration logic for rules engine options.
+        /// the action with configuration logic for the rules engine.
         /// </param>
         /// <returns>the configured rules engine builder.</returns>
-        IConfiguredRulesEngineBuilder Configure(Action<RulesEngineOptions> configurationAction);
+        IConfiguredRulesEngineBuilder Configure(Action<IRulesEngineConfiguration> configurationAction);
     }
 }

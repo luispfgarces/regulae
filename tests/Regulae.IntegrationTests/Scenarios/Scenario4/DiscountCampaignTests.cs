@@ -22,9 +22,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_Adding15PercentRulePerBrandAndEvaluatingOneOfTheBrands_Returns15PercentDiscountRate(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_Adding15PercentRulePerBrandAndEvaluatingOneOfTheBrands_Returns15PercentDiscountRate(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -33,13 +33,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "in" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Discounts Weekend MAY2021")
@@ -64,7 +64,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "in" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -74,8 +74,8 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             var matchDateTime = DateTime.Parse("2021-05-29T12:34:52Z");
             var conditions = new Dictionary<DiscountConditions, object>
             {
-                { DiscountConditions.ProductBrand,"ASUS" },
-                { DiscountConditions.ProductRecommendedRetailPrice,1249.90m },
+                { DiscountConditions.ProductBrand, "ASUS" },
+                { DiscountConditions.ProductRecommendedRetailPrice, 1249.90m },
             };
 
             var actual = await genericRulesEngine.MatchOneAsync(DiscountConfigurations.DiscountCampaigns, matchDateTime, conditions);
@@ -86,9 +86,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_Adding20PercentRulePerProductTierAndEvaluatingOneOfTheTiers_Returns20PercentDiscountRate(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_Adding20PercentRulePerProductTierAndEvaluatingOneOfTheTiers_Returns20PercentDiscountRate(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -97,13 +97,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "in" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Discounts Weekend MAY2021 - Tiered discount")
@@ -128,7 +128,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "in" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -151,9 +151,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_Adding5PercentRuleWithNotContainsTestConditionAndInputWithMatchingConditions_Return5PercentDiscountRate(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_Adding5PercentRuleWithNotContainsTestConditionAndInputWithMatchingConditions_Return5PercentDiscountRate(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -162,13 +162,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "not contains" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Not a staff discount")
@@ -187,7 +187,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "not contains" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -208,9 +208,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithMatchingConditions_ReturnNotNull(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithMatchingConditions_ReturnNotNull(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -219,13 +219,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "equal" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Blue Product")
@@ -244,7 +244,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "in" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -265,9 +265,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithoutConditions_ReturnNull(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithoutConditions_ReturnNull(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -276,13 +276,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "equal" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Blue Product")
@@ -301,7 +301,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "in" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -318,9 +318,9 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithoutMatchingConditions_ReturnNull(bool enableCompilation)
+        [InlineData(EvaluationStrategies.Interpreted)]
+        [InlineData(EvaluationStrategies.Compiled)]
+        public async Task DiscountsWeekend_AddingRuleWithNullTestConditionAndInputWithoutMatchingConditions_ReturnNull(EvaluationStrategies evaluationStrategy)
         {
             // Arrange
             var serviceProvider = new ServiceCollection()
@@ -329,13 +329,13 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             var rulesEngine = RulesEngineBuilder.CreateRulesEngine()
                 .SetInMemoryDataSource(serviceProvider)
-                .Configure(options =>
-                {
-                    options.AutoCreateRulesets = true;
-                    options.EnableCompilation = enableCompilation;
-                })
+                .Configure(c => c.EnableAutoCreateRulesets()
+                    .UseEvaluationStrategy(evaluationStrategy))
                 .Build();
-            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>();
+            var genericRulesEngine = rulesEngine.MakeGeneric<DiscountConfigurations, DiscountConditions>(opt =>
+            {
+                opt.AutoCreateConditions = true;
+            });
 
             // Act 1 - Create rule with "equal" operator
             var ruleBuilderResult = Rule.Create<DiscountConfigurations, DiscountConditions>("Blue Product")
@@ -354,7 +354,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
             // Act 2 - Add new rule with "in" operator
             var rule = ruleBuilderResult.Rule;
 
-            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtTop);
+            var addRuleResult = await genericRulesEngine.AddRuleAsync(rule, RuleAddPriorityOption.AtSmallestNumber);
 
             // Assert 2 - Verify if rule was added
             addRuleResult.Should().NotBeNull();

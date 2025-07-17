@@ -14,10 +14,13 @@
             "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
             "_t": "value",
             "Condition": "PowerStatus",
-            "DataType": "String",
             "LogicalOperator": "Eval",
             "Operator": "Equal",
-            "Operand": "Offline"
+            "RightOperand": {
+                "Cardinality": "One",
+                "DataType": "String",
+                "Value": "Offline"
+            }
         }
     },
     {
@@ -40,19 +43,25 @@
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "PowerStatus",
-                    "DataType": "String",
                     "LogicalOperator": "Eval",
                     "Operator": "Equal",
-                    "Operand": "Offline"
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "String",
+                        "Value": "Offline"
+                    }
                 },
                 {
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "PowerStatus",
-                    "DataType": "String",
                     "LogicalOperator": "Eval",
                     "Operator": "Equal",
-                    "Operand": "Shutdown"
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "String",
+                        "Value": "Shutdown"
+                    }
                 }
             ]
         }
@@ -72,10 +81,13 @@
             "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
             "_t": "value",
             "Condition": "PowerStatus",
-            "DataType": "String",
             "LogicalOperator": "Eval",
             "Operator": "Equal",
-            "Operand": "Offline"
+            "RightOperand": {
+                "Cardinality": "One",
+                "DataType": "String",
+                "Value": "Offline"
+            }
         }
     },
     {
@@ -98,19 +110,25 @@
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "TemperatureCelsius",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThanOrEqual",
-                    "Operand": 70
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 70
+                    }
                 },
                 {
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "SmokeRate",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThanOrEqual",
-                    "Operand": 50
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 50
+                    }
                 }
             ]
         }
@@ -135,19 +153,25 @@
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "TemperatureCelsius",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThanOrEqual",
-                    "Operand": 70
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 70
+                    }
                 },
                 {
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "SmokeRate",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThanOrEqual",
-                    "Operand": 50
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 50
+                    }
                 }
             ]
         }
@@ -172,19 +196,25 @@
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "TemperatureCelsius",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThanOrEqual",
-                    "Operand": 50
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 50
+                    }
                 },
                 {
                     "$type": "Regulae.Providers.MongoDb.DataModel.ValueConditionNodeDataModel, Regulae.Providers.MongoDb",
                     "_t": "value",
                     "Condition": "SmokeRate",
-                    "DataType": "Decimal",
                     "LogicalOperator": "Eval",
                     "Operator": "GreaterThan",
-                    "Operand": 40
+                    "RightOperand": {
+                        "Cardinality": "One",
+                        "DataType": "Decimal",
+                        "Value": 40
+                    }
                 }
             ]
         }
