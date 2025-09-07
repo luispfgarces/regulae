@@ -6,6 +6,7 @@ namespace Regulae.Generic
     internal static class GenericConversions
     {
         public static T Convert<T>(string value)
+            where T : notnull
         {
             var valueType = typeof(T);
             if (valueType.IsEnum)
@@ -17,13 +18,14 @@ namespace Regulae.Generic
         }
 
         public static string Convert<T>(T value)
+            where T : notnull
         {
             if (value is string stringValue)
             {
                 return stringValue;
             }
 
-            return value!.ToString();
+            return value.ToString()!;
         }
     }
 }

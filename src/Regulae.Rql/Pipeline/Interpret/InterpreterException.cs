@@ -2,7 +2,6 @@ namespace Regulae.Rql.Pipeline.Interpret
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.Serialization;
     using Regulae.Rql;
 
     [ExcludeFromCodeCoverage]
@@ -18,14 +17,6 @@ namespace Regulae.Rql.Pipeline.Interpret
             this.Rql = rql;
             this.BeginPosition = beginPosition;
             this.EndPosition = endPosition;
-        }
-
-        protected InterpreterException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.Rql = info.GetString(nameof(this.Rql));
-            this.BeginPosition = (RqlSourcePosition)info.GetValue(nameof(this.BeginPosition), typeof(RqlSourcePosition));
-            this.EndPosition = (RqlSourcePosition)info.GetValue(nameof(this.EndPosition), typeof(RqlSourcePosition));
         }
 
         public RqlSourcePosition BeginPosition { get; }

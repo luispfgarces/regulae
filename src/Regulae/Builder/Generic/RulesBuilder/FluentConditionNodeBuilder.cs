@@ -8,6 +8,7 @@ namespace Regulae.Builder.Generic.RulesBuilder
     using Regulae.Generic;
 
     internal sealed class FluentConditionNodeBuilder<TCondition> : IFluentConditionNodeBuilder<TCondition>
+        where TCondition : notnull
     {
         private readonly List<IConditionNode> conditions;
         private readonly LogicalOperators logicalOperator;

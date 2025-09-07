@@ -4,6 +4,7 @@ namespace Regulae.Builder.Validation
     using Regulae.Generic.ConditionNodes;
 
     internal sealed class GenericValueConditionNodeValidator<TCondition> : AbstractValidator<ValueConditionNode<TCondition>>
+        where TCondition : notnull
     {
         public GenericValueConditionNodeValidator()
         {

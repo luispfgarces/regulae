@@ -29,7 +29,11 @@ namespace Regulae.Extensions
         /// <param name="dateBegin">The date begin.</param>
         /// <returns></returns>
         /// <remarks>the <paramref name="dateBegin"/> is interpreted using current culture.</remarks>
-        public static IRuleConfigureDateEndOptional<TRuleset, TCondition> Since<TRuleset, TCondition>(this IRuleConfigureDateBegin<TRuleset, TCondition> builder, string dateBegin)
+        public static IRuleConfigureDateEndOptional<TRuleset, TCondition> Since<TRuleset, TCondition>(
+            this IRuleConfigureDateBegin<TRuleset, TCondition> builder,
+            string dateBegin)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.Since(DateTime.Parse(dateBegin, CultureInfo.CurrentCulture, DateTimeStyles.None));
 
         /// <summary>
@@ -86,6 +90,8 @@ namespace Regulae.Extensions
             int year,
             int month,
             int day)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.SinceUtc(year, month, day, 0, 0, 0);
 
         /// <summary>
@@ -110,6 +116,8 @@ namespace Regulae.Extensions
             int hour,
             int minute,
             int second)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.Since(new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc));
 
         /// <summary>
@@ -132,6 +140,8 @@ namespace Regulae.Extensions
         /// <returns></returns>
         /// <remarks>the <paramref name="dateEnd"/> is interpreted using current culture.</remarks>
         public static IRuleBuilder<TRuleset, TCondition> Until<TRuleset, TCondition>(this IRuleConfigureDateEnd<TRuleset, TCondition> builder, string? dateEnd)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.Until(dateEnd != null ? DateTime.Parse(dateEnd, CultureInfo.CurrentCulture, DateTimeStyles.None) : null);
 
         /// <summary>
@@ -186,6 +196,8 @@ namespace Regulae.Extensions
             int year,
             int month,
             int day)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.Until(new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc));
 
         /// <summary>
@@ -210,6 +222,8 @@ namespace Regulae.Extensions
             int hour,
             int minute,
             int second)
+            where TRuleset : notnull
+            where TCondition : notnull
             => builder.Until(new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc));
     }
 }

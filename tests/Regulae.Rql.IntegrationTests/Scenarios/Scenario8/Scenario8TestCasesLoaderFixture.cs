@@ -13,9 +13,9 @@ namespace Regulae.Rql.IntegrationTests.Scenarios.Scenario8
         static Scenario8TestCasesLoaderFixture()
         {
             var scenarioTestCases = LoadScenarioTestCases();
-            MatchAllTestCases = scenarioTestCases.MatchAllTestCases.Select(tc => new object[] { tc.Rql!, tc.ExpectsRules, tc.RuleNames! }).ToList();
-            MatchOneTestCases = scenarioTestCases.MatchOneTestCases.Select(tc => new object[] { tc.Rql!, tc.ExpectsRule, tc.RuleName! }).ToList();
-            SearchTestCases = scenarioTestCases.SearchTestCases.Select(tc => new object[] { tc.Rql!, tc.ExpectsRules, tc.RuleNames! }).ToList();
+            MatchAllTestCases = scenarioTestCases.MatchAllTestCases!.Select(tc => new object[] { tc.Rql!, tc.ExpectsRules, tc.RuleNames! }).ToList();
+            MatchOneTestCases = scenarioTestCases.MatchOneTestCases!.Select(tc => new object[] { tc.Rql!, tc.ExpectsRule, tc.RuleName! }).ToList();
+            SearchTestCases = scenarioTestCases.SearchTestCases!.Select(tc => new object[] { tc.Rql!, tc.ExpectsRules, tc.RuleNames! }).ToList();
         }
 
         public static IEnumerable<object[]>? MatchAllTestCases { get; private set; }

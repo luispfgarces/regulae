@@ -43,7 +43,7 @@ namespace Regulae.Tests.Builder
         public void Success_GivenAllValidParameters_ReturnsRuleBuilderResultWithSuccessAndNewRule()
         {
             // Arrange
-            var rule = new Rule();
+            var rule = new Rule("Test rule", "Test ruleset", DateTime.UtcNow, null, new ObjectContentContainer(new object()));
 
             // Act
             var ruleBuilderResult = RuleBuilderResult.Success(rule);

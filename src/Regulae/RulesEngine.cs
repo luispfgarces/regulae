@@ -46,10 +46,7 @@ namespace Regulae
         /// <inheritdoc/>
         public Task<OperationResult> ActivateRuleAsync(Rule rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             rule.Active = true;
 
@@ -59,15 +56,8 @@ namespace Regulae
         /// <inheritdoc/>
         public Task<OperationResult> AddRuleAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
-
-            if (ruleAddPriorityOption is null)
-            {
-                throw new ArgumentNullException(nameof(ruleAddPriorityOption));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
+            ArgumentNullException.ThrowIfNull(ruleAddPriorityOption);
 
             return this.AddRuleInternalAsync(rule, ruleAddPriorityOption).AsTask();
         }
@@ -111,10 +101,7 @@ namespace Regulae
         /// <inheritdoc/>
         public Task<OperationResult> DeactivateRuleAsync(Rule rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             rule.Active = false;
 
@@ -217,10 +204,7 @@ namespace Regulae
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<Rule>> SearchAsync(SearchArgs<string, string> searchArgs)
         {
-            if (searchArgs is null)
-            {
-                throw new ArgumentNullException(nameof(searchArgs));
-            }
+            ArgumentNullException.ThrowIfNull(searchArgs);
 
             var validator = this.validatorProvider.GetValidatorFor<SearchArgs<string, string>>();
             var validationResult = await validator.ValidateAsync(searchArgs).ConfigureAwait(false);
@@ -260,10 +244,7 @@ namespace Regulae
         /// <inheritdoc/>
         public Task<OperationResult> UpdateRuleAsync(Rule rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             return this.UpdateRuleInternalAsync(rule).AsTask();
         }
@@ -309,7 +290,7 @@ namespace Regulae
                 errors.AddRange(ruleSanitizeResult.Errors);
             }
 
-            if (errors.Any())
+            if (errors.Count != 0)
             {
                 return OperationResult.Failure(errors);
             }
@@ -346,7 +327,7 @@ namespace Regulae
 
         private ValueTask AddRuleInternalAtBottomAsync(Rule rule, IReadOnlyCollection<Rule> existentRules)
         {
-            rule.Priority = !existentRules.Any() ? 1 : existentRules.Max(r => r.Priority) + 1;
+            rule.Priority = existentRules.Count == 0 ? 1 : existentRules.Max(r => r.Priority) + 1;
 
             return ManagementOperations.Manage(existentRules)
                 .UsingSource(this.rulesSource)
@@ -377,8 +358,8 @@ namespace Regulae
         private ValueTask AddRuleInternalAtRuleNameAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption, IReadOnlyCollection<Rule> existentRules)
         {
             var firstPriorityToIncrement = existentRules
-                                    .FirstOrDefault(r => string.Equals(r.Name, ruleAddPriorityOption.AtRuleNameOptionValue, StringComparison.OrdinalIgnoreCase))
-                                    .Priority;
+                .First(r => string.Equals(r.Name, ruleAddPriorityOption.AtRuleNameOptionValue, StringComparison.OrdinalIgnoreCase))
+                .Priority;
             rule.Priority = firstPriorityToIncrement;
 
             return ManagementOperations.Manage(existentRules)
@@ -496,7 +477,7 @@ namespace Regulae
                 return OperationResult.Failure($"Rule with name '{rule.Name}' does not exist.");
             }
 
-            var validationResult = this.ruleValidator.Validate(rule);
+            var validationResult = await this.ruleValidator.ValidateAsync(rule).ConfigureAwait(false);
 
             if (!validationResult.IsValid)
             {

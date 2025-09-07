@@ -11,13 +11,15 @@ namespace Regulae.Evaluation.Compiled
     using Regulae.Evaluation;
     using Regulae.Evaluation.Compiled.ExpressionBuilders;
 
-    internal sealed class RuleConditionsExpressionBuilder : RuleConditionsExpressionBuilderBase, IRuleConditionsExpressionBuilder
+    internal sealed class RuleConditionsExpressionBuilder : IRuleConditionsExpressionBuilder
     {
-        private static readonly FieldInfo operandCardinalityField = typeof(Operand).GetField("Cardinality");
-        private static readonly FieldInfo operandValueField = typeof(Operand).GetField("Value");
+        private static readonly MethodInfo multiplicityEvaluateMethod = typeof(MultiplicityEvaluator)
+            .GetMethod(nameof(MultiplicityEvaluator.Evaluate))!;
+        private static readonly FieldInfo operandCardinalityField = typeof(Operand).GetField("Cardinality")!;
+        private static readonly FieldInfo operandValueField = typeof(Operand).GetField("Value")!;
 
         private static readonly MethodInfo tryGetValueMethod = typeof(IDictionary<string, Operand>)
-            .GetMethod(nameof(IDictionary<string, Operand>.TryGetValue));
+            .GetMethod(nameof(IDictionary<string, Operand>.TryGetValue))!;
 
         private readonly IDataTypesConfigurationProvider dataTypesConfigurationProvider;
         private readonly RulesEngineOptions rulesEngineOptions;
@@ -91,11 +93,10 @@ namespace Regulae.Evaluation.Compiled
             builder.Assign(multiplicityVariableExpression, builder.Call(
                 instance: null!,
                 multiplicityEvaluateMethod,
-                new Expression[]
-                {
+                [
                     builder.AccessField(leftOperandVariableExpression, operandCardinalityField),
                     builder.Constant(valueConditionNode.RightOperand.Cardinality),
-                }));
+                ]));
 
             builder.Switch(multiplicityVariableExpression, @switch =>
             {
@@ -171,7 +172,7 @@ namespace Regulae.Evaluation.Compiled
                 builder.Call(
                     instance: conditionsVariableExpression,
                     tryGetValueMethod,
-                    new Expression[] { builder.Constant(valueConditionNode.Condition), leftOperandVariableExpression }));
+                    [builder.Constant(valueConditionNode.Condition), leftOperandVariableExpression]));
 
             var leftOperandValueFieldAccessExpression = builder.AccessField(leftOperandVariableExpression, operandValueField);
             if (this.rulesEngineOptions.MissingConditionBehavior == MissingConditionBehaviors.Discard || matchMode == MatchModes.Search)
@@ -231,7 +232,7 @@ namespace Regulae.Evaluation.Compiled
                     {
                         LogicalOperators.And => builder.AndAlso(conditionExpressions),
                         LogicalOperators.Or => builder.OrElse(conditionExpressions),
-                        _ => throw new NotSupportedException($"Unsupported logical operator on composed condition node: '{conditionNode.LogicalOperator}'.")
+                        _ => throw new NotSupportedException($"Unsupported logical operator on composed condition node: '{conditionNode.LogicalOperator}'."),
                     };
                     builder.Assign(builder.GetVariable("Result"), conditionExpression);
                     break;

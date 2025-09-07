@@ -10,23 +10,19 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
             IExpressionBlockBuilder parent,
             ExpressionConfiguration expressionConfiguration)
         {
-            if (expressionConfiguration is null)
-            {
-                throw new ArgumentNullException(nameof(expressionConfiguration));
-            }
+            ArgumentNullException.ThrowIfNull(expressionConfiguration);
 
             return new ExpressionBlockBuilder(scopeName, parent, this, expressionConfiguration);
         }
 
-        public IExpressionParametersBuilder CreateExpressionBuilder(
-            ExpressionConfiguration expressionConfiguration)
+        public IExpressionParametersBuilder CreateExpressionBuilder(string name)
         {
-            if (expressionConfiguration is null)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException(nameof(expressionConfiguration));
+                throw new ArgumentNullException(nameof(name));
             }
 
-            return new ExpressionBuilder(expressionConfiguration, this);
+            return new ExpressionBuilder(name, this);
         }
 
         public IExpressionParametersConfiguration CreateExpressionParametersConfiguration()

@@ -10,8 +10,9 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
     {
         private static readonly Type booleanType = typeof(bool);
 
-        private static readonly MethodInfo startsWithMethodInfo = typeof(string)
-            .GetMethod(nameof(string.StartsWith), new[] { typeof(string), typeof(StringComparison) });
+        private static readonly MethodInfo startsWithMethodInfo = typeof(string).GetMethod(
+            nameof(string.StartsWith),
+            [typeof(string), typeof(StringComparison)])!;
 
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
@@ -23,7 +24,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
             return builder.Call(
                 args.LeftHandOperand,
                 startsWithMethodInfo,
-                new Expression[] { args.RightHandOperand, builder.Constant(StringComparison.InvariantCultureIgnoreCase) });
+                [args.RightHandOperand, builder.Constant(StringComparison.InvariantCultureIgnoreCase)]);
         }
     }
 }

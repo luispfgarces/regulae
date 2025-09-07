@@ -1,6 +1,8 @@
 namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
     using FluentAssertions;
     using Moq;
     using Regulae.Evaluation.Compiled.ExpressionBuilders;
@@ -14,7 +16,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var scope = "TestScope";
             var parent = Mock.Of<IExpressionBlockBuilder>();
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
 
             var defaultExpressionBuilderFactory = new DefaultExpressionBuilderFactory();
 
@@ -26,11 +28,20 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 .And.BeOfType<ExpressionBlockBuilder>();
         }
 
+        private static ExpressionConfiguration CreateTestExpressionConfiguration() => new ExpressionConfiguration
+        {
+            ExpressionName = "TestExpression",
+            Parameters = new Dictionary<string, ParameterExpression>(),
+            ReturnDefaultValue = null,
+            ReturnLabelTarget = Expression.Label("TestLabel"),
+            ReturnType = typeof(void),
+        };
+
         [Fact]
         public void CreateExpressionBlockBuilder_GivenNotNullExpressionConfigurationWithScopeAndParent_ReturnsNewExpressionBlockBuilder()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
 
             var defaultExpressionBuilderFactory = new DefaultExpressionBuilderFactory();
 
@@ -60,12 +71,12 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void CreateExpressionBuilder_GivenNotNullExpressionConfiguration_ReturnsNewExpressionBuilder()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var name = "TestExpression";
 
             var defaultExpressionBuilderFactory = new DefaultExpressionBuilderFactory();
 
             // Act
-            var actual = defaultExpressionBuilderFactory.CreateExpressionBuilder(expressionConfiguration);
+            var actual = defaultExpressionBuilderFactory.CreateExpressionBuilder(name);
 
             // Assert
             actual.Should().NotBeNull()
@@ -83,7 +94,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
 
             // Assert
             action.Should().ThrowExactly<ArgumentNullException>()
-                .Which.ParamName.Should().Be("expressionConfiguration");
+                .Which.ParamName.Should().Be("name");
         }
 
         [Fact]

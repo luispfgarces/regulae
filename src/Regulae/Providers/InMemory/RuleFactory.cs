@@ -12,34 +12,21 @@ namespace Regulae.Providers.InMemory
     {
         public Rule CreateRule(RuleDataModel ruleDataModel)
         {
-            if (ruleDataModel is null)
-            {
-                throw new ArgumentNullException(nameof(ruleDataModel));
-            }
+            ArgumentNullException.ThrowIfNull(ruleDataModel);
 
             var contentContainer = new ObjectContentContainer(ruleDataModel.Content);
 
-            var rule = new Rule
+            return new Rule(ruleDataModel.Name, ruleDataModel.Ruleset, ruleDataModel.DateBegin, ruleDataModel.DateEnd, contentContainer)
             {
                 Active = ruleDataModel.Active,
-                ContentContainer = contentContainer,
-                Ruleset = ruleDataModel.Ruleset,
-                DateBegin = ruleDataModel.DateBegin,
-                DateEnd = ruleDataModel.DateEnd,
-                Name = ruleDataModel.Name,
                 Priority = ruleDataModel.Priority,
                 RootCondition = ruleDataModel.RootCondition is { } ? ConvertConditionNode(ruleDataModel.RootCondition) : null!,
             };
-
-            return rule;
         }
 
         public RuleDataModel CreateRule(Rule rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             var content = rule.ContentContainer.GetContentAs<object>();
 
@@ -95,17 +82,17 @@ namespace Regulae.Providers.InMemory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IConditionNode CreateValueConditionNode(ValueConditionNodeDataModel conditionNodeDataModel)
+        private static ValueConditionNode CreateValueConditionNode(ValueConditionNodeDataModel conditionNodeDataModel)
         {
             return new ValueConditionNode(
-                conditionNodeDataModel.Condition,
+                conditionNodeDataModel.Condition!,
                 conditionNodeDataModel.Operator,
-                conditionNodeDataModel.RightOperand,
+                conditionNodeDataModel.RightOperand!,
                 new PropertiesDictionary(conditionNodeDataModel.Properties));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ConditionNodeDataModel ConvertComposedConditionNode(ComposedConditionNode composedConditionNode)
+        private ComposedConditionNodeDataModel ConvertComposedConditionNode(ComposedConditionNode composedConditionNode)
         {
             var conditionNodeDataModels = new ConditionNodeDataModel[composedConditionNode.ChildConditionNodes.Count()];
             var i = 0;

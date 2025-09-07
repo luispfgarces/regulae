@@ -4,6 +4,8 @@ namespace Regulae.WebUI.Sample.Engine
     using Regulae.Builder.Generic;
 
     internal class RuleSpecificationBase<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         public RuleSpecificationBase(
             RuleBuilderResult<TRuleset, TCondition> ruleBuilderResult,

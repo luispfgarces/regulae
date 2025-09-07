@@ -60,7 +60,7 @@ namespace Regulae.WebUI.Sample
 
             app.UseAntiforgery();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.MapControllers();
 
             app.UseRegulaeWebUI(opt =>
             {

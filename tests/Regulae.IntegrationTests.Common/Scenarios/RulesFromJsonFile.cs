@@ -17,7 +17,8 @@ namespace Regulae.IntegrationTests.Common.Scenarios
         public static RulesFromJsonFile Load => instance;
 
         public IEnumerable<Rule<TRuleset, TCondition>> FromJsonFile<TRuleset, TCondition>(string filePath, Type contentRuntimeType, bool serializedContent = true)
-            where TRuleset : new()
+            where TRuleset : notnull, new()
+            where TCondition : notnull
         {
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             using var streamReader = new StreamReader(fileStream);
@@ -27,6 +28,21 @@ namespace Regulae.IntegrationTests.Common.Scenarios
 
             foreach (var ruleDataModel in ruleDataModels)
             {
+                if (ruleDataModel.Name is null)
+                {
+                    throw new InvalidDataException("Rule name is not defined.");
+                }
+
+                if (ruleDataModel.Ruleset is null)
+                {
+                    throw new InvalidDataException($"Ruleset is not defined for rule '{ruleDataModel.Name}'.");
+                }
+
+                if (ruleDataModel.Content is null)
+                {
+                    throw new InvalidDataException($"Content is not defined for rule '{ruleDataModel.Name}'.");
+                }
+
                 var ruleset = GetRuleset<TRuleset>(ruleDataModel.Ruleset);
                 object content;
                 if (serializedContent)
@@ -46,7 +62,7 @@ namespace Regulae.IntegrationTests.Common.Scenarios
 
                 if (ruleDataModel.RootCondition is { })
                 {
-                    ruleBuilder.ApplyWhen(b => this.ConvertConditionNode(b, ruleDataModel.RootCondition));
+                    ruleBuilder.ApplyWhen(b => this.ConvertConditionNode(b, ruleDataModel.RootCondition, ruleDataModel.Name));
                 }
                 var ruleBuilderResult = ruleBuilder.Build();
 
@@ -64,8 +80,23 @@ namespace Regulae.IntegrationTests.Common.Scenarios
             return addedRules;
         }
 
-        private static IFluentConditionNodeBuilder<TCondition> CreateValueConditionNode<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel)
+        private static IFluentConditionNodeBuilder<TCondition> CreateValueConditionNode<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel, string ruleName)
         {
+            if (conditionNodeDataModel.DataType is null)
+            {
+                throw new InvalidDataException($"Data type is not defined for value condition node on rule '{ruleName}'.");
+            }
+
+            if (conditionNodeDataModel.Condition is null)
+            {
+                throw new InvalidDataException($"Condition is not defined for value condition node on rule '{ruleName}'.");
+            }
+
+            if (conditionNodeDataModel.Operator is null)
+            {
+                throw new InvalidDataException($"Operator is not defined for value condition node on rule '{ruleName}'.");
+            }
+
             var dataType = Parse<DataTypes>(conditionNodeDataModel.DataType);
             var condition = Parse<TCondition>(conditionNodeDataModel.Condition);
             var @operator = Parse<Operators>(conditionNodeDataModel.Operator);
@@ -92,8 +123,23 @@ namespace Regulae.IntegrationTests.Common.Scenarios
             };
         }
 
-        private static IConditionNode CreateValueConditionNode<TCondition>(IRootConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel)
+        private static IConditionNode CreateValueConditionNode<TCondition>(IRootConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel, string ruleName)
         {
+            if (conditionNodeDataModel.DataType is null)
+            {
+                throw new InvalidDataException($"Data type is not defined for value condition node on rule '{ruleName}'.");
+            }
+
+            if (conditionNodeDataModel.Condition is null)
+            {
+                throw new InvalidDataException($"Condition is not defined for value condition node on rule '{ruleName}'.");
+            }
+
+            if (conditionNodeDataModel.Operator is null)
+            {
+                throw new InvalidDataException($"Operator is not defined for value condition node on rule '{ruleName}'.");
+            }
+
             var dataType = Parse<DataTypes>(conditionNodeDataModel.DataType);
             var condition = Parse<TCondition>(conditionNodeDataModel.Condition);
             var @operator = Parse<Operators>(conditionNodeDataModel.Operator);
@@ -129,37 +175,52 @@ namespace Regulae.IntegrationTests.Common.Scenarios
         private static object Parse(string value, Type type)
             => type.IsEnum ? Enum.Parse(type, value) : Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
 
-        private IConditionNode ConvertConditionNode<TCondition>(IRootConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel)
+        private IConditionNode ConvertConditionNode<TCondition>(IRootConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel, string ruleName)
         {
+            if (conditionNodeDataModel.LogicalOperator is null)
+            {
+                throw new InvalidDataException($"Logical operator is not defined for condition node on rule '{ruleName}'.");
+            }
+
             var logicalOperator = Parse<LogicalOperators>(conditionNodeDataModel.LogicalOperator);
 
             return logicalOperator switch
             {
-                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel)),
-                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel)),
-                LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel),
+                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel, ruleName),
                 _ => throw new NotSupportedException($"The logical operator '{logicalOperator}' is not supported."),
             };
         }
 
-        private IFluentConditionNodeBuilder<TCondition> ConvertConditionNode<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel)
+        private IFluentConditionNodeBuilder<TCondition> ConvertConditionNode<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel, string ruleName)
         {
+            if (conditionNodeDataModel.LogicalOperator is null)
+            {
+                throw new InvalidDataException($"Logical operator is not defined for condition node on rule '{ruleName}'.");
+            }
+
             var logicalOperator = Parse<LogicalOperators>(conditionNodeDataModel.LogicalOperator);
 
             return logicalOperator switch
             {
-                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel)),
-                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel)),
-                LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel),
+                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel, ruleName),
                 _ => throw new NotSupportedException($"The logical operator '{logicalOperator}' is not supported."),
             };
         }
 
-        private IFluentConditionNodeBuilder<TCondition> HandleChildConditionNodes<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel)
+        private IFluentConditionNodeBuilder<TCondition> HandleChildConditionNodes<TCondition>(IFluentConditionNodeBuilder<TCondition> conditionNodeBuilder, ConditionNodeDataModel conditionNodeDataModel, string ruleName)
         {
+            if (conditionNodeDataModel.ChildConditionNodes is null || !conditionNodeDataModel.ChildConditionNodes.Any())
+            {
+                throw new InvalidDataException($"Child condition nodes are not defined for logical operator node on rule '{ruleName}'.");
+            }
+
             foreach (var child in conditionNodeDataModel.ChildConditionNodes)
             {
-                this.ConvertConditionNode(conditionNodeBuilder, child);
+                this.ConvertConditionNode(conditionNodeBuilder, child, ruleName);
             }
 
             return conditionNodeBuilder;

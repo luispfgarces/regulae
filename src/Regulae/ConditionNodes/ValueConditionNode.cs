@@ -69,7 +69,7 @@ namespace Regulae.ConditionNodes
         /// <returns>
         /// <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj) => obj is ValueConditionNode node && StringComparer.Ordinal.Equals(this.Condition, node.Condition) && this.LogicalOperator == node.LogicalOperator && EqualityComparer<object>.Default.Equals(this.RightOperand, node.RightOperand) && this.Operator == node.Operator && EqualityComparer<IDictionary<string, object>>.Default.Equals(this.Properties, node.Properties);
+        public override bool Equals(object? obj) => obj is ValueConditionNode node && StringComparer.Ordinal.Equals(this.Condition, node.Condition) && this.LogicalOperator == node.LogicalOperator && EqualityComparer<object>.Default.Equals(this.RightOperand, node.RightOperand) && this.Operator == node.Operator && EqualityComparer<IDictionary<string, object>>.Default.Equals(this.Properties, node.Properties);
 
         /// <summary>
         /// Returns a hash code for this instance.

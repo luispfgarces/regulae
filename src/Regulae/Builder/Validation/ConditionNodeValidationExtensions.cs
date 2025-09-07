@@ -9,6 +9,7 @@ namespace Regulae.Builder.Validation
     internal static class ConditionNodeValidationExtensions
     {
         public static void PerformValidation<TCondition, TValidationContext>(this IConditionNode<TCondition> conditionNode, GenericConditionNodeValidationArgs<TCondition, TValidationContext> conditionNodeValidationArgs)
+            where TCondition : notnull
         {
             ValidationResult validationResult;
             switch (conditionNode)

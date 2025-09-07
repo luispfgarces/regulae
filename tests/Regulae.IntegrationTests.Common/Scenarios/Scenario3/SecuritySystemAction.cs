@@ -8,6 +8,6 @@ namespace Regulae.IntegrationTests.Common.Scenarios.Scenario3
     {
         public Guid ActionId { get; set; }
 
-        public string ActionName { get; set; }
+        public string? ActionName { get; set; }
     }
 }

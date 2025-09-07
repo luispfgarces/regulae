@@ -11,6 +11,8 @@ namespace Regulae.Generic
     /// <typeparam name="TRuleset">The ruleset type that strongly types rulesets.</typeparam>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     public interface IRulesEngine<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         /// <summary>
         /// Gets the options.

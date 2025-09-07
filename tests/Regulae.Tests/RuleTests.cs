@@ -14,13 +14,9 @@ namespace Regulae.Tests
         public void Clone_WithRuleWithoutRootCondition_ReturnsCopy()
         {
             // Arrange
-            var rule = new Rule
+            var rule = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = DateTime.UtcNow.AddDays(-1),
-                DateEnd = DateTime.UtcNow.AddDays(1),
                 Priority = 1,
-                Name = "Name",
                 RootCondition = null,
             };
 
@@ -35,13 +31,9 @@ namespace Regulae.Tests
         public void Clone_WithRuleWithRootCondition_ReturnsCopy()
         {
             // Arrange
-            var rule = new Rule
+            var rule = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = DateTime.UtcNow.AddDays(-1),
-                DateEnd = DateTime.UtcNow.AddDays(1),
                 Priority = 1,
-                Name = "Name",
                 RootCondition = new ValueConditionNode(ConditionNames.PluviosityRate.ToString(), Operators.GreaterThanOrEqual, 80.0m),
             };
             rule.RootCondition.Properties["key1"] = "value1";
@@ -60,10 +52,7 @@ namespace Regulae.Tests
             // Arrange
             var expected = new ContentContainer((_) => null);
 
-            var sut = new Rule
-            {
-                ContentContainer = expected
-            };
+            var sut = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), expected);
 
             // Act
             var actual = sut.ContentContainer;
@@ -78,10 +67,7 @@ namespace Regulae.Tests
             // Arrange
             var expected = new DateTime(2018, 07, 19);
 
-            var sut = new Rule
-            {
-                DateBegin = expected
-            };
+            var sut = new Rule("Name", "Ruleset", expected, DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()));
 
             // Act
             var actual = sut.DateBegin;
@@ -96,10 +82,7 @@ namespace Regulae.Tests
             // Arrange
             var expected = new DateTime(2018, 07, 19);
 
-            var sut = new Rule
-            {
-                DateEnd = expected
-            };
+            var sut = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), expected, new ContentContainer(_ => new object()));
 
             // Act
             var actual = sut.DateEnd;
@@ -112,7 +95,7 @@ namespace Regulae.Tests
         public void DateEnd_NotHavingSettedValue_ReturnsNull()
         {
             // Arrange
-            var sut = new Rule();
+            var sut = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), null, new ContentContainer(_ => new object()));
 
             // Act
             var actual = sut.DateEnd;
@@ -127,10 +110,7 @@ namespace Regulae.Tests
             // Arrange
             var expected = "My awesome name";
 
-            var sut = new Rule
-            {
-                Name = expected
-            };
+            var sut = new Rule(expected, "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()));
 
             // Act
             var actual = sut.Name;
@@ -145,7 +125,7 @@ namespace Regulae.Tests
             // Arrange
             var expected = 123;
 
-            var sut = new Rule
+            var sut = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()))
             {
                 Priority = expected
             };
@@ -164,7 +144,7 @@ namespace Regulae.Tests
             var mockConditionNode = new Mock<IConditionNode>();
             var expected = mockConditionNode.Object;
 
-            var sut = new Rule
+            var sut = new Rule("Name", "Ruleset", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), new ContentContainer(_ => new object()))
             {
                 RootCondition = expected
             };

@@ -7,7 +7,6 @@ namespace Regulae.Tests.Providers.InMemory
     using Regulae;
     using Regulae.Builder;
     using Regulae.Providers.InMemory;
-    using Regulae.Providers.InMemory;
     using Xunit;
 
     public class InMemoryProviderRulesDataSourceSelectorExtensionsTests

@@ -45,10 +45,7 @@ namespace Regulae.Core
         /// <exception cref="ArgumentNullException">when the given source dictionary is null.</exception>
         public PropertiesDictionary(IDictionary<string, object> source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            ArgumentNullException.ThrowIfNull(source);
 
             if (source.Count > DictionarySlimLimit)
             {
@@ -234,7 +231,7 @@ namespace Regulae.Core
         /// specified key; otherwise, <see langword="false"/>.
         /// </returns>
         public bool TryGetValue(string key, out object value)
-            => this.underlyingDictionary.TryGetValue(key, out value);
+            => this.underlyingDictionary.TryGetValue(key, out value!);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SwitchToDictionaryFullImplementationIfLimitReached()

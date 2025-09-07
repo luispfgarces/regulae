@@ -2,8 +2,8 @@ namespace Regulae.Source
 {
     internal sealed class CreateConditionArgs
     {
-        public DataTypes DataType { get; set; }
+        public required DataTypes DataType { get; set; }
 
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

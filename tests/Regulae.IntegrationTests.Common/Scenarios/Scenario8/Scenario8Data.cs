@@ -21,6 +21,11 @@ namespace Regulae.IntegrationTests.Common.Scenarios.Scenario8
             foreach (var condition in conditions)
             {
                 var dataTypeAttribute = conditionType.GetMember(condition!.ToString()).First().GetCustomAttribute<DataTypeAttribute>();
+                if (dataTypeAttribute is null)
+                {
+                    throw new InvalidDataException($"Condition '{condition}' does not have a DataTypeAttribute.");
+                }
+
                 yield return (condition, dataTypeAttribute.DataType);
             }
 

@@ -20,6 +20,8 @@ namespace Regulae.Extensions
         /// <returns>A new instance of generic engine</returns>
         public static IRulesEngine<TRuleset, TCondition> MakeGeneric<TRuleset, TCondition>(
             this IRulesEngine rulesEngine)
+            where TRuleset : notnull
+            where TCondition : notnull
             => rulesEngine.MakeGeneric<TRuleset, TCondition>(opt => { });
 
         /// <summary>
@@ -39,6 +41,8 @@ namespace Regulae.Extensions
         public static IRulesEngine<TRuleset, TCondition> MakeGeneric<TRuleset, TCondition>(
             this IRulesEngine rulesEngine,
             Action<GenericRulesEngineOptions> configureGenericRulesEngineOptions)
+            where TRuleset : notnull
+            where TCondition : notnull
         {
             var genericRulesEngineOptions = new GenericRulesEngineOptions();
             configureGenericRulesEngineOptions(genericRulesEngineOptions);
@@ -48,9 +52,10 @@ namespace Regulae.Extensions
             {
                 var conditionType = typeof(TCondition);
                 var conditions = Enum.GetValues(conditionType).Cast<TCondition>();
-                foreach (var condition in conditions)
+
+                foreach (var condition in conditions!)
                 {
-                    var dataTypeAttribute = conditionType.GetMember(condition!.ToString()).First().GetCustomAttribute<DataTypeAttribute>();
+                    var dataTypeAttribute = conditionType.GetMember(condition.ToString()!).First().GetCustomAttribute<DataTypeAttribute>();
                     if (dataTypeAttribute is null)
                     {
                         throw new InvalidOperationException($"The condition value '{condition}' does not declare attribute [DataType] which is required " +

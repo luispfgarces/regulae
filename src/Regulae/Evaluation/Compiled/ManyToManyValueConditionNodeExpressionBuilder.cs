@@ -8,7 +8,7 @@ namespace Regulae.Evaluation.Compiled
 
     internal sealed class ManyToManyValueConditionNodeExpressionBuilder : IValueConditionNodeExpressionBuilder
     {
-        private static readonly MethodInfo enumerableEmptyMethodInfo = typeof(Enumerable).GetMethod(nameof(Enumerable.Empty));
+        private static readonly MethodInfo enumerableEmptyMethodInfo = typeof(Enumerable).GetMethod(nameof(Enumerable.Empty))!;
         private readonly IConditionExpressionBuilderProvider conditionExpressionBuilderProvider;
 
         public ManyToManyValueConditionNodeExpressionBuilder(IConditionExpressionBuilderProvider conditionExpressionBuilderProvider)

@@ -28,7 +28,7 @@ namespace Regulae.Evaluation.Compiled
                 && EqualityComparer<Expression>.Default.Equals(this.RightOperandExpression, other.RightOperandExpression)
                 && EqualityComparer<Expression>.Default.Equals(this.TestLeftOperand, other.TestLeftOperand);
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
             => obj is BuildValueConditionNodeExpressionArgs args && this.Equals(args);
 
         public override readonly int GetHashCode()

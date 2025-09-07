@@ -8,6 +8,8 @@ namespace Regulae.Builder.Generic.RulesBuilder
     /// <typeparam name="TRuleset">The ruleset type that strongly types rulesets.</typeparam>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     public interface IRuleConfigureDateBegin<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         /// <summary>
         /// Sets the new rule with the specified date begin.

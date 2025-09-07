@@ -9,15 +9,29 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
     {
         private readonly IExpressionBuilderFactory factory;
 
-        public ExpressionBuilder(ExpressionConfiguration expressionConfiguration, IExpressionBuilderFactory factory)
+        public ExpressionBuilder(string name, IExpressionBuilderFactory factory)
         {
-            this.ExpressionConfiguration = expressionConfiguration;
+            this.Name = name;
             this.factory = factory;
         }
 
         public static IExpressionBuilderFactory ExpressionBuilderFactory { get; set; } = new DefaultExpressionBuilderFactory();
 
-        public ExpressionConfiguration ExpressionConfiguration { get; }
+        public IEnumerable<Expression>? Expressions { get; private set; }
+
+        public IReadOnlyDictionary<string, LabelTarget>? LabelTargets { get; private set; }
+
+        public string Name { get; }
+
+        public IReadOnlyDictionary<string, ParameterExpression>? Parameters { get; private set; }
+
+        public LabelTarget? ReturnLabelTarget { get; private set; }
+
+        public Type? ReturnType { get; private set; }
+
+        public object? ReturnDefaultValue { get; private set; }
+
+        public IReadOnlyDictionary<string, ParameterExpression>? Variables { get; private set; }
 
         public static IExpressionParametersBuilder NewExpression(string name)
         {
@@ -26,44 +40,36 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
                 throw new ArgumentException("A non-null, empty, or white-space expression name must be provided.", nameof(name));
             }
 
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ExpressionName = name,
-            };
-
-            return ExpressionBuilderFactory.CreateExpressionBuilder(expressionConfiguration);
+            return ExpressionBuilderFactory.CreateExpressionBuilder(name);
         }
 
         public ExpressionResult Build()
         {
-            var variableExpressionsCopy = new List<ParameterExpression>(this.ExpressionConfiguration.Variables.Values);
-            var bodyBlockExpressionsCopy = new List<Expression>(this.ExpressionConfiguration.Expressions)
+            var variableExpressionsCopy = new List<ParameterExpression>(this.Variables!.Values);
+            var bodyBlockExpressionsCopy = new List<Expression>(this.Expressions!)
             {
                 Expression.Label(
-                    this.ExpressionConfiguration.ReturnLabelTarget,
-                    Expression.Constant(this.ExpressionConfiguration.ReturnDefaultValue)),
+                    this.ReturnLabelTarget!,
+                    Expression.Constant(this.ReturnDefaultValue)),
             };
 
             var implementationExpression = Expression.Block(variables: variableExpressionsCopy, expressions: bodyBlockExpressionsCopy);
 
             return new ExpressionResult(
-                this.ExpressionConfiguration.ExpressionName,
+                this.Name,
                 implementationExpression,
-                this.ExpressionConfiguration.Parameters.Values,
-                this.ExpressionConfiguration.ReturnType);
+                this.Parameters!.Values,
+                this.ReturnType!);
         }
 
         public IExpressionImplementationBuilder HavingReturn(Type type, object defaultValue)
         {
-            if (type is null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            ArgumentNullException.ThrowIfNull(type);
 
-            this.ExpressionConfiguration.ReturnType = type;
-            this.ExpressionConfiguration.ReturnDefaultValue = defaultValue;
-            this.ExpressionConfiguration.ReturnLabelTarget
-                = Expression.Label(type, $"{this.ExpressionConfiguration.ExpressionName}_ReturnLabel");
+            this.ReturnType = type;
+            this.ReturnDefaultValue = defaultValue;
+            this.ReturnLabelTarget
+                = Expression.Label(type, $"{this.Name}_ReturnLabel");
 
             return this;
         }
@@ -74,27 +80,33 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         public IConfiguredExpressionBuilder SetImplementation(
             Action<IExpressionBlockBuilder> builder)
         {
-            if (builder is null)
+            ArgumentNullException.ThrowIfNull(builder);
+
+            var expressionConfiguration = new ExpressionConfiguration
             {
-                throw new ArgumentNullException(nameof(builder));
-            }
+                ExpressionName = this.Name!,
+                ReturnType = this.ReturnType!,
+                ReturnDefaultValue = this.ReturnDefaultValue,
+                ReturnLabelTarget = this.ReturnLabelTarget!,
+                Parameters = this.Parameters!,
+            };
 
             var implementationExpressionBuilder = this.factory.CreateExpressionBlockBuilder(
                 scopeName: string.Empty,
                 parent: null!,
-                expressionConfiguration: this.ExpressionConfiguration);
+                expressionConfiguration: expressionConfiguration);
             builder(implementationExpressionBuilder);
 
-            this.ExpressionConfiguration.LabelTargets = implementationExpressionBuilder.LabelTargets;
-            this.ExpressionConfiguration.Variables = implementationExpressionBuilder.Variables;
-            this.ExpressionConfiguration.Expressions = implementationExpressionBuilder.Expressions;
+            this.LabelTargets = implementationExpressionBuilder.LabelTargets;
+            this.Variables = implementationExpressionBuilder.Variables;
+            this.Expressions = implementationExpressionBuilder.Expressions;
 
             return this;
         }
 
         public IExpressionReturnBuilder WithoutParameters()
         {
-            this.ExpressionConfiguration.Parameters = new Dictionary<string, ParameterExpression>(StringComparer.Ordinal);
+            this.Parameters = new Dictionary<string, ParameterExpression>(StringComparer.Ordinal);
 
             return this;
         }
@@ -102,15 +114,12 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
         public IExpressionReturnBuilder WithParameters(
             Action<IExpressionParametersConfiguration> parametersConfigurationAction)
         {
-            if (parametersConfigurationAction is null)
-            {
-                throw new ArgumentNullException(nameof(parametersConfigurationAction));
-            }
+            ArgumentNullException.ThrowIfNull(parametersConfigurationAction);
 
             var expressionBuilderParametersConfiguration = this.factory.CreateExpressionParametersConfiguration();
             parametersConfigurationAction(expressionBuilderParametersConfiguration);
 
-            this.ExpressionConfiguration.Parameters = expressionBuilderParametersConfiguration.Parameters;
+            this.Parameters = expressionBuilderParametersConfiguration.Parameters;
 
             return this;
         }

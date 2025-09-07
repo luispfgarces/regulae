@@ -4,6 +4,7 @@ namespace Regulae.Builder.Validation
     using Regulae.Generic.ConditionNodes;
 
     internal sealed class GenericComposedConditionNodeValidator<TCondition> : AbstractValidator<ComposedConditionNode<TCondition>>
+        where TCondition : notnull
     {
         private readonly GenericValueConditionNodeValidator<TCondition> valueConditionNodeValidator;
 
@@ -13,12 +14,7 @@ namespace Regulae.Builder.Validation
 
             this.RuleForEach(c => c.ChildConditionNodes)
                 .NotNull()
-                .Custom((cn, cc) => cn.PerformValidation(new GenericConditionNodeValidationArgs<TCondition, ComposedConditionNode<TCondition>>
-                {
-                    ComposedConditionNodeValidator = this,
-                    ValidationContext = cc,
-                    ValueConditionNodeValidator = this.valueConditionNodeValidator,
-                }));
+                .Custom((cn, cc) => cn.PerformValidation(new GenericConditionNodeValidationArgs<TCondition, ComposedConditionNode<TCondition>>(this, cc, this.valueConditionNodeValidator)));
         }
     }
 }

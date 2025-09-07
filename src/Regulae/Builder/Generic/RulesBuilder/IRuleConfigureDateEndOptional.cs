@@ -8,6 +8,8 @@ namespace Regulae.Builder.Generic.RulesBuilder
     public interface IRuleConfigureDateEndOptional<TRuleset, TCondition> :
         IRuleConfigureDateEnd<TRuleset, TCondition>,
         IRuleBuilder<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
     }
 }

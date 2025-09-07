@@ -13,6 +13,8 @@ namespace Regulae.Generic
     /// <typeparam name="TRuleset">The ruleset type that strongly types rulesets.</typeparam>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     public class RulesEngine<TRuleset, TCondition> : IRulesEngine<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         private readonly GenericRuleValidator<TRuleset, TCondition> ruleValidator = GenericRuleValidator<TRuleset, TCondition>.Instance;
         private readonly IRulesEngine wrappedRulesEngine;
@@ -28,10 +30,7 @@ namespace Regulae.Generic
         /// <inheritdoc/>
         public Task<OperationResult> ActivateRuleAsync(Rule<TRuleset, TCondition> rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             // Implicit conversion from Rule<TRuleset, TCondition> to Rule.
             return this.wrappedRulesEngine.ActivateRuleAsync(rule);
@@ -40,10 +39,7 @@ namespace Regulae.Generic
         /// <inheritdoc/>
         public Task<OperationResult> AddRuleAsync(Rule<TRuleset, TCondition> rule, RuleAddPriorityOption ruleAddPriorityOption)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             // Implicit conversion from Rule<TRuleset, TCondition> to Rule.
             return this.wrappedRulesEngine.AddRuleAsync(rule, ruleAddPriorityOption);
@@ -66,10 +62,7 @@ namespace Regulae.Generic
         /// <inheritdoc/>
         public Task<OperationResult> DeactivateRuleAsync(Rule<TRuleset, TCondition> rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             // Implicit conversion from Rule<TRuleset, TCondition> to Rule.
             return this.wrappedRulesEngine.DeactivateRuleAsync(rule);
@@ -131,10 +124,7 @@ namespace Regulae.Generic
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<Rule<TRuleset, TCondition>>> SearchAsync(SearchArgs<TRuleset, TCondition> searchArgs)
         {
-            if (searchArgs is null)
-            {
-                throw new ArgumentNullException(nameof(searchArgs));
-            }
+            ArgumentNullException.ThrowIfNull(searchArgs);
 
             var rulesetAsString = GenericConversions.Convert(searchArgs.Ruleset);
             var searchArgsNew = new SearchArgs<string, string>(rulesetAsString, searchArgs.DateBegin, searchArgs.DateEnd)
@@ -151,10 +141,7 @@ namespace Regulae.Generic
         /// <inheritdoc/>
         public Task<OperationResult> UpdateRuleAsync(Rule<TRuleset, TCondition> rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             // Implicit conversion from Rule<TRuleset, TCondition> to Rule.
             return this.wrappedRulesEngine.UpdateRuleAsync(rule);

@@ -68,7 +68,7 @@ namespace Regulae.Rql.Tests.Pipeline.Interpret
             // Assert
             actual.Should().NotBeNull()
                 .And.BeOfType<ExpressionStatementResult>();
-            var actualExpressionStatementResult = actual as ExpressionStatementResult;
+            var actualExpressionStatementResult = (ExpressionStatementResult)actual;
             actualExpressionStatementResult.Rql.Should().BeEmpty();
             actualExpressionStatementResult.Result.Should().BeOfType<RqlNothing>();
         }

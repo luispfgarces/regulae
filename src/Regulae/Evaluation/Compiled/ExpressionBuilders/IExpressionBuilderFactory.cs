@@ -9,8 +9,7 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
             IExpressionBlockBuilder parent,
             ExpressionConfiguration expressionConfiguration);
 
-        IExpressionParametersBuilder CreateExpressionBuilder(
-            ExpressionConfiguration expressionConfiguration);
+        IExpressionParametersBuilder CreateExpressionBuilder(string name);
 
         IExpressionParametersConfiguration CreateExpressionParametersConfiguration();
 

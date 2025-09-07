@@ -6,6 +6,8 @@ namespace Regulae.Builder.Generic.RulesBuilder
     /// <typeparam name="TRuleset">The ruleset type that strongly types rulesets.</typeparam>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     public interface IRuleConfigureRuleset<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         /// <summary>
         /// Sets the new rule to belong to the specified ruleset.

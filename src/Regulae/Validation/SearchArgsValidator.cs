@@ -5,6 +5,8 @@ namespace Regulae.Validation
     using Regulae;
 
     internal sealed class SearchArgsValidator<TRuleset, TCondition> : AbstractValidator<SearchArgs<TRuleset, TCondition>>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         private readonly Type conditionRuntimeType;
         private readonly Type rulesetRuntimeType;

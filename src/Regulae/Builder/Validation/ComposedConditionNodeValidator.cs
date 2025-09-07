@@ -15,12 +15,7 @@ namespace Regulae.Builder.Validation
             this.RuleFor(c => c.LogicalOperator).IsContainedOn(LogicalOperators.And, LogicalOperators.Or);
             this.RuleForEach(c => c.ChildConditionNodes)
                 .NotNull()
-                .Custom((cn, cc) => cn.PerformValidation(new ConditionNodeValidationArgs<ComposedConditionNode>
-                {
-                    ComposedConditionNodeValidator = this,
-                    ValidationContext = cc,
-                    ValueConditionNodeValidator = this.valueConditionNodeValidator
-                }));
+                .Custom((cn, cc) => cn.PerformValidation(new ConditionNodeValidationArgs<ComposedConditionNode>(this, cc, this.valueConditionNodeValidator)));
         }
     }
 }

@@ -43,6 +43,7 @@ namespace Regulae.Builder
         public static IConditionNode CreateComposedNode<TCondition>(
             LogicalOperators logicalOperator,
             Func<IFluentConditionNodeBuilder<TCondition>, IFluentConditionNodeBuilder<TCondition>> conditionFunc)
+            where TCondition : notnull
         {
             var composedConditionNodeBuilder = new FluentConditionNodeBuilder<TCondition>(logicalOperator);
 

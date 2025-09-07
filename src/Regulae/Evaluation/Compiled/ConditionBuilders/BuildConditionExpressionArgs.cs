@@ -13,7 +13,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
 
         public Expression RightHandOperand { get; set; }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
             => obj is BuildConditionExpressionArgs args && this.Equals(args);
 
         public readonly bool Equals(BuildConditionExpressionArgs other)

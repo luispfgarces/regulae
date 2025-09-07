@@ -10,6 +10,8 @@ namespace Regulae.Generic
     /// <typeparam name="TRuleset">The ruleset type that strongly types rulesets.</typeparam>
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     public class Rule<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         private readonly Rule wrappedRule;
         private IConditionNode<TCondition>? rootCondition;

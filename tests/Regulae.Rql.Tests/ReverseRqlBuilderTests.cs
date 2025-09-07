@@ -292,7 +292,7 @@ namespace Regulae.Rql.Tests
         public void VisitLiteralExpression_GivenLiteralExpression_ReturnsRqlRepresentation(object literalType, object value, string expected)
         {
             // Arrange
-            var value1 = (LiteralType)literalType == LiteralType.DateTime ? DateTime.Parse(value.ToString()) : value;
+            var value1 = (LiteralType)literalType == LiteralType.DateTime ? DateTime.Parse(value.ToString()!) : value;
             var token = Token.Create(value1.ToString(), false, value1, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 6, TokenType.CREATE);
             var literalExpression = LiteralExpression.Create((LiteralType)literalType, token, value1);
 

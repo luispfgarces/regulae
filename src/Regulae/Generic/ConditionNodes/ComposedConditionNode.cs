@@ -14,6 +14,7 @@ namespace Regulae.Generic.ConditionNodes
     /// <typeparam name="TCondition">The condition type that strongly types conditions.</typeparam>
     [DebuggerDisplay("Composed condition: apply {LogicalOperator.ToString(),nq} operator for {System.Linq.Enumerable.Count(ChildConditionNodes),nq} nodes")]
     public class ComposedConditionNode<TCondition> : IConditionNode<TCondition>
+        where TCondition : notnull
     {
         private readonly ComposedConditionNode composedConditionNode;
         private List<IConditionNode<TCondition>>? children;
@@ -64,9 +65,9 @@ namespace Regulae.Generic.ConditionNodes
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// <see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is ComposedConditionNode<TCondition> node && EqualityComparer<ComposedConditionNode>.Default.Equals(this.composedConditionNode, node.composedConditionNode);
+        public override bool Equals(object? obj) => obj is ComposedConditionNode<TCondition> node && EqualityComparer<ComposedConditionNode>.Default.Equals(this.composedConditionNode, node.composedConditionNode);
 
         /// <summary>
         /// Returns a hash code for this instance.

@@ -15,6 +15,8 @@ namespace Regulae.Builder.Generic.RulesBuilder
         IRuleConfigureDateBegin<TRuleset, TCondition>,
         IRuleConfigureDateEndOptional<TRuleset, TCondition>,
         IRuleConfigureRuleset<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         private readonly GenericRuleValidator<TRuleset, TCondition> genericRuleValidator = GenericRuleValidator<TRuleset, TCondition>.Instance;
         private readonly RuleBuilder ruleBuilder;
@@ -55,13 +57,13 @@ namespace Regulae.Builder.Generic.RulesBuilder
                 var validationResult = this.genericRuleValidator.Validate(genericRule);
                 if (validationResult.IsValid)
                 {
-                    return RuleBuilderResult<TRuleset, TCondition>.Success(genericRule);
+                    return RuleBuilderResult.Success<TRuleset, TCondition>(genericRule);
                 }
 
-                return RuleBuilderResult<TRuleset, TCondition>.Failure(validationResult.Errors.Select(ve => ve.ErrorMessage).ToList());
+                return RuleBuilderResult.Failure<TRuleset, TCondition>(validationResult.Errors.Select(ve => ve.ErrorMessage).ToList());
             }
 
-            return RuleBuilderResult<TRuleset, TCondition>.Failure(ruleBuilderResult.Errors);
+            return RuleBuilderResult.Failure<TRuleset, TCondition>(ruleBuilderResult.Errors);
         }
 
         public IRuleConfigureContent<TRuleset, TCondition> InRuleset(TRuleset ruleset)

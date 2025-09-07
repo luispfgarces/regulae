@@ -18,52 +18,34 @@ namespace Regulae.Tests
             var dateBegin = new DateTime(2018, 01, 01);
             var dateEnd = new DateTime(2019, 01, 01);
 
-            var rule1 = new Rule
+            var rule1 = new Rule("Rule 1", "Test ruleset", dateBegin, dateEnd, new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = dateBegin,
-                DateEnd = dateEnd,
-                Name = "Rule 1",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var rule2 = new Rule
+            var rule2 = new Rule("Rule 2", "Test ruleset", new DateTime(2020, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2020, 01, 01),
-                DateEnd = new DateTime(2021, 01, 01),
-                Name = "Rule 2",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var rule3 = new Rule
+            var rule3 = new Rule("Rule 3", "Test ruleset", dateBegin, dateEnd, new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = dateBegin,
-                DateEnd = dateEnd,
-                Name = "Rule 3",
                 Priority = 1,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "EUR")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "EUR"),
             };
 
-            var rule4 = new Rule
+            var rule4 = new Rule("Rule 4", "Test ruleset", dateBegin, dateEnd, new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = dateBegin,
-                DateEnd = dateEnd,
-                Name = "Rule 4",
                 Priority = 1,
                 RootCondition = new ComposedConditionNode(
-                LogicalOperators.And,
-                new IConditionNode[]
-                {
-                    new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, "true"),
-                    new ValueConditionNode(ConditionNames.PluviosityRate.ToString(), Operators.Equal, "15"),
-                    new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "JPY")
-                }
-                )
+                    LogicalOperators.And,
+                    [
+                        new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, "true"),
+                        new ValueConditionNode(ConditionNames.PluviosityRate.ToString(), Operators.Equal, "15"),
+                        new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "JPY")
+                    ]),
             };
 
             var matchRules = new[]
@@ -119,14 +101,10 @@ namespace Regulae.Tests
 
             var matchRules = new List<Rule>
             {
-                new()
+                new("Rule 1", "Test ruleset", dateBegin, dateEnd, new ObjectContentContainer(new object()))
                 {
-                    ContentContainer = new ContentContainer(_ => new object()),
-                    DateBegin = dateBegin,
-                    DateEnd = dateEnd,
-                    Name = "Rule 3",
                     Priority = 1,
-                    RootCondition = null
+                    RootCondition = null,
                 }
             };
 

@@ -18,12 +18,8 @@ namespace Regulae.Builder.Validation
             this.RuleFor(r => r.DateBegin).NotEmpty();
             this.RuleFor(r => r.DateEnd).GreaterThanOrEqualTo(r => r.DateBegin).When(r => r.DateEnd != null);
             this.RuleFor(r => r.Name).NotNull().NotEmpty();
-            this.RuleFor(r => r.RootCondition).Custom((cn, cc) => cn.PerformValidation(new ConditionNodeValidationArgs<Rule>
-            {
-                ComposedConditionNodeValidator = this.composedConditionNodeValidator,
-                ValidationContext = cc,
-                ValueConditionNodeValidator = this.valueConditionNodeValidator,
-            }));
+            this.RuleFor(r => r.RootCondition).Custom((cn, cc) => cn?.PerformValidation(
+                new ConditionNodeValidationArgs<Rule>(this.composedConditionNodeValidator, cc, this.valueConditionNodeValidator)));
             this.RuleFor(r => r.Ruleset).NotEmpty();
         }
 

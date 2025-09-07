@@ -51,15 +51,10 @@ namespace Regulae.Builder.RulesBuilder
 
         public RuleBuilderResult Build()
         {
-            var rule = new Rule
+            var rule = new Rule(this.name, this.ruleset!, this.dateBegin, this.dateEnd, this.contentContainer!)
             {
                 Active = this.active ?? true,
-                ContentContainer = this.contentContainer!,
-                DateBegin = this.dateBegin,
-                DateEnd = this.dateEnd,
-                Name = this.name,
-                RootCondition = this.rootCondition!,
-                Ruleset = this.ruleset!,
+                RootCondition = this.rootCondition,
             };
 
             var validationResult = this.ruleValidator.Validate(rule);
@@ -86,10 +81,7 @@ namespace Regulae.Builder.RulesBuilder
 
         public IRuleConfigureDateBegin SetContent(object content, IContentSerializationProvider contentSerializationProvider)
         {
-            if (contentSerializationProvider is null)
-            {
-                throw new ArgumentNullException(nameof(contentSerializationProvider));
-            }
+            ArgumentNullException.ThrowIfNull(contentSerializationProvider);
 
             this.contentContainer = new SerializedContentContainer(this.ruleset!, content, contentSerializationProvider);
             return this;

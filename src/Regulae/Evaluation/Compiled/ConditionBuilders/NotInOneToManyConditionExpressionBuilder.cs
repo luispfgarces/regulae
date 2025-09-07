@@ -11,14 +11,14 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
         private static readonly MethodInfo enumerableGenericContains
             = typeof(Enumerable)
                 .GetMethods()
-                .FirstOrDefault(m => string.Equals(m.Name, "Contains", StringComparison.Ordinal) && m.GetParameters().Length == 2);
+                .First(m => string.Equals(m.Name, "Contains", StringComparison.Ordinal) && m.GetParameters().Length == 2);
 
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
             var callExpression = builder.Call(
-                instance: null,
+                instance: null!,
                 enumerableGenericContains.MakeGenericMethod(args.DataTypeConfiguration.OneCardinality.Type),
-                new Expression[] { args.RightHandOperand, args.LeftHandOperand });
+                [args.RightHandOperand, args.LeftHandOperand]);
 
             return builder.Not(callExpression);
         }

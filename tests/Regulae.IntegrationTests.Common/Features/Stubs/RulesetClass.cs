@@ -4,6 +4,6 @@ namespace Regulae.IntegrationTests.Common.Features.Stubs
     {
         public int RulesetProperty1 { get; set; }
 
-        public string RulesetProperty2 { get; set; }
+        public string? RulesetProperty2 { get; set; }
     }
 }

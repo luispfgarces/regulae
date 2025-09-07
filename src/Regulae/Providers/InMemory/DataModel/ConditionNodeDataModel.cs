@@ -5,8 +5,8 @@ namespace Regulae.Providers.InMemory.DataModel
 
     internal class ConditionNodeDataModel
     {
-        public LogicalOperators LogicalOperator { get; set; }
+        public required LogicalOperators LogicalOperator { get; set; }
 
-        public IDictionary<string, object> Properties { get; set; }
+        public required IDictionary<string, object> Properties { get; set; }
     }
 }

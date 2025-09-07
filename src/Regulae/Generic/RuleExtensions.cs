@@ -7,6 +7,7 @@ namespace Regulae.Generic
     internal static class RuleExtensions
     {
         public static IConditionNode<TCondition> ToGenericConditionNode<TCondition>(this IConditionNode rootCondition)
+            where TCondition : notnull
         {
             if (rootCondition.LogicalOperator == LogicalOperators.Eval)
             {
@@ -19,6 +20,9 @@ namespace Regulae.Generic
             return new ComposedConditionNode<TCondition>(composedConditionNode);
         }
 
-        public static Rule<TRuleset, TCondition> ToGenericRule<TRuleset, TCondition>(this Rule rule) => new(rule);
+        public static Rule<TRuleset, TCondition> ToGenericRule<TRuleset, TCondition>(this Rule rule)
+            where TRuleset : notnull
+            where TCondition : notnull
+            => new(rule);
     }
 }

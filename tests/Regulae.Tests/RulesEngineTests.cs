@@ -43,16 +43,11 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = nameof(RulesetNames.Type1);
 
-            var testRule = new Rule
+            var testRule = new Rule("Update test rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Update test rule",
                 Priority = 3,
                 Active = false,
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
-                Ruleset = ruleset,
             };
 
             Mock.Get(rulesSourceMock)
@@ -80,15 +75,10 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = new Ruleset(RulesetNames.Type1.ToString(), DateTime.UtcNow);
 
-            var testRule = new Rule
+            var testRule = new Rule("Test rule", ruleset.Name, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                Ruleset = ruleset.Name,
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             Mock.Get(rulesSourceMock)
@@ -123,15 +113,10 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = new Ruleset(RulesetNames.Type1.ToString(), DateTime.UtcNow);
 
-            var testRule = new Rule
+            var testRule = new Rule("Test rule", ruleset.Name, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                Ruleset = ruleset.Name,
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             Mock.Get(rulesSourceMock)
@@ -160,15 +145,10 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = new Ruleset(RulesetNames.Type1.ToString(), DateTime.UtcNow);
 
-            var testRule = new Rule
+            var testRule = new Rule("Test rule", ruleset.Name, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                Ruleset = ruleset.Name,
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             Mock.Get(this.rulesSourceMock)
@@ -267,15 +247,10 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = nameof(RulesetNames.Type1);
 
-            var testRule = new Rule
+            var testRule = new Rule("Update test rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Update test rule",
                 Priority = 3,
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
-                Ruleset = ruleset,
             };
 
             var evaluationOptions = new EvaluationOptions
@@ -380,34 +355,22 @@ namespace Regulae.Tests
                 { ConditionNames.IsoCurrency.ToString(), "USD" },
             };
 
-            var expected1 = new Rule
+            var expected1 = new Rule("Expected rule 1", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Expected rule 1",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var expected2 = new Rule
+            var expected2 = new Rule("Expected rule 2", ruleset, new DateTime(2010, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2010, 01, 01),
-                DateEnd = new DateTime(2021, 01, 01),
-                Name = "Expected rule 2",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var notExpected = new Rule
+            var notExpected = new Rule("Not expected rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Not expected rule",
                 Priority = 1, // Topmost rule, should be the one that wins if options are set to topmost wins.
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "CHE")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "CHE"),
             };
 
             var rules = new[]
@@ -458,24 +421,16 @@ namespace Regulae.Tests
                 { ConditionNames.IsoCurrency.ToString(), "USD" },
             };
 
-            var other = new Rule
+            var other = new Rule("Expected rule", ruleset, new DateTime(2010, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Expected rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var expected = new Rule
+            var expected = new Rule("Expected rule", ruleset, new DateTime(2010, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2010, 01, 01),
-                DateEnd = new DateTime(2021, 01, 01),
-                Name = "Expected rule",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             var rules = new[]
@@ -522,24 +477,16 @@ namespace Regulae.Tests
                 { ConditionNames.IsoCurrency.ToString(), "USD" },
             };
 
-            var expected = new Rule
+            var expected = new Rule("Expected rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Expected rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            var other = new Rule
+            var other = new Rule("Expected rule", ruleset, new DateTime(2010, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2010, 01, 01),
-                DateEnd = new DateTime(2021, 01, 01),
-                Name = "Expected rule",
                 Priority = 200,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             var rules = new[]
@@ -587,23 +534,15 @@ namespace Regulae.Tests
 
             var rules = new[]
             {
-                new Rule
+                new Rule("Expected rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
                 {
-                    ContentContainer = new ContentContainer(_ => new object()),
-                    DateBegin = new DateTime(2018, 01, 01),
-                    DateEnd = new DateTime(2019, 01, 01),
-                    Name = "Expected rule",
                     Priority = 3,
-                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
                 },
-                new Rule
+                new Rule("Expected rule", ruleset, new DateTime(2010, 01, 01), new DateTime(2021, 01, 01), new ObjectContentContainer(new object()))
                 {
-                    ContentContainer = new ContentContainer(_ => new object()),
-                    DateBegin = new DateTime(2010, 01, 01),
-                    DateEnd = new DateTime(2021, 01, 01),
-                    Name = "Expected rule",
                     Priority = 200,
-                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                    RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
                 }
             };
 
@@ -638,15 +577,10 @@ namespace Regulae.Tests
             // Arrange
             var ruleset = nameof(RulesetNames.Type1);
 
-            var testRule = new Rule
+            var testRule = new Rule("Update test rule", ruleset, new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Update test rule",
                 Priority = 3,
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
-                Ruleset = ruleset,
             };
 
             var evaluationOptions = new EvaluationOptions
@@ -682,14 +616,10 @@ namespace Regulae.Tests
         public async Task UpdateRuleAsync_GivenRuleWithInvalidDateEnd_UpdatesRuleFailure()
         {
             // Arrange
-            var testRule = new Rule
+            var testRule = new Rule("Update test rule", nameof(RulesetNames.Type1), new DateTime(2018, 01, 01), new DateTime(2019, 01, 01), new ObjectContentContainer(new object()))
             {
-                ContentContainer = new ContentContainer(_ => new object()),
-                DateBegin = new DateTime(2018, 01, 01),
-                DateEnd = new DateTime(2019, 01, 01),
-                Name = "Update test rule",
                 Priority = 3,
-                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA")
+                RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
             var evaluationOptions = new EvaluationOptions

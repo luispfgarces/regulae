@@ -143,28 +143,28 @@ namespace Regulae
         public static implicit operator Operand(string value) => new(value);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.Boolean[]"/> to <see cref="Operand"/>.
+        /// Performs an implicit conversion from <see cref="T:System.Boolean[]"/> to <see cref="Operand"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static implicit operator Operand(bool[] value) => new(value);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.Decimal[]"/> to <see cref="Operand"/>.
+        /// Performs an implicit conversion from <see cref="T:System.Decimal[]"/> to <see cref="Operand"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static implicit operator Operand(decimal[] value) => new(value);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.Int32[]"/> to <see cref="Operand"/>.
+        /// Performs an implicit conversion from <see cref="T:System.Int32[]"/> to <see cref="Operand"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static implicit operator Operand(int[] value) => new(value);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.String[]"/> to <see cref="Operand"/>.
+        /// Performs an implicit conversion from <see cref="T:System.String[]"/> to <see cref="Operand"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>

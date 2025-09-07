@@ -5,7 +5,6 @@ namespace Regulae.Tests.Serialization
     using Moq;
     using Regulae.Serialization;
     using Regulae.Tests.TestStubs;
-    using Regulae.Serialization;
     using Xunit;
 
     public class SerializedContentContainerTests

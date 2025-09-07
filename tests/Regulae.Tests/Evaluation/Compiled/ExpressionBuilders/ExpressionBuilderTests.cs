@@ -11,52 +11,6 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
     public class ExpressionBuilderTests
     {
         [Fact]
-        public void Build_GivenExpressionConfiguration_ReturnsExpressionResultWithBuiltExpression()
-        {
-            // Arrange
-            var testParameter = Expression.Parameter(typeof(int), "input");
-            var testVariable = Expression.Variable(typeof(int), "result");
-            var testReturnLabelTarget = Expression.Label(typeof(int));
-
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ExpressionName = "a",
-                Expressions = new List<Expression>
-                {
-                    Expression.Assign(testVariable, testParameter),
-                    Expression.Return(testReturnLabelTarget, testVariable),
-                },
-                LabelTargets = new Dictionary<string, LabelTarget>(),
-                Parameters = new Dictionary<string, ParameterExpression> { { "input", testParameter } },
-                ReturnDefaultValue = 0,
-                ReturnLabelTarget = testReturnLabelTarget,
-                ReturnType = typeof(int),
-                Variables = new Dictionary<string, ParameterExpression> { { "result", testVariable } },
-            };
-
-            var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
-
-            var configuredExpressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
-
-            // Act
-            var result = configuredExpressionBuilder.Build();
-
-            // Assert
-            result.Should().NotBeNull();
-            result.ExpressionName.Should().Be("a");
-            result.Implementation.Should().NotBeNull();
-            result.Parameters.Should().NotBeNullOrEmpty()
-                .And.BeEquivalentTo(expressionConfiguration.Parameters.Values);
-            result.ReturnType.Should().Be(typeof(int));
-
-            var compiledExpression = Expression.Lambda<Func<int, int>>(result.Implementation, result.Parameters).Compile();
-            var compiledExpressionResult = compiledExpression.Invoke(4);
-            compiledExpressionResult.Should().Be(4);
-
-            configuredExpressionBuilder.ExpressionConfiguration.Should().BeSameAs(expressionConfiguration);
-        }
-
-        [Fact]
         public void HavingReturn_GivenNotNullTypeAndDefaultValue_ReturnsExpressionImplementationBuilder()
         {
             // Arrange
@@ -64,13 +18,9 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             object defaultValue = null;
 
             var expressionName = "TestExpression";
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ExpressionName = expressionName,
-            };
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var actual = expressionBuilder.HavingReturn(type, defaultValue);
@@ -78,20 +28,20 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Assert
             actual.Should().NotBeNull()
                 .And.BeSameAs(expressionBuilder);
-            expressionConfiguration.ReturnDefaultValue.Should().Be(defaultValue);
-            expressionConfiguration.ReturnType.Should().Be(type);
-            expressionConfiguration.ReturnLabelTarget.Should().NotBeNull();
-            expressionConfiguration.ReturnLabelTarget.Name.Should().Contain(expressionName);
+            expressionBuilder.ReturnDefaultValue.Should().Be(defaultValue);
+            expressionBuilder.ReturnType.Should().Be(type);
+            expressionBuilder.ReturnLabelTarget.Should().NotBeNull();
+            expressionBuilder.ReturnLabelTarget.Name.Should().Contain(expressionName);
         }
 
         [Fact]
         public void HavingReturn_GivenNullTypeAndDefaultValue_ReturnsExpressionImplementationBuilder()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionName = "TestExpression";
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var action = FluentActions.Invoking(() => expressionBuilder.HavingReturn(null, null));
@@ -108,13 +58,9 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             object defaultValue = null;
 
             var expressionName = "TestExpression";
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ExpressionName = expressionName,
-            };
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var actual = expressionBuilder.HavingReturn<object>(defaultValue);
@@ -122,10 +68,10 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Assert
             actual.Should().NotBeNull()
                 .And.BeSameAs(expressionBuilder);
-            expressionConfiguration.ReturnDefaultValue.Should().Be(defaultValue);
-            expressionConfiguration.ReturnType.Should().Be(typeof(object));
-            expressionConfiguration.ReturnLabelTarget.Should().NotBeNull();
-            expressionConfiguration.ReturnLabelTarget.Name.Should().Contain(expressionName);
+            expressionBuilder.ReturnDefaultValue.Should().Be(defaultValue);
+            expressionBuilder.ReturnType.Should().Be(typeof(object));
+            expressionBuilder.ReturnLabelTarget.Should().NotBeNull();
+            expressionBuilder.ReturnLabelTarget.Name.Should().Contain(expressionName);
         }
 
         [Fact]
@@ -142,7 +88,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 .And.BeOfType<ExpressionBuilder>();
 
             var expressionBuilder = actual as ExpressionBuilder;
-            expressionBuilder.ExpressionConfiguration.ExpressionName.Should().Be(expressionName);
+            expressionBuilder.Name.Should().Be(expressionName);
         }
 
         [Fact]
@@ -163,17 +109,9 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void SetImplementation_GivenNonNullBuilderAction_ReturnsConfiguredExpressionBuilder()
         {
             // Arrange
+            var expressionName = "TestExpression";
             var testParameter = Expression.Parameter(typeof(int), "input");
             var testReturnLabelTarget = Expression.Label(typeof(int));
-
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ExpressionName = "a",
-                Parameters = new Dictionary<string, ParameterExpression> { { "input", testParameter } },
-                ReturnDefaultValue = 0,
-                ReturnLabelTarget = testReturnLabelTarget,
-                ReturnType = typeof(int),
-            };
 
             var testExpressions = new List<Expression>
             {
@@ -211,7 +149,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 .Returns(implementationExpressionBuilder);
 
             var expressionBuilder = new ExpressionBuilder(
-                expressionConfiguration,
+                expressionName,
                 expressionBuilderFactory);
 
             // Act
@@ -221,11 +159,11 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             actual.Should().NotBeNull()
                 .And.BeSameAs(expressionBuilder);
             executedBuilderAction.Should().BeTrue();
-            expressionConfiguration.LabelTargets.Should().NotBeNull()
+            expressionBuilder.LabelTargets.Should().NotBeNull()
                 .And.BeSameAs(testLabelTargets);
-            expressionConfiguration.Variables.Should().NotBeNull()
+            expressionBuilder.Variables.Should().NotBeNull()
                 .And.BeSameAs(testVariables);
-            expressionConfiguration.Expressions.Should().NotBeNull()
+            expressionBuilder.Expressions.Should().NotBeNull()
                 .And.BeSameAs(testExpressions);
         }
 
@@ -233,14 +171,14 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void SetImplementation_GivenNullBuilderAction_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionName = "TestExpression";
 
             Action<IExpressionBlockBuilder> builderAction = null;
 
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBuilder = new ExpressionBuilder(
-                expressionConfiguration,
+                expressionName,
                 expressionBuilderFactory);
 
             // Act
@@ -255,10 +193,10 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void WithoutParameters_NoConditions_ReturnsExpressionReturnBuilder()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionName = "TestExpression";
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var actual = expressionBuilder.WithoutParameters();
@@ -266,7 +204,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Assert
             actual.Should().NotBeNull()
                 .And.BeSameAs(expressionBuilder);
-            expressionConfiguration.Parameters.Should().NotBeNull()
+            expressionBuilder.Parameters.Should().NotBeNull()
                 .And.BeEmpty();
         }
 
@@ -274,7 +212,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void WithParameters_GivenNotNullBuilderAction_ReturnsExpressionReturnBuilder()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionName = "TestExpression";
             var parameterExpressions = new Dictionary<string, ParameterExpression>();
             var expressionParametersConfiguration = Mock.Of<IExpressionParametersConfiguration>();
             Mock.Get(expressionParametersConfiguration)
@@ -293,7 +231,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 .Setup(x => x.CreateExpressionParametersConfiguration())
                 .Returns(expressionParametersConfiguration);
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var actual = expressionBuilder.WithParameters(c =>
@@ -304,17 +242,17 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Assert
             actual.Should().NotBeNull()
                 .And.BeSameAs(expressionBuilder);
-            expressionConfiguration.Parameters.Should().ContainKey("testParameter");
+            expressionBuilder.Parameters.Should().ContainKey("testParameter");
         }
 
         [Fact]
         public void WithParameters_GivenNullBuilderAction_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionName = "TestExpression";
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
-            var expressionBuilder = new ExpressionBuilder(expressionConfiguration, expressionBuilderFactory);
+            var expressionBuilder = new ExpressionBuilder(expressionName, expressionBuilderFactory);
 
             // Act
             var action = FluentActions.Invoking(() => expressionBuilder.WithParameters(null));

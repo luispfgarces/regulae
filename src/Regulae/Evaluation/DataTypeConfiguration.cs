@@ -42,6 +42,12 @@ namespace Regulae.Evaluation
             var valuePatternAttribute = TypesCache.DataTypes
                 .GetMember(dataType.ToString())[0]
                 .GetCustomAttribute<DataTypeValuePatternAttribute>();
+
+            if (valuePatternAttribute is null)
+            {
+                throw new InvalidOperationException($"The data type '{dataType}' does not define a value pattern through the {nameof(DataTypeValuePatternAttribute)}.");
+            }
+
             var valuePattern = new Regex(
                 valuePatternAttribute.Pattern,
                 RegexOptions.Compiled | RegexOptions.IgnoreCase,

@@ -6,20 +6,14 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
     internal sealed class ExpressionConfiguration
     {
-        public string ExpressionName { get; set; }
+        public required string ExpressionName { get; set; }
 
-        public IEnumerable<Expression> Expressions { get; set; }
+        public required IReadOnlyDictionary<string, ParameterExpression> Parameters { get; set; }
 
-        public IReadOnlyDictionary<string, LabelTarget> LabelTargets { get; set; }
+        public required object? ReturnDefaultValue { get; set; }
 
-        public IReadOnlyDictionary<string, ParameterExpression> Parameters { get; set; }
+        public required LabelTarget ReturnLabelTarget { get; set; }
 
-        public object ReturnDefaultValue { get; set; }
-
-        public LabelTarget ReturnLabelTarget { get; set; }
-
-        public Type ReturnType { get; set; }
-
-        public IReadOnlyDictionary<string, ParameterExpression> Variables { get; set; }
+        public required Type ReturnType { get; set; }
     }
 }

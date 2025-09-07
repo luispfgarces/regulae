@@ -9,7 +9,9 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
 
     internal sealed class ContainsOneToOneConditionExpressionBuilder : IConditionExpressionBuilder
     {
-        private static readonly MethodInfo stringContainsMethodInfo = typeof(string).GetMethod(nameof(Enumerable.Contains), new[] { typeof(string) });
+        private static readonly MethodInfo stringContainsMethodInfo = typeof(string).GetMethod(
+            nameof(Enumerable.Contains),
+            [typeof(string)])!;
 
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
@@ -22,7 +24,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
             return builder.Call(
                 args.LeftHandOperand,
                 stringContainsMethodInfo,
-                new Expression[] { args.RightHandOperand });
+                [args.RightHandOperand]);
         }
     }
 }

@@ -4,6 +4,6 @@ namespace Regulae.Source
 
     internal sealed class UpdateRuleArgs
     {
-        public Rule Rule { get; set; }
+        public required Rule Rule { get; set; }
     }
 }

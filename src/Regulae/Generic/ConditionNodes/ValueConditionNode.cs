@@ -13,6 +13,7 @@ namespace Regulae.Generic.ConditionNodes
     /// <seealso cref="IValueConditionNode{TCondition}"/>
     [DebuggerDisplay("{RightOperand.DataType.ToString(),nq} condition: <{Condition.ToString(),nq}> {Operator} {RightOperand.Value}")]
     public class ValueConditionNode<TCondition> : IValueConditionNode<TCondition>
+        where TCondition : notnull
     {
         private readonly ValueConditionNode valueConditionNode;
 
@@ -49,9 +50,9 @@ namespace Regulae.Generic.ConditionNodes
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// <see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is ValueConditionNode<TCondition> node && EqualityComparer<ValueConditionNode>.Default.Equals(this.valueConditionNode, node.valueConditionNode);
+        public override bool Equals(object? obj) => obj is ValueConditionNode<TCondition> node && EqualityComparer<ValueConditionNode>.Default.Equals(this.valueConditionNode, node.valueConditionNode);
 
         /// <summary>
         /// Returns a hash code for this instance.

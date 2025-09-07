@@ -38,7 +38,7 @@ namespace Regulae.Evaluation.Interpreted.ValueEvaluation.Dispatchers
 
         private static void ThrowIfUnsupportedOperandsAndOperatorCombination(Operators @operator, Multiplicities multiplicity)
         {
-            if (!OperatorsMetadata.AllByOperator.TryGetValue(@operator, out var operatorMetadata) && operatorMetadata.SupportedMultiplicities.Contains(multiplicity))
+            if (!OperatorsMetadata.AllByOperator.TryGetValue(@operator, out var operatorMetadata) && operatorMetadata!.SupportedMultiplicities.Contains(multiplicity))
             {
                 throw new NotSupportedException($"The multiplicity '{multiplicity}' is not supported for operator '{@operator}'.");
             }

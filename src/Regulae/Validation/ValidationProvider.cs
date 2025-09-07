@@ -6,7 +6,7 @@ namespace Regulae.Validation
 
     internal sealed class ValidationProvider : IValidatorProvider
     {
-        private readonly IDictionary<Type, IValidator> validatorsByType;
+        private readonly Dictionary<Type, IValidator> validatorsByType;
 
         private ValidationProvider()
         {
@@ -18,7 +18,7 @@ namespace Regulae.Validation
 
         public IValidator<T> GetValidatorFor<T>()
             => this.validatorsByType.TryGetValue(typeof(T), out var validator)
-                ? validator as IValidator<T>
+                ? (IValidator<T>)validator
                 : throw new NotSupportedException($"No validator for type '{typeof(T).Name}' exists.");
 
         public ValidationProvider MapValidatorFor<T>(IValidator<T> validator)

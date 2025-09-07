@@ -9,6 +9,8 @@ namespace Regulae
     /// <typeparam name="TRuleset">The type of the ruleset.</typeparam>
     /// <typeparam name="TCondition">The type of the condition.</typeparam>
     public class SearchArgs<TRuleset, TCondition>
+        where TRuleset : notnull
+        where TCondition : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchArgs{TRuleset, TCondition}"/> class.
@@ -70,7 +72,7 @@ namespace Regulae
         /// <summary>
         /// Gets or sets whether rules without search conditions should or not be excluded.
         /// </summary>
-        /// <value><c>true</c> if [exclude rules without search conditions]; otherwise, <c>false</c>.</value>
+        /// <value><see langword="true"/> if [exclude rules without search conditions]; otherwise, <see langword="false"/>.</value>
         public bool ExcludeRulesWithoutSearchConditions { get; set; }
 
         /// <summary>

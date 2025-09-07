@@ -38,12 +38,6 @@ namespace Regulae.Builder
             IConditionsEvalEngine conditionsEvalEngine;
             switch (rulesEngineOptions.EvaluationStrategy)
             {
-                case EvaluationStrategies.Interpreted:
-                    var operatorEvalStrategyFactory = new OperatorEvalStrategyFactory();
-                    var conditionEvalDispatchProvider = new ConditionEvalDispatchProvider(operatorEvalStrategyFactory, multiplicityEvaluator, dataTypesConfigurationProvider);
-                    conditionsEvalEngine = new InterpretedConditionsEvalEngine(conditionEvalDispatchProvider, conditionsTreeAnalyzer, rulesEngineOptions);
-                    break;
-
                 case EvaluationStrategies.Compiled:
                     var conditionExpressionBuilderProvider = new ConditionExpressionBuilderProvider();
                     var valueConditionNodeCompilerProvider = new ValueConditionNodeExpressionBuilderProvider(conditionExpressionBuilderProvider);
@@ -54,7 +48,10 @@ namespace Regulae.Builder
                     break;
 
                 default:
-                    throw new NotSupportedException($"Specified a evaluation strategy is not supported: {rulesEngineOptions.EvaluationStrategy}");
+                    var operatorEvalStrategyFactory = new OperatorEvalStrategyFactory();
+                    var conditionEvalDispatchProvider = new ConditionEvalDispatchProvider(operatorEvalStrategyFactory, multiplicityEvaluator, dataTypesConfigurationProvider);
+                    conditionsEvalEngine = new InterpretedConditionsEvalEngine(conditionEvalDispatchProvider, conditionsTreeAnalyzer, rulesEngineOptions);
+                    break;
             }
 
             if (rulesEngineOptions.Cache is not null)

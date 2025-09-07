@@ -8,7 +8,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
 
     internal sealed class NotContainsOneToOneConditionExpressionBuilder : IConditionExpressionBuilder
     {
-        private static readonly MethodInfo stringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+        private static readonly MethodInfo stringContainsMethodInfo = typeof(string).GetMethod("Contains", [typeof(string)])!;
 
         public Expression BuildConditionExpression(IExpressionBlockBuilder builder, BuildConditionExpressionArgs args)
         {
@@ -20,7 +20,7 @@ namespace Regulae.Evaluation.Compiled.ConditionBuilders
             return builder.Not(builder.Call(
                 args.LeftHandOperand,
                 stringContainsMethodInfo,
-                new Expression[] { args.RightHandOperand }));
+                [args.RightHandOperand]));
         }
     }
 }

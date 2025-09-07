@@ -5,7 +5,6 @@ namespace Regulae.Rql.IntegrationTests.GrammarCheck
     using FluentAssertions;
     using Regulae.Rql.Pipeline.Parse;
     using Regulae.Rql.Pipeline.Scan;
-    using Regulae.Rql.Pipeline.Parse;
     using Xunit;
     using Xunit.Abstractions;
     using YamlDotNet.Serialization;
@@ -44,9 +43,14 @@ namespace Regulae.Rql.IntegrationTests.GrammarCheck
 
                     var checks = deserializer.Deserialize<GrammarChecks>(checksStreamReader);
 
+                    if (checks.Checks is null || !checks.Checks.Any())
+                    {
+                        throw new InvalidOperationException($"No checks found in the file '{checksFile}'.");
+                    }
+
                     foreach (var checkLine in checks.Checks)
                     {
-                        yield return new object[] { checkLine.Rql, checkLine.ExpectsSuccess, checkLine.ExpectedMessages };
+                        yield return new object[] { checkLine.Rql!, checkLine.ExpectsSuccess!, checkLine.ExpectedMessages!, };
                     }
                 }
             }

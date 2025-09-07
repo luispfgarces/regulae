@@ -9,6 +9,22 @@ namespace Regulae
     /// </summary>
     public class Rule
     {
+        internal Rule(
+            string name,
+            string ruleset,
+            DateTime dateBegin,
+            DateTime? dateEnd,
+            IContentContainer contentContainer)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentException.ThrowIfNullOrWhiteSpace(ruleset);
+            this.Name = name;
+            this.Ruleset = ruleset;
+            this.DateBegin = dateBegin;
+            this.DateEnd = dateEnd;
+            this.ContentContainer = contentContainer ?? throw new ArgumentNullException(nameof(contentContainer));
+        }
+
         /// <summary>
         /// Gets and sets the if the rules is active.
         /// </summary>
@@ -42,7 +58,7 @@ namespace Regulae
         /// <summary>
         /// Gets the rule root condition. This property is null when rule has no conditions.
         /// </summary>
-        public IConditionNode RootCondition { get; internal set; }
+        public IConditionNode? RootCondition { get; internal set; }
 
         /// <summary>
         /// Gets the ruleset to which the rule belongs to.
@@ -56,6 +72,8 @@ namespace Regulae
         /// <typeparam name="TCondition">The type of the conditions.</typeparam>
         /// <returns></returns>
         public static IRuleConfigureRuleset<TRuleset, TCondition> Create<TRuleset, TCondition>(string name)
+            where TRuleset : notnull
+            where TCondition : notnull
             => new RuleBuilder<TRuleset, TCondition>(name);
 
         /// <summary>
@@ -69,17 +87,11 @@ namespace Regulae
         /// Clones the rule into a different instance.
         /// </summary>
         /// <returns></returns>
-        public virtual Rule Clone()
-            => new Rule
-            {
-                Active = this.Active,
-                ContentContainer = this.ContentContainer,
-                DateBegin = this.DateBegin,
-                DateEnd = this.DateEnd,
-                Name = this.Name,
-                Priority = this.Priority,
-                RootCondition = this.RootCondition?.Clone()!,
-                Ruleset = this.Ruleset,
-            };
+        public virtual Rule Clone() => new Rule(this.Name, this.Ruleset, this.DateBegin, this.DateEnd, this.ContentContainer)
+        {
+            Active = this.Active,
+            Priority = this.Priority,
+            RootCondition = this.RootCondition?.Clone()!,
+        };
     }
 }

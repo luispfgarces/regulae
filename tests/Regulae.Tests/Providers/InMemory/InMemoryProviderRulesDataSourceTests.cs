@@ -51,8 +51,14 @@ namespace Regulae.Tests.Providers.InMemory
         public async Task AddRuleAsync_GivenRule_ConvertsToRuleDataModelAndAddsToDataSource()
         {
             // Arrange
-            var rule = new Rule();
-            var ruleDataModel = new RuleDataModel();
+            var rule = new Rule("Test rule", "Test ruleset", DateTime.UtcNow, null, new ObjectContentContainer(new object()));
+            var ruleDataModel = new RuleDataModel
+            {
+                Content = new object(),
+                DateBegin = DateTime.UtcNow,
+                Name = "Test",
+                Ruleset = "TestRuleset",
+            };
 
             var inMemoryRulesStorage = Mock.Of<IInMemoryRulesStorage>();
             var ruleFactory = Mock.Of<IRuleFactory>();
@@ -125,8 +131,14 @@ namespace Regulae.Tests.Providers.InMemory
         public async Task UpdateRuleAsync_GivenRule_ConvertsToRuleDataModelAndUpdatesOnDataSource()
         {
             // Arrange
-            var rule = new Rule();
-            var ruleDataModel = new RuleDataModel();
+            var rule = new Rule("Test rule", "Test ruleset", DateTime.UtcNow, null, new ObjectContentContainer(new object()));
+            var ruleDataModel = new RuleDataModel
+            {
+                Content = new object(),
+                DateBegin = DateTime.UtcNow,
+                Name = "Test",
+                Ruleset = "TestRuleset",
+            };
 
             var inMemoryRulesStorage = Mock.Of<IInMemoryRulesStorage>();
             var ruleFactory = Mock.Of<IRuleFactory>();

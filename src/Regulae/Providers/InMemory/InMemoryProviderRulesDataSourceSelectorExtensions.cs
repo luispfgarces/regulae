@@ -29,13 +29,17 @@ namespace Regulae.Providers.InMemory
             this IRulesDataSourceSelector rulesDataSourceSelector,
             IServiceProvider serviceProvider)
         {
-            if (serviceProvider is null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
+            ArgumentNullException.ThrowIfNull(serviceProvider);
 
-            var inMemoryRulesStorage = (IInMemoryRulesStorage)serviceProvider
+            var inMemoryRulesStorage = (IInMemoryRulesStorage?)serviceProvider
                 .GetService(typeof(IInMemoryRulesStorage));
+
+            if (inMemoryRulesStorage is null)
+            {
+                throw new InvalidOperationException(
+                    $"The service provider is not configured for in-memory rules data source. " +
+                    $"Please make sure you call {nameof(ServiceCollectionExtensions.AddInMemoryRulesDataSource)}(...) when building the service collection.");
+            }
 
             return rulesDataSourceSelector.SetInMemoryDataSource(inMemoryRulesStorage);
         }
@@ -44,10 +48,7 @@ namespace Regulae.Providers.InMemory
             this IRulesDataSourceSelector rulesDataSourceSelector,
             IInMemoryRulesStorage inMemoryRulesStorage)
         {
-            if (rulesDataSourceSelector is null)
-            {
-                throw new ArgumentNullException(nameof(rulesDataSourceSelector));
-            }
+            ArgumentNullException.ThrowIfNull(rulesDataSourceSelector);
 
             var ruleFactory = new RuleFactory();
             var inMemoryProviderRulesDataSource

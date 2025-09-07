@@ -4,12 +4,33 @@ namespace Regulae.Tests.Builder
     using Moq;
     using Regulae;
     using Regulae.Builder;
+    using Regulae.Cache;
     using Xunit;
 
     public class ConfiguredRulesEngineBuilderTests
     {
         [Fact]
-        public void Build_WhenCompilationIsEnabled_ReturnsRulesEngineWithCompiledEvaluation()
+        public void Build_WhenCacheIsSpecified_ReturnsRulesEngineWithRulesSourceCaching()
+        {
+            // Arrange
+            var rulesDataSource = Mock.Of<IRulesDataSource>();
+            var cache = Mock.Of<ICache>();
+            var configuredRulesEngineBuilder = new ConfiguredRulesEngineBuilder(rulesDataSource);
+
+            configuredRulesEngineBuilder.Configure(opt =>
+            {
+                opt.UseCache(cache);
+            });
+
+            // Act
+            var actual = configuredRulesEngineBuilder.Build();
+
+            // Assert
+            actual.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Build_WhenCompiledEvaluationStrategy_ReturnsRulesEngineWithCompiledEvaluation()
         {
             // Arrange
             var rulesDataSource = Mock.Of<IRulesDataSource>();
@@ -17,7 +38,7 @@ namespace Regulae.Tests.Builder
 
             configuredRulesEngineBuilder.Configure(opt =>
             {
-                opt.SetAutoCreateRulesets(true);
+                opt.UseEvaluationStrategy(EvaluationStrategies.Compiled);
             });
 
             // Act
@@ -25,38 +46,27 @@ namespace Regulae.Tests.Builder
 
             // Assert
             actual.Should().NotBeNull();
+            actual.Options.EvaluationStrategy.Should().Be(EvaluationStrategies.Compiled);
         }
 
         [Fact]
-        public void Build_WhenCompilationIsNotEnabled_ReturnsRulesEngineWithClassicEvaluation()
+        public void Build_WhenInterpretedEvaluationStrategy_ReturnsRulesEngineWithInterpretedEvaluation()
         {
             // Arrange
             var rulesDataSource = Mock.Of<IRulesDataSource>();
             var configuredRulesEngineBuilder = new ConfiguredRulesEngineBuilder(rulesDataSource);
 
-            // Act
-            var actual = configuredRulesEngineBuilder.Build();
-
-            // Assert
-            actual.Should().NotBeNull();
-        }
-
-        [Fact]
-        public void Configure_GivenOptionsConfigurationAction_SetsOptionsAndValidates()
-        {
-            // Arrange
-            var rulesDataSource = Mock.Of<IRulesDataSource>();
-            var configuredRulesEngineBuilder = new ConfiguredRulesEngineBuilder(rulesDataSource);
-
-            // Act
-            var actual = configuredRulesEngineBuilder.Configure(opt =>
+            configuredRulesEngineBuilder.Configure(opt =>
             {
-                opt.SetMissingConditionBehavior(MissingConditionBehaviors.Discard);
+                opt.UseEvaluationStrategy(EvaluationStrategies.Interpreted);
             });
 
+            // Act
+            var actual = configuredRulesEngineBuilder.Build();
+
             // Assert
-            actual.Should().NotBeNull()
-                .And.BeSameAs(configuredRulesEngineBuilder);
+            actual.Should().NotBeNull();
+            actual.Options.EvaluationStrategy.Should().Be(EvaluationStrategies.Interpreted);
         }
     }
 }

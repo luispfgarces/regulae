@@ -8,6 +8,7 @@ namespace Regulae.Generic
     /// </summary>
     /// <typeparam name="TRuleset">The type of the ruleset.</typeparam>
     public class Ruleset<TRuleset>
+        where TRuleset : notnull
     {
         private readonly Ruleset wrappedRuleset;
 

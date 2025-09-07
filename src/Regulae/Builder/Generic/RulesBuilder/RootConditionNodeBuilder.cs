@@ -6,6 +6,7 @@ namespace Regulae.Builder.Generic.RulesBuilder
     using Regulae.Generic;
 
     internal sealed class RootConditionNodeBuilder<TCondition> : IRootConditionNodeBuilder<TCondition>
+        where TCondition : notnull
     {
         public IConditionNode And(
             Func<IFluentConditionNodeBuilder<TCondition>, IFluentConditionNodeBuilder<TCondition>> conditionFunc)

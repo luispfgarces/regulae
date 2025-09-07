@@ -4,10 +4,10 @@ namespace Regulae.Providers.InMemory.DataModel
 
     internal sealed class ConditionDataModel
     {
-        public DateTime Creation { get; set; }
+        public required DateTime Creation { get; set; }
 
-        public DataTypes DataType { get; set; }
+        public required DataTypes DataType { get; set; }
 
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

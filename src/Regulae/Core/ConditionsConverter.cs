@@ -20,7 +20,7 @@ namespace Regulae.Core
 
         private static readonly Dictionary<DataTypes, Func<object, object>> SingleConverters = new()
         {
-            { DataTypes.String, value => value is string s ? s : Convert.ToString(value, CultureInfo.InvariantCulture) },
+            { DataTypes.String, value => value is string s ? s : Convert.ToString(value, CultureInfo.InvariantCulture)! },
             { DataTypes.Boolean, value => value is bool b ? b : bool.TryParse(value.ToString(), out var bv) ? bv : throw new InvalidCastException($"The value {value} is not convertible to bool.") },
             { DataTypes.Integer, value => value is int i ? i : int.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var iv) ? iv : throw new InvalidCastException($"The value {value} is not convertible to int.") },
             { DataTypes.Decimal, value => value is decimal d ? d : decimal.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var dv) ? dv : throw new InvalidCastException($"The value {value} is not convertible to decimal.") },
@@ -46,11 +46,7 @@ namespace Regulae.Core
                         "Please create the condition before using it to evaluate rules.");
                 }
 
-#if NETSTANDARD2_1_OR_GREATER
                 _ = conditionsLeftOperands.TryAdd(condition.Key, ConvertToOperand(condition.Value, conditionModel.DataType));
-#else
-                conditionsLeftOperands.Add(condition.Key, ConvertToOperand(condition.Value, conditionModel.DataType));
-#endif
             }
 
             return conditionsLeftOperands;

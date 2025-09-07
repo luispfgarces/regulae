@@ -16,7 +16,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var expression = Expression.Constant(1);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -33,7 +33,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void AddExpression_GivenNullExpression_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -59,7 +59,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 Expression.Constant(true),
             };
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -94,7 +94,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var expressions = Array.Empty<Expression>();
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -114,7 +114,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Constant(true);
             var rightExpression = Expression.Constant(false);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -136,7 +136,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void AndAlso_GivenNullCollectionOfExpressions_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -156,7 +156,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Variable(type: typeof(int), name: "testVariable");
             var rightExpression = Expression.Constant(1);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -183,7 +183,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var scopeName = "testScope";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var childExpressionBlockBuilder = Mock.Of<IExpressionBlockBuilder>();
             Mock.Get(childExpressionBlockBuilder)
                 .SetupGet(x => x.Expressions)
@@ -222,7 +222,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var scopeName = "testScope";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var childExpressionBlockBuilder = Mock.Of<IExpressionBlockBuilder>();
             Mock.Get(childExpressionBlockBuilder)
                 .SetupGet(x => x.Expressions)
@@ -251,7 +251,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var scopeName = "testScope";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var childExpressionBlockBuilder = Mock.Of<IExpressionBlockBuilder>();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
             Mock.Get(expressionBuilderFactory)
@@ -274,7 +274,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void Block_GivenNullOrEmptyScopeAndNotNullImplementationBuilderWithLogicToAddExpressions_ReturnsExpression(string scopeName)
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var childExpressionBlockBuilder = Mock.Of<IExpressionBlockBuilder>();
             Mock.Get(childExpressionBlockBuilder)
                 .SetupGet(x => x.Expressions)
@@ -314,7 +314,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var instanceExpression = Expression.Variable(typeof(int));
             var methodInfo = typeof(int).GetMethod(nameof(ToString), Array.Empty<Type>());
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -335,7 +335,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var methodInfo = typeof(int).GetMethod(nameof(ToString), new[] { typeof(string) });
             var parameterExpressions = new Expression[] { Expression.Constant("format") };
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -355,7 +355,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var constantValue = true;
             var constantType = typeof(bool);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -374,7 +374,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var constantValue = true;
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -393,7 +393,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var expressionToConvert = Expression.Constant("test", typeof(object));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -413,7 +413,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var expressionToConvert = Expression.Constant("test", typeof(object));
             var typeToConvert = typeof(string);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -432,7 +432,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTargetName = "testLabel";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -451,7 +451,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTargetName = "testLabel";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -473,7 +473,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTargetName = "testLabel";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
             var parent = Mock.Of<IExpressionBlockBuilder>();
             Mock.Get(parent)
@@ -500,7 +500,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var scopeName = "childScopeTest";
             var parentLabelTargetName = $"{scopeName}{labelTargetName}";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
             var parent = Mock.Of<IExpressionBlockBuilder>();
             string actualParentLabelTargetName = null;
@@ -532,7 +532,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var variableName = "testVariable";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -557,7 +557,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var variableName = "testVariable";
             var variableType = typeof(int);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -577,7 +577,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var variableName = "testVariable";
             var variableType = typeof(int);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -602,7 +602,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var variableName = "testVariable";
             var variableType = typeof(int);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
             var parent = Mock.Of<IExpressionBlockBuilder>();
             Mock.Get(parent)
@@ -630,7 +630,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var scopeName = "childScopeTest";
             var parentLabelTargetName = $"{scopeName}{variableName}";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
             var parent = Mock.Of<IExpressionBlockBuilder>();
             string actualParentLabelTargetName = null;
@@ -662,7 +662,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void Empty_NoConditions_ReturnsExpression()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -682,7 +682,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -705,7 +705,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTargetName = "testLabel";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -726,7 +726,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTargetName = "testLabel";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -746,13 +746,11 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var parameterName = "testParameter";
             var expected = Expression.Parameter(typeof(int), parameterName);
 
-            var expressionConfiguration = new ExpressionConfiguration
+            var expectedParameters = new Dictionary<string, ParameterExpression>
             {
-                Parameters = new Dictionary<string, ParameterExpression>
-                {
-                    { parameterName, expected }
-                }
+                { parameterName, expected }
             };
+            var expressionConfiguration = CreateTestExpressionConfiguration("TestExpression", expectedParameters, null, null, null);
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -772,10 +770,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var parameterName = "testParameter";
 
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                Parameters = new Dictionary<string, ParameterExpression>()
-            };
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -794,7 +789,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var variableName = "testVariable";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -815,7 +810,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var variableName = "testVariable";
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -834,7 +829,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTarget = Expression.Label("testLabelTarget");
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -856,7 +851,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -880,7 +875,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -904,7 +899,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var resultExpression = Expression.Variable(typeof(bool), "result");
             var thenExpression = Expression.Assign(resultExpression, Expression.Constant(true));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -923,7 +918,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var testExpression = Expression.Equal(Expression.Variable(typeof(int), "x"), Expression.Constant(0, typeof(int)));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -944,7 +939,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var testExpression = Expression.Equal(Expression.Variable(typeof(int), "x"), Expression.Constant(0, typeof(int)));
             var thenExpression = Expression.Assign(resultExpression, Expression.Constant(true));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -974,7 +969,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var thenExpression = Expression.Assign(resultExpression, Expression.Constant(true));
             var elseExpression = Expression.Assign(resultExpression, Expression.Constant(false));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1000,7 +995,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var labelTarget = Expression.Label("testLabel");
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1024,7 +1019,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1048,7 +1043,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1071,7 +1066,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var originalExpression = Expression.Constant(false, typeof(bool));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1093,7 +1088,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Parameter(typeof(int), "x");
             var rightExpression = Expression.Constant(0, typeof(int));
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1123,7 +1118,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 Expression.Constant(true),
             };
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1158,7 +1153,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var expressions = Array.Empty<Expression>();
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1178,7 +1173,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             var leftExpression = Expression.Constant(true);
             var rightExpression = Expression.Constant(false);
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1200,7 +1195,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void OrElse_GivenNullCollectionOfExpressions_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1217,10 +1212,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void Return_GivenNullReturnValueExpression_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ReturnLabelTarget = Expression.Label(typeof(string)),
-            };
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1239,10 +1231,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var returnValueExpression = Expression.Constant("testValue");
 
-            var expressionConfiguration = new ExpressionConfiguration
-            {
-                ReturnLabelTarget = Expression.Label(typeof(string)),
-            };
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1265,7 +1254,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
         public void Switch_GivenNullSwitchValueExpressionAndSwitchExpressionBuilder_ThrowsArgumentNullException()
         {
             // Arrange
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1284,7 +1273,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             // Arrange
             var switchValueExpression = Expression.Variable(typeof(string), "input");
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionBuilderFactory = Mock.Of<IExpressionBuilderFactory>();
 
             var expressionBlockBuilder = new ExpressionBlockBuilder(string.Empty, null, expressionBuilderFactory, expressionConfiguration);
@@ -1311,7 +1300,7 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
                 Expression.SwitchCase(Expression.Assign(resultVariable, Expression.Constant(true)), Expression.Constant("C")),
             };
 
-            var expressionConfiguration = new ExpressionConfiguration();
+            var expressionConfiguration = CreateTestExpressionConfiguration();
             var expressionSwitchBuilder = Mock.Of<IExpressionSwitchBuilder>();
             Mock.Get(expressionSwitchBuilder)
                 .SetupGet(x => x.DefaultBody)
@@ -1339,5 +1328,31 @@ namespace Regulae.Tests.Evaluation.Compiled.ExpressionBuilders
             switchExpression.SwitchValue.Should().BeSameAs(switchValueExpression);
             switchExpression.Cases.Should().BeEquivalentTo(expectedSwitchCases);
         }
+
+        private static ExpressionConfiguration CreateTestExpressionConfiguration(
+            string expressionName,
+            IReadOnlyDictionary<string, ParameterExpression> parameters,
+            object returnDefaultValue,
+            LabelTarget returnLabelTarget,
+            Type returnType)
+            => new ExpressionConfiguration
+            {
+                ExpressionName = expressionName,
+                Parameters = parameters,
+                ReturnDefaultValue = returnDefaultValue,
+                ReturnLabelTarget = returnLabelTarget,
+                ReturnType = returnType,
+            };
+
+        private static ExpressionConfiguration CreateTestExpressionConfiguration(
+            string expressionName = "TestExpression",
+            object returnDefaultValue = null,
+            string returnLabelTarget = "TestLabel")
+            => CreateTestExpressionConfiguration(
+                expressionName,
+                new Dictionary<string, ParameterExpression>(),
+                returnDefaultValue,
+                Expression.Label(returnLabelTarget),
+                typeof(void));
     }
 }

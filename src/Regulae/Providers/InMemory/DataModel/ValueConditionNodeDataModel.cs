@@ -4,10 +4,10 @@ namespace Regulae.Providers.InMemory.DataModel
 
     internal sealed class ValueConditionNodeDataModel : ConditionNodeDataModel
     {
-        public string Condition { get; set; }
+        public required string Condition { get; set; }
 
-        public Operators Operator { get; set; }
+        public required Operators Operator { get; set; }
 
-        public Operand RightOperand { get; set; }
+        public required Operand RightOperand { get; set; }
     }
 }

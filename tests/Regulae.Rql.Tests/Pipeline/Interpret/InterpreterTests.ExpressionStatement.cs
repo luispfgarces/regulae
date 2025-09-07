@@ -35,7 +35,7 @@ namespace Regulae.Rql.Tests.Pipeline.Interpret
             actual.Should().NotBeNull().And.BeOfType<ExpressionStatementResult>();
             actual.Rql.Should().Be(expectedRql);
             actual.Success.Should().BeTrue();
-            var actualExpressionStatementResult = actual as ExpressionStatementResult;
+            var actualExpressionStatementResult = (ExpressionStatementResult)actual;
             actualExpressionStatementResult.Result.Should().BeEquivalentTo(expectedValue);
         }
     }
