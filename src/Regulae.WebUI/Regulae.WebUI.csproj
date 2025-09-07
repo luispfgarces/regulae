@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor" InitialTargets="EmbedScopedCss">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<SignAssembly Condition="'$(OS)'=='Windows_NT'">true</SignAssembly>
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<LangVersion>13.0</LangVersion>
@@ -28,7 +27,7 @@
 		<EmbeddedResource Include="Assets/**" />
 	</ItemGroup>
 
-	<Target Name="EmbedScopedCss" BeforeTargets="Build" DependsOnTargets="$(GenerateComputedBuildStaticWebAssetsDependsOn)">
+	<Target Name="EmbedScopedCss" BeforeTargets="PrepareForBuild" DependsOnTargets="$(GenerateComputedBuildStaticWebAssetsDependsOn)">
 		<ItemGroup>
 			<EmbeddedResource Include="$(IntermediateOutputPath)\scopedcss\bundle\$(AssemblyName).styles.css">
 				<LogicalName>$(AssemblyName).Assets.$(AssemblyName).styles.css</LogicalName>
@@ -49,7 +48,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Blazor.Bootstrap" Version="3.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.*" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.2">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
