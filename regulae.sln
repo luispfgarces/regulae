@@ -46,6 +46,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regulae.Rql.Tests", "tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regulae.Rql.IntegrationTests", "tests\Regulae.Rql.IntegrationTests\Regulae.Rql.IntegrationTests.csproj", "{C24A2234-AD6A-4377-9FAA-9CC58386107C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{C4865D60-3519-4BA1-92F1-636ECF4407E8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet-build.yml = .github\workflows\dotnet-build.yml
+		.github\workflows\dotnet-publish.yml = .github\workflows\dotnet-publish.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +145,7 @@ Global
 		{76298D4D-537C-4522-91AB-0084535B1FF0} = {AEE746EC-CEAA-4892-8C29-0CAAB97A23A8}
 		{776E54A7-9099-4EBD-9C62-A371DFED58E5} = {74E24C97-8EE4-4B69-AECD-4765FD2C751F}
 		{C24A2234-AD6A-4377-9FAA-9CC58386107C} = {74E24C97-8EE4-4B69-AECD-4765FD2C751F}
+		{C4865D60-3519-4BA1-92F1-636ECF4407E8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA9D4C31-972B-49C2-9F63-C56ED766DAB0}
