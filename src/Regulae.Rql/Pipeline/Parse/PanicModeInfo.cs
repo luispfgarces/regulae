@@ -23,5 +23,9 @@ namespace Regulae.Rql.Pipeline.Parse
         {
             return this.CauseToken == other.CauseToken && string.Equals(this.Message, other.Message, StringComparison.Ordinal);
         }
+
+        public override bool Equals(object obj) => obj is PanicModeInfo pmi && this.Equals(pmi);
+
+        public override int GetHashCode() => HashCode.Combine(this.CauseToken, this.Message);
     }
 }

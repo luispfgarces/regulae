@@ -1,7 +1,6 @@
 namespace Regulae.Rql.Runtime
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Regulae;
     using Regulae.Rql.Runtime.RuleManipulation;
@@ -66,8 +65,8 @@ namespace Regulae.Rql.Runtime
 
         public async ValueTask<RqlArray> GetRulesetsAsync()
         {
-            var rulesets = await this.rulesEngine.GetRulesetsAsync();
-            var rqlArrayRulesets = new RqlArray(rulesets.Count());
+            var rulesets = await this.rulesEngine.GetRulesetsAsync().ConfigureAwait(false);
+            var rqlArrayRulesets = new RqlArray(rulesets.Count);
             var i = 0;
             foreach (var ruleset in rulesets)
             {
@@ -80,7 +79,7 @@ namespace Regulae.Rql.Runtime
         public async ValueTask<RqlArray> GetUniqueConditionsAsync(string rulesetName, DateTime dateBegin, DateTime dateEnd)
         {
             var conditions = await this.rulesEngine.GetUniqueConditionsAsync(rulesetName, dateBegin, dateEnd).ConfigureAwait(false);
-            var rqlArrayConditions = new RqlArray(conditions.Count());
+            var rqlArrayConditions = new RqlArray(conditions.Count);
             var i = 0;
             foreach (var condition in conditions)
             {
@@ -111,7 +110,7 @@ namespace Regulae.Rql.Runtime
             }
 
             var rules = await this.rulesEngine.MatchManyAsync(matchRulesArgs.Ruleset, matchRulesArgs.MatchDate.Value, matchRulesArgs.Conditions).ConfigureAwait(false);
-            var rqlArrayAll = new RqlArray(rules.Count());
+            var rqlArrayAll = new RqlArray(rules.Count);
             var i = 0;
             foreach (var rule in rules)
             {
@@ -133,7 +132,7 @@ namespace Regulae.Rql.Runtime
             };
 
             var rules = await this.rulesEngine.SearchAsync(searchArgs).ConfigureAwait(false);
-            var rqlArray = new RqlArray(rules.Count());
+            var rqlArray = new RqlArray(rules.Count);
             var i = 0;
             foreach (var rule in rules)
             {

@@ -16,11 +16,6 @@ namespace Regulae.Rql.Messages
             this.WarningsCount = 0;
         }
 
-        ~MessageContainer()
-        {
-            Dispose(disposing: false);
-        }
-
         public int ErrorsCount { get; private set; }
         public IReadOnlyList<Message> Messages => this.messages.AsReadOnly();
         public int WarningsCount { get; private set; }
@@ -28,7 +23,6 @@ namespace Regulae.Rql.Messages
         public void Dispose()
         {
             this.Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         public void Error(string message, RqlSourcePosition beginPosition, RqlSourcePosition endPosition)
@@ -45,14 +39,14 @@ namespace Regulae.Rql.Messages
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 if (disposing)
                 {
                     this.messages = null;
                 }
 
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 

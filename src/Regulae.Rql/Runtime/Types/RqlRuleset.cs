@@ -48,6 +48,12 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlRuleset other) => this.Value.Equals(other.Value);
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}> {this.Value.Name}";
+        public override string ToString() => $"<{this.Type.Name}> {this.Value.Name}";
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlRuleset ruleset && this.Equals(ruleset);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.Value.GetHashCode();
     }
 }

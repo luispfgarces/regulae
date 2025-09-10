@@ -58,10 +58,7 @@ namespace Regulae.Rql.Pipeline.Scan
 
         public ScanResult ScanTokens(string source)
         {
-            if (source is null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            ArgumentNullException.ThrowIfNull(source);
 
             var tokens = new List<Token>();
             using var messageContainer = new MessageContainer();
@@ -169,7 +166,7 @@ namespace Regulae.Rql.Pipeline.Scan
             // Trim the surrounding dollar symbols.
             lexeme = scanContext.ExtractLexeme();
             var value = Regex.Unescape(lexeme.Substring(1, lexeme.Length - 2));
-            if (!DateTime.TryParse(value, out _))
+            if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, out _))
             {
                 scanContext.TokenCandidate.MarkAsError($"Invalid date '{lexeme}'.");
                 return Token.None;

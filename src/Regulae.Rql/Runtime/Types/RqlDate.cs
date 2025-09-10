@@ -58,6 +58,12 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlDate other) => this.Value == other.Value;
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}> {this.Value:g}";
+        public override string ToString() => $"<{this.Type.Name}> {this.Value:g}";
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlDate date && this.Equals(date);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.Value.GetHashCode();
     }
 }

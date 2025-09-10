@@ -58,6 +58,12 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlBool other) => this.Value == other.Value;
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}> {this.Value}";
+        public override string ToString() => $"<{this.Type.Name}> {this.Value}";
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlBool @bool && this.Equals(@bool);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.Value.GetHashCode();
     }
 }

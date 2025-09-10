@@ -47,7 +47,7 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlReadOnlyObject other) => this.properties.Equals(other.properties);
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}>{Environment.NewLine}{this.ToString(4)}";
+        public override string ToString() => $"<{this.Type.Name}>{Environment.NewLine}{this.ToString(4)}";
 
         internal string ToString(int indent)
         {
@@ -98,5 +98,12 @@ namespace Regulae.Rql.Runtime.Types
 
             return result;
         }
+
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlReadOnlyObject @object && this.Equals(@object);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.properties.GetHashCode();
     }
 }

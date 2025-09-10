@@ -20,59 +20,26 @@ namespace Regulae.Rql.Pipeline.Parse.Strategies
                 throw new InvalidOperationException("Unable to handle array expression.");
             }
 
+            if (parseContext.IsMatchCurrentToken(TokenType.BRACE_LEFT))
+            {
+                return this.ParseArrayInitializerWithElementsExpression(parseContext);
+            }
+
+            return this.ParseArrayInitializerWithSizeExpression(parseContext);
+        }
+
+        private NewArrayExpression ParseArrayInitializerWithSizeExpression(ParseContext parseContext)
+        {
             var initializerBeginToken = Token.None;
             var initializerEndToken = Token.None;
             var size = Expression.None;
-            if (parseContext.IsMatchCurrentToken(TokenType.BRACE_LEFT))
-            {
-                var values = new List<Expression>();
-                initializerBeginToken = parseContext.GetCurrentToken();
-                if (!parseContext.MoveNext())
-                {
-                    parseContext.EnterPanicMode("Expected values following array initialization token '{'.", parseContext.GetCurrentToken());
-                    return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, values.ToArray(), initializerEndToken);
-                }
-
-                // TODO: update according to future logic to process 'or' expressions.
-                var literal = this.ParseExpressionWith<TermParseStrategy>(parseContext);
-                values.Add(literal);
-                if (parseContext.PanicMode)
-                {
-                    return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, values.ToArray(), initializerEndToken);
-                }
-
-                _ = parseContext.MoveNext();
-                while (parseContext.IsMatchCurrentToken(TokenType.COMMA))
-                {
-                    _ = parseContext.MoveNext();
-
-                    // TODO: update according to future logic to process 'or' expressions.
-                    literal = this.ParseExpressionWith<TermParseStrategy>(parseContext);
-                    values.Add(literal);
-                    if (parseContext.PanicMode)
-                    {
-                        return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, values.ToArray(), initializerEndToken);
-                    }
-
-                    _ = parseContext.MoveNext();
-                }
-
-                if (!parseContext.IsMatchCurrentToken(TokenType.BRACE_RIGHT))
-                {
-                    parseContext.EnterPanicMode("Expected token '}'.", parseContext.GetCurrentToken());
-                    return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, values.ToArray(), initializerEndToken);
-                }
-
-                initializerEndToken = parseContext.GetCurrentToken();
-                return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, values.ToArray(), initializerEndToken);
-            }
 
             // At this moment, assumes that an empty with fixed size is being declared.
             var arrayToken = parseContext.GetCurrentToken();
             if (!parseContext.MoveNextIfNextToken(TokenType.STRAIGHT_BRACKET_LEFT))
             {
                 parseContext.EnterPanicMode("Expected token '['.", parseContext.GetNextToken());
-                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, Array.Empty<Expression>(), initializerEndToken);
+                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, [], initializerEndToken);
             }
 
             initializerBeginToken = parseContext.GetCurrentToken();
@@ -80,17 +47,62 @@ namespace Regulae.Rql.Pipeline.Parse.Strategies
             size = this.ParseSizeExpression(parseContext);
             if (parseContext.PanicMode)
             {
-                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, Array.Empty<Expression>(), initializerEndToken);
+                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, [], initializerEndToken);
             }
 
             if (!parseContext.MoveNextIfNextToken(TokenType.STRAIGHT_BRACKET_RIGHT))
             {
                 parseContext.EnterPanicMode("Expected token ']'.", parseContext.GetNextToken());
-                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, Array.Empty<Expression>(), initializerEndToken);
+                return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, [], initializerEndToken);
             }
 
             initializerEndToken = parseContext.GetCurrentToken();
-            return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, Array.Empty<Expression>(), initializerEndToken);
+            return NewArrayExpression.Create(arrayToken, initializerBeginToken, size, [], initializerEndToken);
+        }
+
+        private NewArrayExpression ParseArrayInitializerWithElementsExpression(ParseContext parseContext)
+        {
+            var initializerBeginToken = parseContext.GetCurrentToken();
+            var initializerEndToken = Token.None;
+            var values = new List<Expression>();
+            if (!parseContext.MoveNext())
+            {
+                parseContext.EnterPanicMode("Expected values following array initialization token '{'.", parseContext.GetCurrentToken());
+                return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, [.. values], initializerEndToken);
+            }
+
+            // TODO: update according to future logic to process 'or' expressions.
+            var literal = this.ParseExpressionWith<TermParseStrategy>(parseContext);
+            values.Add(literal);
+            if (parseContext.PanicMode)
+            {
+                return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, [.. values], initializerEndToken);
+            }
+
+            _ = parseContext.MoveNext();
+            while (parseContext.IsMatchCurrentToken(TokenType.COMMA))
+            {
+                _ = parseContext.MoveNext();
+
+                // TODO: update according to future logic to process 'or' expressions.
+                literal = this.ParseExpressionWith<TermParseStrategy>(parseContext);
+                values.Add(literal);
+                if (parseContext.PanicMode)
+                {
+                    return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, [.. values], initializerEndToken);
+                }
+
+                _ = parseContext.MoveNext();
+            }
+
+            if (!parseContext.IsMatchCurrentToken(TokenType.BRACE_RIGHT))
+            {
+                parseContext.EnterPanicMode("Expected token '}'.", parseContext.GetCurrentToken());
+                return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, [.. values], initializerEndToken);
+            }
+
+            initializerEndToken = parseContext.GetCurrentToken();
+            return NewArrayExpression.Create(Token.None, initializerBeginToken, Expression.None, [.. values], initializerEndToken);
         }
 
         private Expression ParseSizeExpression(ParseContext parseContext)

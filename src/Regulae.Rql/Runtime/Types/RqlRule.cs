@@ -56,10 +56,10 @@ namespace Regulae.Rql.Runtime.Types
         public static implicit operator RqlAny(RqlRule rqlRule) => new RqlAny(rqlRule);
 
         /// <inheritdoc/>
-        public bool Equals(RqlRule other) => this.Value.Equals(other.Value);
+        public bool Equals(RqlRule other) => object.Equals(this.Value, other.Value);
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}>{Environment.NewLine}{this.ToString(4)}";
+        public override string ToString() => $"<{this.Type.Name}>{Environment.NewLine}{this.ToString(4)}";
 
         internal string ToString(int indent)
         {
@@ -168,5 +168,11 @@ namespace Regulae.Rql.Runtime.Types
 
             return rqlArray;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlRule rule && this.Equals(rule);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.Value.GetHashCode();
     }
 }

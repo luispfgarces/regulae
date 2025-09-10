@@ -18,6 +18,23 @@ namespace Regulae.Rql.Pipeline.Interpret
     {
         private readonly IReverseRqlBuilder reverseRqlBuilder;
         private readonly IRuntime runtime;
+        private static readonly Dictionary<TokenType, RqlOperators> tokenToRqlOperatorMappings = new()
+        {
+            { TokenType.AND, RqlOperators.And },
+            { TokenType.ASSIGN, RqlOperators.Assign },
+            { TokenType.EQUAL, RqlOperators.Equals },
+            { TokenType.GREATER_THAN, RqlOperators.GreaterThan },
+            { TokenType.GREATER_THAN_OR_EQUAL, RqlOperators.GreaterThanOrEquals },
+            { TokenType.IN, RqlOperators.In },
+            { TokenType.LESS_THAN, RqlOperators.LesserThan },
+            { TokenType.LESS_THAN_OR_EQUAL, RqlOperators.LesserThanOrEquals },
+            { TokenType.MINUS, RqlOperators.Minus },
+            { TokenType.NOT_EQUAL, RqlOperators.NotEquals },
+            { TokenType.OR, RqlOperators.Or },
+            { TokenType.PLUS, RqlOperators.Plus },
+            { TokenType.SLASH, RqlOperators.Slash },
+            { TokenType.STAR, RqlOperators.Star },
+        };
 
         public Interpreter(
             IRuntime runtime,
@@ -50,7 +67,7 @@ namespace Regulae.Rql.Pipeline.Interpret
 
         public Task<IRuntimeValue> VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
-            throw new NotImplementedException("To be supported on future release.");
+            throw new NotSupportedException("To be supported on future release.");
         }
 
         public async Task<IRuntimeValue> VisitBinaryExpression(BinaryExpression binaryExpression)
@@ -206,76 +223,23 @@ namespace Regulae.Rql.Pipeline.Interpret
 
         public Task<object> VisitOperatorSegment(OperatorSegment operatorExpression)
         {
-            var resultOperator = RqlOperators.None;
-            switch (operatorExpression.Tokens[0].Type)
+            if (!tokenToRqlOperatorMappings.TryGetValue(operatorExpression.Tokens[0].Type, out var resultOperator))
             {
-                case TokenType.AND:
-                    resultOperator = RqlOperators.And;
-                    break;
+                switch (operatorExpression.Tokens[0].Type)
+                {
+                    case TokenType.NOT:
+                        if (operatorExpression.Tokens.Length > 1 && operatorExpression.Tokens[1].Type == TokenType.IN)
+                        {
+                            resultOperator = RqlOperators.NotIn;
+                        }
+                        break;
 
-                case TokenType.ASSIGN:
-                    resultOperator = RqlOperators.Assign;
-                    break;
-
-                case TokenType.EQUAL:
-                    resultOperator = RqlOperators.Equals;
-                    break;
-
-                case TokenType.GREATER_THAN:
-                    resultOperator = RqlOperators.GreaterThan;
-                    break;
-
-                case TokenType.GREATER_THAN_OR_EQUAL:
-                    resultOperator = RqlOperators.GreaterThanOrEquals;
-                    break;
-
-                case TokenType.IN:
-                    resultOperator = RqlOperators.In;
-                    break;
-
-                case TokenType.LESS_THAN:
-                    resultOperator = RqlOperators.LesserThan;
-                    break;
-
-                case TokenType.LESS_THAN_OR_EQUAL:
-                    resultOperator = RqlOperators.LesserThanOrEquals;
-                    break;
-
-                case TokenType.MINUS:
-                    resultOperator = RqlOperators.Minus;
-                    break;
-
-                case TokenType.NOT:
-                    if (operatorExpression.Tokens.Length > 1 && operatorExpression.Tokens[1].Type == TokenType.IN)
-                    {
-                        resultOperator = RqlOperators.NotIn;
-                    }
-                    break;
-
-                case TokenType.NOT_EQUAL:
-                    resultOperator = RqlOperators.NotEquals;
-                    break;
-
-                case TokenType.OR:
-                    resultOperator = RqlOperators.Or;
-                    break;
-
-                case TokenType.PLUS:
-                    resultOperator = RqlOperators.Plus;
-                    break;
-
-                case TokenType.SLASH:
-                    resultOperator = RqlOperators.Slash;
-                    break;
-
-                case TokenType.STAR:
-                    resultOperator = RqlOperators.Star;
-                    break;
-
-                default:
-                    ThrowNotSupportedException();
-                    break;
+                    default:
+                        ThrowNotSupportedException();
+                        break;
+                }
             }
+
 
             if (resultOperator == RqlOperators.None)
             {

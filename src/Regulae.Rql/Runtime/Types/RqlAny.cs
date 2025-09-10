@@ -64,5 +64,11 @@ namespace Regulae.Rql.Runtime.Types
         internal IRuntimeValue Unwrap() => this.underlyingRuntimeValue;
 
         internal T Unwrap<T>() where T : IRuntimeValue => (T)this.underlyingRuntimeValue;
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlAny any && this.Equals(any);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(this.Type, this.underlyingRuntimeValue);
     }
 }

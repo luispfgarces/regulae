@@ -53,7 +53,7 @@ namespace Regulae.Rql.Runtime.Types
         public RqlAny SetPropertyValue(RqlString name, RqlAny value) => this.properties[name.Value] = value;
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{Type.Name}>{Environment.NewLine}{this.ToString(4)}";
+        public override string ToString() => $"<{this.Type.Name}>{Environment.NewLine}{this.ToString(4)}";
 
         internal string ToString(int indent)
         {
@@ -104,5 +104,11 @@ namespace Regulae.Rql.Runtime.Types
 
             return result;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlObject @object && this.Equals(@object);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => this.properties.GetHashCode();
     }
 }

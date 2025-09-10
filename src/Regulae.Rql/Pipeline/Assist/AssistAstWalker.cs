@@ -16,7 +16,7 @@ namespace Regulae.Rql.Pipeline.Assist
     {
         private readonly RqlSourcePosition position;
         private readonly IRuntime runtime;
-        private readonly IDictionary<string, object> storedContext;
+        private readonly Dictionary<string, object> storedContext;
 
         private AssistAstWalker(IRuntime runtime, RqlSourcePosition position)
         {
@@ -39,7 +39,7 @@ namespace Regulae.Rql.Pipeline.Assist
                 }
             }
 
-            return new IAssistSuggestion[0];
+            return [];
         }
 
         public Task<IAssistSuggestion[]> VisitAssignmentExpression(AssignmentExpression assignmentExpression) => Task.FromResult(EmptyAssistSuggestions());
@@ -322,17 +322,17 @@ namespace Regulae.Rql.Pipeline.Assist
         public async Task<IAssistSuggestion[]> VisitUnaryExpression(UnaryExpression expression)
             => await expression.Right.Accept(this).ConfigureAwait(false);
 
-        private static IAssistSuggestion[] EmptyAssistSuggestions() => new IAssistSuggestion[0];
+        private static IAssistSuggestion[] EmptyAssistSuggestions() => [];
 
         private static IAssistSuggestion[] ExpressionSuggestions()
-            => new[]
-            {
+            =>
+            [
                 AssistSuggestion.New(nameof(TokenType.ARRAY)),
                 AssistSuggestion.New(nameof(TokenType.MATCH)),
                 AssistSuggestion.New(nameof(TokenType.NOTHING)),
                 AssistSuggestion.New(nameof(TokenType.OBJECT)),
                 AssistSuggestion.New(nameof(TokenType.SEARCH)),
-            };
+            ];
 
         private static IAssistSuggestion[] MultipleAssistSuggestions(params string[] lexemes)
         {

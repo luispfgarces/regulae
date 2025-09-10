@@ -30,14 +30,7 @@ namespace Regulae.Rql.Runtime.Types
             this.Value = new RqlAny[size];
             if (shouldInitializeElements)
             {
-#if NETSTANDARD2_1_OR_GREATER
                 Array.Fill(this.Value, new RqlAny());
-#else
-                for (var i = 0; i < this.size; i++)
-                {
-                    this.Value[i] = new RqlAny();
-                }
-#endif
             }
         }
 
@@ -173,5 +166,11 @@ namespace Regulae.Rql.Runtime.Types
 
             return stringBuilder.ToString();
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlArray array && this.Equals(array);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(this.size, this.Value);
     }
 }

@@ -43,7 +43,7 @@ namespace Regulae.WebUI.ViewModels
 
         private static ExportRules.ConditionNode ToExportRulesModel(this ConditionNodeViewModel rootCondition)
         {
-            if (rootCondition.LogicalOperator == nameof(LogicalOperators.Eval))
+            if (string.Equals(rootCondition.LogicalOperator, nameof(LogicalOperators.Eval), StringComparison.Ordinal))
             {
                 var condition = rootCondition as ValueConditionNodeViewModel;
 
@@ -76,7 +76,7 @@ namespace Regulae.WebUI.ViewModels
         private static ConditionNodeViewModel ToViewModel(this IConditionNode rootCondition)
         {
             if (rootCondition.LogicalOperator == LogicalOperators.Eval ||
-                rootCondition.LogicalOperator == 0)
+                rootCondition.LogicalOperator == LogicalOperators.Unknown)
             {
                 var condition = rootCondition as ValueConditionNode;
 

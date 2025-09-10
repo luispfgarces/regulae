@@ -6,6 +6,11 @@ namespace Regulae
     public enum LogicalOperators
     {
         /// <summary>
+        /// The unknown logical operator (only for validation purposes).
+        /// </summary>
+        Unknown = 0,
+
+        /// <summary>
         /// Applies a AND between a set of condition nodes.
         /// </summary>
         And = 1,

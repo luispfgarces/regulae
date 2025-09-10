@@ -12,7 +12,7 @@ namespace Regulae.Rql.Pipeline.Assist
 
     internal class AssistEngine : IAssistEngine
     {
-        private static readonly Regex suggestionBeginCharRegex = new Regex("^[a-zA-Z@].*$");
+        private static readonly Regex suggestionBeginCharRegex = new Regex("^[a-zA-Z@].*$", RegexOptions.None, TimeSpan.FromSeconds(1));
         private readonly IRuntime runtime;
 
         public AssistEngine(IRuntime runtime)
@@ -53,7 +53,7 @@ namespace Regulae.Rql.Pipeline.Assist
             return astAssistSuggestions;
         }
 
-        private static IReadOnlyList<IAssistSuggestion> EmptyAssistSuggestions() => new IAssistSuggestion[0];
+        private static IReadOnlyList<IAssistSuggestion> EmptyAssistSuggestions() => [];
 
         private static Token FindTokenAtPosition(IReadOnlyList<Token> tokens, RqlSourcePosition position)
         {
