@@ -7,10 +7,8 @@ namespace Regulae
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
-    using Regulae.Builder.Validation;
     using Regulae.Core;
     using Regulae.Evaluation;
-    using Regulae.Extensions;
     using Regulae.Management;
     using Regulae.Source;
     using Regulae.Validation;
@@ -20,24 +18,25 @@ namespace Regulae
     /// </summary>
     public class RulesEngine : IRulesEngine
     {
+        private readonly IAddRuleController addRuleController;
         private readonly IConditionsConverter conditionsConverter;
         private readonly IConditionsEvalEngine conditionsEvalEngine;
         private readonly IRuleConditionsExtractor ruleConditionsExtractor;
-        private readonly IRuleSanitizer ruleSanitizer;
         private readonly IRulesSource rulesSource;
-        private readonly RuleValidator ruleValidator = RuleValidator.Instance;
         private readonly IValidatorProvider validatorProvider;
+        private readonly IUpdateRuleController updateRuleController;
 
         internal RulesEngine(
             RulesEngineArgs rulesEngineArgs)
         {
+            this.addRuleController = rulesEngineArgs.AddRuleController;
             this.conditionsConverter = rulesEngineArgs.ConditionsConverter;
             this.conditionsEvalEngine = rulesEngineArgs.ConditionsEvalEngine;
             this.rulesSource = rulesEngineArgs.RulesSource;
             this.validatorProvider = rulesEngineArgs.ValidatorProvider;
             this.Options = rulesEngineArgs.RulesEngineOptions;
             this.ruleConditionsExtractor = rulesEngineArgs.RuleConditionsExtractor;
-            this.ruleSanitizer = rulesEngineArgs.RuleSanitizer;
+            this.updateRuleController = rulesEngineArgs.UpdateRuleController;
         }
 
         /// <inheritdoc/>
@@ -67,7 +66,7 @@ namespace Regulae
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return OperationResult.Failure("A condition must have a non-null, blank, or whitespace name.");
+                return Operation.Failure(OperationError.Create("R000", "A condition must have a non-null, blank, or whitespace name."));
             }
 
             var args = new CreateConditionArgs
@@ -77,7 +76,7 @@ namespace Regulae
             };
 
             await this.rulesSource.CreateConditionAsync(args).ConfigureAwait(false);
-            return OperationResult.Success();
+            return Operation.Success();
         }
 
         /// <inheritdoc/>
@@ -92,7 +91,7 @@ namespace Regulae
             var existentRulesets = await this.rulesSource.GetRulesetsAsync(getRulesetArgs).ConfigureAwait(false);
             if (existentRulesets.ContainsKey(ruleset))
             {
-                return OperationResult.Failure($"The ruleset '{ruleset}' already exists.");
+                return Operation.Failure(OperationError.Create("R000", $"The ruleset '{ruleset}' already exists."));
             }
 
             return await this.CreateRulesetInternalAsync(ruleset).ConfigureAwait(false);
@@ -197,8 +196,8 @@ namespace Regulae
             var conditionsAsOperands = await this.conditionsConverter.ConvertConditionsAsync(conditions).ConfigureAwait(false);
 
             return this.Options.PriorityCriteria == PriorityCriterias.SmallestNumber
-                ? EvalOneTraverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true)
-                : EvalOneReverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true);
+                ? this.EvalOneTraverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true)
+                : this.EvalOneReverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true);
         }
 
         /// <inheritdoc/>
@@ -251,143 +250,35 @@ namespace Regulae
 
         private async ValueTask<OperationResult> AddRuleInternalAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption)
         {
-            var errors = new List<string>();
-            var rulesets = await this.rulesSource.GetRulesetsAsync(new GetRulesetsArgs()).ConfigureAwait(false);
-
-            if (!rulesets.ContainsKey(rule.Ruleset))
+            var validateOperationResult = await this.addRuleController.ValidateAddRuleAsync(rule, ruleAddPriorityOption).ConfigureAwait(false);
+            if (validateOperationResult.Errors.Count == 1 && string.Equals(validateOperationResult.Errors[0].Code, Constants.ErrorCodes.R0006, StringComparison.Ordinal) && this.Options.AutoCreateRulesets)
             {
-                if (!this.Options.AutoCreateRulesets)
+                var createRulesetOperationResult = await this.CreateRulesetInternalAsync(rule.Ruleset).ConfigureAwait(false);
+                if (createRulesetOperationResult.IsSuccess)
                 {
-                    errors.Add($"Specified ruleset '{rule.Ruleset}' does not exist. " +
-                        $"Please create the ruleset first or set the rules engine option '{nameof(this.Options.AutoCreateRulesets)}' to true.");
-                    return OperationResult.Failure(errors);
+                    validateOperationResult.Errors.Clear();
                 }
-
-                await this.CreateRulesetInternalAsync(rule.Ruleset).ConfigureAwait(false);
+                else
+                {
+                    foreach (var error in createRulesetOperationResult.Errors)
+                    {
+                        validateOperationResult.Errors.Add(error);
+                    }
+                }
+            }
+            if (validateOperationResult.IsSuccess)
+            {
+                return await this.addRuleController.AddRuleAsync(rule, ruleAddPriorityOption).ConfigureAwait(false);
             }
 
-            var rulesFilterArgs = new GetRulesFilteredArgs
-            {
-                Ruleset = rule.Ruleset,
-            };
-
-            var existentRules = await this.rulesSource.GetRulesFilteredAsync(rulesFilterArgs).ConfigureAwait(false);
-
-            if (ruleAddPriorityOption.PriorityOption == PriorityOptions.AtRuleName
-                && !existentRules.Any(r => string.Equals(r.Name, ruleAddPriorityOption.AtRuleNameOptionValue, StringComparison.OrdinalIgnoreCase)))
-            {
-                errors.Add($"Rule name '{ruleAddPriorityOption.AtRuleNameOptionValue}' specified for priority placement does not exist.");
-            }
-
-            if (existentRules.Any(r => string.Equals(r.Name, rule.Name, StringComparison.OrdinalIgnoreCase)))
-            {
-                errors.Add($"A rule with name '{rule.Name}' already exists.");
-            }
-
-            var ruleSanitizeResult = await this.ruleSanitizer.SanitizeAsync(rule).ConfigureAwait(false);
-            if (!ruleSanitizeResult.IsSuccess)
-            {
-                errors.AddRange(ruleSanitizeResult.Errors);
-            }
-
-            if (errors.Count != 0)
-            {
-                return OperationResult.Failure(errors);
-            }
-
-            switch (ruleAddPriorityOption.PriorityOption)
-            {
-                case PriorityOptions.AtSmallestNumber:
-                    await this.AddRuleInternalAtTopAsync(rule, existentRules).ConfigureAwait(false);
-
-                    break;
-
-                case PriorityOptions.AtLargestNumber:
-
-                    await this.AddRuleInternalAtBottomAsync(rule, existentRules).ConfigureAwait(false);
-
-                    break;
-
-                case PriorityOptions.AtNumber:
-                    await this.AddRuleInternalAtPriorityNumberAsync(rule, ruleAddPriorityOption, existentRules).ConfigureAwait(false);
-
-                    break;
-
-                case PriorityOptions.AtRuleName:
-                    await this.AddRuleInternalAtRuleNameAsync(rule, ruleAddPriorityOption, existentRules).ConfigureAwait(false);
-
-                    break;
-
-                default:
-                    throw new NotSupportedException($"The placement option '{ruleAddPriorityOption.PriorityOption}' is not supported.");
-            }
-
-            return OperationResult.Success();
-        }
-
-        private ValueTask AddRuleInternalAtBottomAsync(Rule rule, IReadOnlyCollection<Rule> existentRules)
-        {
-            rule.Priority = existentRules.Count == 0 ? 1 : existentRules.Max(r => r.Priority) + 1;
-
-            return ManagementOperations.Manage(existentRules)
-                .UsingSource(this.rulesSource)
-                .AddRule(rule)
-                .ExecuteOperationsAsync();
-        }
-
-        private ValueTask AddRuleInternalAtPriorityNumberAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption, IReadOnlyCollection<Rule> existentRules)
-        {
-            var priorityMin = existentRules.MinOrDefault(r => r.Priority);
-            var priorityMax = existentRules.MaxOrDefault(r => r.Priority);
-
-            var rulePriority = ruleAddPriorityOption.AtNumberOptionValue;
-            rulePriority = Math.Min(rulePriority, priorityMax + 1);
-            rulePriority = Math.Max(rulePriority, priorityMin);
-
-            rule.Priority = rulePriority;
-
-            return ManagementOperations.Manage(existentRules)
-                .UsingSource(this.rulesSource)
-                .FilterFromThresholdPriorityToBottom(rulePriority)
-                .IncreasePriority()
-                .UpdateRules()
-                .AddRule(rule)
-                .ExecuteOperationsAsync();
-        }
-
-        private ValueTask AddRuleInternalAtRuleNameAsync(Rule rule, RuleAddPriorityOption ruleAddPriorityOption, IReadOnlyCollection<Rule> existentRules)
-        {
-            var firstPriorityToIncrement = existentRules
-                .First(r => string.Equals(r.Name, ruleAddPriorityOption.AtRuleNameOptionValue, StringComparison.OrdinalIgnoreCase))
-                .Priority;
-            rule.Priority = firstPriorityToIncrement;
-
-            return ManagementOperations.Manage(existentRules)
-                .UsingSource(this.rulesSource)
-                .FilterFromThresholdPriorityToBottom(firstPriorityToIncrement)
-                .IncreasePriority()
-                .UpdateRules()
-                .AddRule(rule)
-                .ExecuteOperationsAsync();
-        }
-
-        private ValueTask AddRuleInternalAtTopAsync(Rule rule, IReadOnlyCollection<Rule> existentRules)
-        {
-            rule.Priority = 1;
-
-            return ManagementOperations.Manage(existentRules)
-                .UsingSource(this.rulesSource)
-                .IncreasePriority()
-                .UpdateRules()
-                .AddRule(rule)
-                .ExecuteOperationsAsync();
+            return validateOperationResult;
         }
 
         private async ValueTask<OperationResult> CreateRulesetInternalAsync(string ruleset)
         {
             var createRulesetArgs = new CreateRulesetArgs { Name = ruleset };
             await this.rulesSource.CreateRulesetAsync(createRulesetArgs).ConfigureAwait(false);
-            return OperationResult.Success();
+            return Operation.Success();
         }
 
         private List<Rule> EvalAll(
@@ -434,7 +325,6 @@ namespace Regulae
             IDictionary<string, Operand> conditions,
             bool active)
         {
-            //var orderedRules = rules.OrderBy(r => r.Priority);
             foreach (var rule in rules)
             {
                 if (this.EvalRule(rule, evaluationOptions, conditions, active))
@@ -464,65 +354,14 @@ namespace Regulae
 
         private async ValueTask<OperationResult> UpdateRuleInternalAsync(Rule rule)
         {
-            var rulesFilterArgs = new GetRulesFilteredArgs
+            var validationResult = await this.updateRuleController.ValidateUpdateRuleAsync(rule).ConfigureAwait(false);
+            if (validationResult.IsSuccess)
             {
-                Ruleset = rule.Ruleset,
-            };
-
-            var existentRules = await this.rulesSource.GetRulesFilteredAsync(rulesFilterArgs).ConfigureAwait(false);
-
-            var existentRule = existentRules.FirstOrDefault(r => string.Equals(r.Name, rule.Name, StringComparison.OrdinalIgnoreCase));
-            if (existentRule is null)
-            {
-                return OperationResult.Failure($"Rule with name '{rule.Name}' does not exist.");
+                return await this.updateRuleController.UpdateRuleAsync(rule).ConfigureAwait(false);
             }
 
-            var validationResult = await this.ruleValidator.ValidateAsync(rule).ConfigureAwait(false);
+            return validationResult;
 
-            if (!validationResult.IsValid)
-            {
-                return OperationResult.Failure(validationResult.Errors.Select(ve => ve.ErrorMessage));
-            }
-
-            var topPriorityThreshold = Math.Min(rule.Priority, existentRule.Priority);
-            var bottomPriorityThreshold = Math.Max(rule.Priority, existentRule.Priority);
-
-            switch (rule.Priority)
-            {
-                case int p when p > existentRule.Priority:
-                    await ManagementOperations.Manage(existentRules)
-                        .UsingSource(this.rulesSource)
-                        .FilterPrioritiesRange(topPriorityThreshold, bottomPriorityThreshold)
-                        .DecreasePriority()
-                        .SetRuleForUpdate(rule)
-                        .UpdateRules()
-                        .ExecuteOperationsAsync()
-                        .ConfigureAwait(false);
-                    break;
-
-                case int p when p < existentRule.Priority:
-                    await ManagementOperations.Manage(existentRules)
-                        .UsingSource(this.rulesSource)
-                        .FilterPrioritiesRange(topPriorityThreshold, bottomPriorityThreshold)
-                        .IncreasePriority()
-                        .SetRuleForUpdate(rule)
-                        .UpdateRules()
-                        .ExecuteOperationsAsync()
-                        .ConfigureAwait(false);
-                    break;
-
-                default:
-                    await ManagementOperations.Manage(existentRules)
-                        .UsingSource(this.rulesSource)
-                        .SetRuleForUpdate(rule)
-                        .UpdateRules()
-                        .ExecuteOperationsAsync()
-                        .ConfigureAwait(false);
-
-                    break;
-            }
-
-            return OperationResult.Success();
         }
     }
 }

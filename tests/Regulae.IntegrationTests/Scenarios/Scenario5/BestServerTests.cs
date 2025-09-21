@@ -86,7 +86,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -100,20 +104,24 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
             addRuleResult.IsSuccess.Should().BeTrue();
 
             // Act 3 - Create rule default
-            var ruleBuilderResultDefault = Rule.Create<BestServerConfigurations, BestServerConditions>("Best Server Default")
+            ruleBuilderResult = Rule.Create<BestServerConfigurations, BestServerConditions>("Best Server Default")
                 .InRuleset(BestServerConfigurations.BestServerEvaluation)
                 .SetContent("Default")
                 .Since(DateTime.Parse("2021-05-29Z")).Until(DateTime.Parse("2021-05-31Z"))
                 .Build();
 
             // Assert 3
-            ruleBuilderResultDefault.Should().NotBeNull();
-            errors = ruleBuilderResultDefault.Errors.Any() ? ruleBuilderResultDefault.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
-            ruleBuilderResultDefault.IsSuccess.Should().BeTrue(
+            ruleBuilderResult.Should().NotBeNull();
+            errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
+            ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
             // Act 4 - Add new default rule
-            addRuleResult = await genericRulesEngine.AddRuleAsync(ruleBuilderResultDefault.Rule, RuleAddPriorityOption.AtLargestNumber);
+            addRuleResult = await genericRulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.AtLargestNumber);
 
             // Assert 4 - Verify if rule was added
             addRuleResult.Should().NotBeNull();
@@ -147,7 +155,7 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
 
             // Assert 7
             actual.Should().NotBeNull();
-            actual.Should().BeEquivalentTo(ruleBuilderResultDefault.Rule);
+            actual.Should().BeEquivalentTo(ruleBuilderResult.Rule);
         }
 
         [Theory]
@@ -192,13 +200,21 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
             // Assert 3
             ruleBuilderResultDefault.Should().NotBeNull();
-            errors = ruleBuilderResultDefault.Errors.Any() ? ruleBuilderResultDefault.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            errors = ruleBuilderResultDefault.Errors.Any()
+                ? ruleBuilderResultDefault.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResultDefault.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule default: \n[\n- {errors}\n]");
 
@@ -252,7 +268,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -275,7 +295,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario5
 
             // Assert 3
             ruleBuilderResultDefault.Should().NotBeNull();
-            errors = ruleBuilderResultDefault.Errors.Any() ? ruleBuilderResultDefault.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            errors = ruleBuilderResultDefault.Errors.Any()
+                ? ruleBuilderResultDefault.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResultDefault.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 

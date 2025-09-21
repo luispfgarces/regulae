@@ -57,7 +57,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -121,7 +125,12 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors =
+                ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -180,7 +189,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -237,7 +250,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -294,7 +311,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
@@ -347,7 +368,11 @@ namespace Regulae.IntegrationTests.Scenarios.Scenario4
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 

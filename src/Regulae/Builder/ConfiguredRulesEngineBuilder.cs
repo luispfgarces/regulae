@@ -4,6 +4,7 @@ namespace Regulae.Builder
     using System.Collections.Generic;
     using System.Linq;
     using Regulae;
+    using Regulae.Builder.Validation;
     using Regulae.Cache;
     using Regulae.Core;
     using Regulae.Evaluation;
@@ -62,23 +63,27 @@ namespace Regulae.Builder
 
             var ruleConditionsExtractor = new RuleConditionsExtractor();
 
-            var validationProvider = ValidationProvider.New()
-                .MapValidatorFor(new SearchArgsValidator<string, string>());
-
             var orderedMiddlewares = rulesSourceMiddlewares
                 .Reverse<IRulesSourceMiddleware>();
             var rulesSource = new RulesSource(this.rulesDataSource, orderedMiddlewares);
             var ruleSanitizer = new RuleSanitizer(rulesSource, dataTypesConfigurationProvider);
             var conditionsConverter = new ConditionsConverter(rulesSource);
+            var validationProvider = ValidationProvider.New()
+                .MapValidatorFor(new SearchArgsValidator<string, string>())
+                .MapValidatorFor(new RuleValidator(rulesSource, rulesEngineOptions))
+                .MapValidatorFor(new RuleAddPriorityOptionValidator(rulesSource));
+            var addRuleController = new AddRuleController(ruleSanitizer, rulesSource, validationProvider);
+            var updateRuleController = new UpdateRuleController(rulesSource, validationProvider);
             var rulesEngineArgs = new RulesEngineArgs
             {
+                AddRuleController = addRuleController,
                 ConditionsConverter = conditionsConverter,
                 ConditionsEvalEngine = conditionsEvalEngine,
                 RuleConditionsExtractor = ruleConditionsExtractor,
-                RuleSanitizer = ruleSanitizer,
                 RulesEngineOptions = rulesEngineOptions,
                 RulesSource = rulesSource,
                 ValidatorProvider = validationProvider,
+                UpdateRuleController = updateRuleController,
             };
 
             return new RulesEngine(rulesEngineArgs);

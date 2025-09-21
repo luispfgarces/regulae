@@ -2,7 +2,6 @@ namespace Regulae
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Represents the result of an operation performed on the rules engine.
@@ -12,11 +11,10 @@ namespace Regulae
         /// <summary>
         /// Initializes a new instance of the <see cref="OperationResult"/> class.
         /// </summary>
-        /// <param name="isSuccess">if set to <c>true</c> it represents a success operation result.</param>
         /// <param name="errors">The errors.</param>
-        protected OperationResult(bool isSuccess, IEnumerable<string> errors)
+        internal OperationResult(IList<OperationError> errors)
         {
-            this.IsSuccess = isSuccess;
+            ArgumentNullException.ThrowIfNull(errors);
             this.Errors = errors;
         }
 
@@ -24,26 +22,14 @@ namespace Regulae
         /// Gets the errors occurred during the operation.
         /// </summary>
         /// <value>The errors.</value>
-        public IEnumerable<string> Errors { get; }
+        public IList<OperationError> Errors { get; }
 
         /// <summary>
         /// Gets a value indicating whether the operation was successfull or not.
         /// </summary>
-        /// <value><c>true</c> if rule operation was successfull; otherwise, <c>false</c>.</value>
-        public bool IsSuccess { get; }
+        /// <value><see langword="true"/> if rule operation was successfull; otherwise, <see langword="false"/>.</value>
+        public bool IsSuccess => this.Errors.Count == 0;
 
-        internal static OperationResult Failure(string error) => Failure(new[] { error });
 
-        internal static OperationResult Failure(IEnumerable<string> errors)
-        {
-            if (errors is null)
-            {
-                throw new ArgumentNullException(nameof(errors));
-            }
-
-            return new OperationResult(isSuccess: false, errors: errors);
-        }
-
-        internal static OperationResult Success() => new(isSuccess: true, errors: Enumerable.Empty<string>());
     }
 }

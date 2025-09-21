@@ -1,6 +1,7 @@
 namespace Regulae.InMemory.Sample.Engine
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Regulae;
     using Regulae.InMemory.Sample.Exceptions;
@@ -13,8 +14,13 @@ namespace Regulae.InMemory.Sample.Engine
 
         public async Task BuildAsync(IRulesEngine rulesEngine)
         {
-            foreach (var ruleSpecificationsProvider in ruleSpecificationsRegistrars)
+            foreach (var ruleSpecificationsProvider in this.ruleSpecificationsRegistrars)
             {
+                foreach (var condition in ruleSpecificationsProvider.Conditions)
+                {
+                    await rulesEngine.CreateConditionAsync(condition.Key.ToString(), condition.Value);
+                }
+
                 foreach (var ruleset in ruleSpecificationsProvider.Rulesets)
                 {
                     await rulesEngine.CreateRulesetAsync(ruleset.ToString());
@@ -26,7 +32,7 @@ namespace Regulae.InMemory.Sample.Engine
                 {
                     if (!ruleSpecification.RuleBuilderResult.IsSuccess)
                     {
-                        throw new RulesBuilderException("Rules builder error getting rules specifications", ruleSpecification.RuleBuilderResult.Errors);
+                        throw new RulesBuilderException("Rules builder error getting rules specifications", ruleSpecification.RuleBuilderResult.Errors.Select(e => e.Message));
                     }
 
                     var ruleOperationResult = await rulesEngine
@@ -37,7 +43,7 @@ namespace Regulae.InMemory.Sample.Engine
 
                     if (!ruleOperationResult.IsSuccess)
                     {
-                        throw new RulesBuilderException("Rules builder error adding rules to engine", ruleOperationResult.Errors);
+                        throw new RulesBuilderException("Rules builder error adding rules to engine", ruleOperationResult.Errors.Select(e => e.Message));
                     }
                 }
             }

@@ -1,5 +1,6 @@
 namespace Regulae.Management
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Regulae;
@@ -9,25 +10,28 @@ namespace Regulae.Management
     internal sealed class ManagementOperationsController
     {
         private readonly List<IManagementOperation> managementOperations;
-        private readonly IEnumerable<Rule> rules;
+        private readonly string ruleset;
         private readonly IRulesSource rulesSource;
 
-        public ManagementOperationsController(IRulesSource rulesSource, IEnumerable<Rule> rules)
+        public ManagementOperationsController(IRulesSource rulesSource, string ruleset)
         {
-            this.managementOperations = new List<IManagementOperation>();
+            ArgumentException.ThrowIfNullOrWhiteSpace(ruleset);
+            ArgumentNullException.ThrowIfNull(rulesSource);
+            this.managementOperations = [];
+            this.ruleset = ruleset;
             this.rulesSource = rulesSource;
-            this.rules = rules;
         }
 
         public ManagementOperationsController AddRule(Rule rule)
             => this.AddOperation(new AddRuleManagementOperation(this.rulesSource, rule));
 
-        public ManagementOperationsController DecreasePriority()
-            => this.AddOperation(new MovePriorityManagementOperation(-1));
-
         public async ValueTask ExecuteOperationsAsync()
         {
-            var rulesIntermediateResult = rules;
+            var getRulesFilteredArgs = new GetRulesFilteredArgs
+            {
+                Ruleset = this.ruleset,
+            };
+            var rulesIntermediateResult = (IEnumerable<Rule>)await this.rulesSource.GetRulesFilteredAsync(getRulesFilteredArgs).ConfigureAwait(false);
 
             foreach (var managementOperation in this.managementOperations)
             {
@@ -35,14 +39,17 @@ namespace Regulae.Management
             }
         }
 
-        public ManagementOperationsController FilterFromThresholdPriorityToBottom(int thresholdPriority)
-            => this.AddOperation(new FilterPrioritiesRangeManagementOperation(thresholdPriority, null));
+        public ManagementOperationsController FilterPriorityFromThresholdNumberToLargestNumber(int thresholdPriority)
+            => this.AddOperation(new FilterPrioritiesRangeManagementOperation(topPriorityThreshold: thresholdPriority, bottomPriorityThreshold: null));
 
-        public ManagementOperationsController FilterPrioritiesRange(int topPriorityThreshold, int bottomPriorityThreshold)
-            => this.AddOperation(new FilterPrioritiesRangeManagementOperation(topPriorityThreshold, bottomPriorityThreshold));
+        public ManagementOperationsController FilterPrioritiesRangeUsingUpdatedRule(Rule updatedRule)
+            => this.AddOperation(new FilterPrioritiesRangeManagementOperation(updatedRule));
 
         public ManagementOperationsController IncreasePriority()
-            => this.AddOperation(new MovePriorityManagementOperation(1));
+            => this.AddOperation(new ReOrganizePrioritiesManagementOperation(1));
+
+        public ManagementOperationsController ReOrganizePrioritiesUsingUpdatedRule(Rule updatedRule)
+            => this.AddOperation(new ReOrganizePrioritiesManagementOperation(updatedRule));
 
         public ManagementOperationsController SetRuleForUpdate(Rule updatedRule)
             => this.AddOperation(new SetRuleForUpdateManagementOperation(updatedRule));

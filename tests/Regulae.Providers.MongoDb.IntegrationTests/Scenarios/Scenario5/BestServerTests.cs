@@ -94,19 +94,27 @@ namespace Regulae.Providers.MongoDb.IntegrationTests.Scenarios.Scenario5
 
             // Assert 1
             ruleBuilderResult.Should().NotBeNull();
-            var errors = ruleBuilderResult.Errors.Any() ? ruleBuilderResult.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            var errors = ruleBuilderResult.Errors.Any()
+                ? ruleBuilderResult.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResult.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule: \n[\n- {errors}\n]");
 
             // Assert 3
             ruleBuilderResultDefault.Should().NotBeNull();
-            errors = ruleBuilderResultDefault.Errors.Any() ? ruleBuilderResultDefault.Errors.Aggregate((s1, s2) => $"{s1}\n- {s2}") : string.Empty;
+            errors = ruleBuilderResultDefault.Errors.Any()
+                ? ruleBuilderResultDefault.Errors
+                    .Select(e => e.Message)
+                    .Aggregate((s1, s2) => $"{s1}\n- {s2}")
+                : string.Empty;
             ruleBuilderResultDefault.IsSuccess.Should().BeTrue(
                 $"errors have occurred while creating rule default: \n[\n- {errors}\n]");
 
             // Act 2 - Add new rule with "in" operator
-            await rulesEngine.AddRuleAsync(ruleBuilderResultDefault.Rule, RuleAddPriorityOption.AtNumber(2));
-            await rulesEngine.AddRuleAsync(ruleBuilderResult.Rule, RuleAddPriorityOption.AtNumber(1));
+            await rulesEngine.AddRuleAsync(ruleBuilderResultDefault.Rule!, RuleAddPriorityOption.AtNumber(2));
+            await rulesEngine.AddRuleAsync(ruleBuilderResult.Rule!, RuleAddPriorityOption.AtNumber(1));
 
             var matchDateTime = DateTime.Parse("2021-05-29T12:34:52Z");
 

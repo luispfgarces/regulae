@@ -6,16 +6,16 @@ namespace Regulae.Tests
     using Regulae;
     using Xunit;
 
-    public class RuleOperationResultTests
+    public class OperationResultTests
     {
         [Fact]
         public void Failure_GivenCollectionOfErrors_ReturnsRuleOperationResultWithErrorsAndNoSuccess()
         {
             // Arrange
-            IEnumerable<string> errors = new[] { "Error1", "Error2" };
+            IList<OperationError> errors = new[] { OperationError.Create("E01", "Error1"), OperationError.Create("E02", "Error2") };
 
             // Act
-            var ruleOperationResult = OperationResult.Failure(errors);
+            var ruleOperationResult = Operation.Failure(errors);
 
             // Assert
             ruleOperationResult.Should().NotBeNull();
@@ -27,10 +27,10 @@ namespace Regulae.Tests
         public void Failure_GivenNullCollectionOfErrors_ThrowsArgumentNullException()
         {
             // Arrange
-            IEnumerable<string> errors = null;
+            IList<OperationError> errors = null;
 
             // Act
-            var argumentNullException = Assert.Throws<ArgumentNullException>(() => OperationResult.Failure(errors));
+            var argumentNullException = Assert.Throws<ArgumentNullException>(() => Operation.Failure(errors));
 
             // Assert
             argumentNullException.Should().NotBeNull();
@@ -41,7 +41,7 @@ namespace Regulae.Tests
         public void Success_NoConditionGiven_ReturnsRuleOperationResultWithoutErrorsAndSuccess()
         {
             // Act
-            var ruleOperationResult = OperationResult.Success();
+            var ruleOperationResult = Operation.Success();
 
             // Assert
             ruleOperationResult.Should().NotBeNull();

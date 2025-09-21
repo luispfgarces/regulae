@@ -1,24 +1,24 @@
 namespace Regulae.Management
 {
-    using System.Collections.Generic;
-    using Regulae;
+    using System;
     using Regulae.Source;
 
     internal static class ManagementOperations
     {
-        public static ManagementOperationsSelector Manage(IEnumerable<Rule> rules) => new(rules);
+        public static ManagementOperationsSelector Manage(string ruleset) => new(ruleset);
 
         internal sealed class ManagementOperationsSelector
         {
-            private readonly IEnumerable<Rule> rules;
+            private readonly string ruleset;
 
-            public ManagementOperationsSelector(IEnumerable<Rule> rules)
+            public ManagementOperationsSelector(string ruleset)
             {
-                this.rules = rules;
+                ArgumentException.ThrowIfNullOrWhiteSpace(ruleset);
+                this.ruleset = ruleset;
             }
 
             public ManagementOperationsController UsingSource(IRulesSource rulesDataSource)
-                => new ManagementOperationsController(rulesDataSource, this.rules);
+                => new ManagementOperationsController(rulesDataSource, this.ruleset);
         }
     }
 }

@@ -2,7 +2,6 @@ namespace Regulae.Builder.Generic
 {
     using System;
     using System.Collections.Generic;
-    using Regulae.Builder;
     using Regulae.Generic;
 
     internal static class RuleBuilderResult
@@ -13,13 +12,13 @@ namespace Regulae.Builder.Generic
         /// <param name="errors">The errors.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">errors</exception>
-        public static RuleBuilderResult<TRuleset, TCondition> Failure<TRuleset, TCondition>(IEnumerable<string> errors)
+        public static RuleBuilderResult<TRuleset, TCondition> Failure<TRuleset, TCondition>(IList<OperationError> errors)
             where TRuleset : notnull
             where TCondition : notnull
         {
             ArgumentNullException.ThrowIfNull(errors);
 
-            return new RuleBuilderResult<TRuleset, TCondition>(isSuccess: false, null!, errors);
+            return new RuleBuilderResult<TRuleset, TCondition>(null, errors);
         }
 
         /// <summary>
@@ -34,25 +33,24 @@ namespace Regulae.Builder.Generic
         {
             ArgumentNullException.ThrowIfNull(rule);
 
-            return new RuleBuilderResult<TRuleset, TCondition>(isSuccess: true, rule, []);
+            return new RuleBuilderResult<TRuleset, TCondition>(rule, []);
         }
     }
 
     /// <summary>
     /// Contains the results information from a generic rule build operation.
     /// </summary>
-    public class RuleBuilderResult<TRuleset, TCondition> : RuleBuilderResultBase
+    public class RuleBuilderResult<TRuleset, TCondition> : OperationResult
         where TRuleset : notnull
         where TCondition : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RuleBuilderResult"/> class.
         /// </summary>
-        /// <param name="isSuccess">if set to <see langword="true"/> [is success].</param>
         /// <param name="rule">The rule.</param>
         /// <param name="errors">The errors.</param>
-        internal RuleBuilderResult(bool isSuccess, Rule<TRuleset, TCondition> rule, IEnumerable<string> errors)
-            : base(isSuccess, errors)
+        internal RuleBuilderResult(Rule<TRuleset, TCondition>? rule, IList<OperationError> errors)
+            : base(errors)
         {
             this.Rule = rule;
         }
@@ -61,7 +59,7 @@ namespace Regulae.Builder.Generic
         /// Gets the rule.
         /// </summary>
         /// <value>The rule.</value>
-        public Rule<TRuleset, TCondition> Rule { get; }
+        public Rule<TRuleset, TCondition>? Rule { get; }
 
 
     }

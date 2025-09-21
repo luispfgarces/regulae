@@ -45,19 +45,19 @@ namespace Regulae.WebUI.Sample.Rules
 
             foreach (var ruleset in Enum.GetValues(typeof(RulesetNames)).Cast<RulesetNames>())
             {
-                for (var i = 1; i < random.Next(intialNumber, finalNumber); i++)
+                for (var i = 1; i < this.random.Next(this.intialNumber, this.finalNumber); i++)
                 {
-                    var dateBegin = CreateRandomDateBegin(currentYear);
+                    var dateBegin = this.CreateRandomDateBegin(currentYear);
 
-                    Add(CreateMultipleRule(ruleset, i, dateBegin, CreateRandomDateEnd(dateBegin)),
+                    this.Add(CreateMultipleRule(ruleset, i, dateBegin, this.CreateRandomDateEnd(dateBegin)),
                         RuleAddPriorityOption.AtNumber(i),
                         rulesSpecifications);
                 }
 
-                var deactiveDateBegin = CreateRandomDateBegin(currentYear);
+                var deactiveDateBegin = this.CreateRandomDateBegin(currentYear);
 
-                Add(CreateMultipleRule(ruleset, finalNumber, deactiveDateBegin, CreateRandomDateEnd(deactiveDateBegin), isActive: false),
-                        RuleAddPriorityOption.AtNumber(finalNumber),
+                this.Add(CreateMultipleRule(ruleset, this.finalNumber, deactiveDateBegin, this.CreateRandomDateEnd(deactiveDateBegin), isActive: false),
+                        RuleAddPriorityOption.AtNumber(this.finalNumber),
                         rulesSpecifications);
             }
 
@@ -81,15 +81,15 @@ namespace Regulae.WebUI.Sample.Rules
                         .Value(ConditionNames.SumAll, Operators.In, new int[] { 9, 8, 6 })
                         .And(a => a
                             .Value(ConditionNames.IsPrimeNumber, Operators.Equal, false)
-                            .Value(ConditionNames.SumAll, Operators.StartsWith, "15")
+                            .Value(ConditionNames.SumAll, Operators.GreaterThanOrEqual, 15)
                         )
                         .And(a => a
                             .Value(ConditionNames.CanNumberBeDividedBy3, Operators.Equal, false)
-                            .Value(ConditionNames.SumAll, Operators.NotEqual, "0")
+                            .Value(ConditionNames.SumAll, Operators.NotEqual, 0)
                         )
                         .And(a => a
                             .Value(ConditionNames.IsPrimeNumber, Operators.Equal, true)
-                            .Value(ConditionNames.SumAll, Operators.StartsWith, "5")
+                            .Value(ConditionNames.SumAll, Operators.LesserThan, 5)
                             .Value(ConditionNames.CanNumberBeDividedBy3, Operators.Equal, false)
                         )))
                 .Build();
@@ -101,14 +101,14 @@ namespace Regulae.WebUI.Sample.Rules
 
         private DateTime CreateRandomDateBegin(int year)
         {
-            var months = random.Next(1, 11);
-            year = random.Next(0, 1) + year;
+            var months = this.random.Next(1, 11);
+            year = this.random.Next(0, 1) + year;
             return new DateTime(year, 1, 1).AddMonths(months);
         }
 
         private DateTime? CreateRandomDateEnd(DateTime dateBegin)
         {
-            var months = random.Next(0, 13);
+            var months = this.random.Next(0, 13);
             if (months == 13)
             {
                 return null;

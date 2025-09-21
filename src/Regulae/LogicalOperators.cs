@@ -23,6 +23,6 @@ namespace Regulae
         /// <summary>
         /// Evals a condition node (only applicable when not in a composed condition node).
         /// </summary>
-        Eval = 3
+        Eval = 3,
     }
 }

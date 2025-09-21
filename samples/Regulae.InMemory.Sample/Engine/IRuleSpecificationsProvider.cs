@@ -5,6 +5,8 @@ namespace Regulae.InMemory.Sample.Engine
 
     internal interface IRuleSpecificationsProvider
     {
+        IReadOnlyDictionary<ConditionNames, DataTypes> Conditions { get; }
+
         RulesetNames[] Rulesets { get; }
 
         IEnumerable<RuleSpecification> GetRulesSpecifications();

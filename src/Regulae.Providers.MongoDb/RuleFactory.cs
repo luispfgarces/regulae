@@ -11,6 +11,7 @@ namespace Regulae.Providers.MongoDb
 
     internal sealed class RuleFactory : IRuleFactory
     {
+        private const string RMNG0001 = "RMNG0001";
         private readonly IContentSerializationProvider contentSerializationProvider;
 
         public RuleFactory(IContentSerializationProvider contentSerializationProvider)
@@ -20,10 +21,7 @@ namespace Regulae.Providers.MongoDb
 
         public Rule CreateRule(RuleDataModel ruleDataModel)
         {
-            if (ruleDataModel is null)
-            {
-                throw new ArgumentNullException(nameof(ruleDataModel));
-            }
+            ArgumentNullException.ThrowIfNull(ruleDataModel);
 
             var ruleBuilderResult = Rule.Create(ruleDataModel.Name)
                 .InRuleset(ruleDataModel.Ruleset)
@@ -45,7 +43,7 @@ namespace Regulae.Providers.MongoDb
             {
                 throw new InvalidRuleException(
                     $"An invalid rule was loaded from data source. Rule Name: {ruleDataModel.Name}",
-                    new[] { $"Loaded rule priority number is invalid: {ruleBuilderResult.Rule.Priority}." });
+                    [OperationError.Create(RMNG0001, string.Create(CultureInfo.InvariantCulture, $"Loaded rule priority number is invalid: {ruleBuilderResult.Rule.Priority}."))]);
             }
 
             return ruleBuilderResult.Rule;
@@ -53,10 +51,7 @@ namespace Regulae.Providers.MongoDb
 
         public RuleDataModel CreateRule(Rule rule)
         {
-            if (rule is null)
-            {
-                throw new ArgumentNullException(nameof(rule));
-            }
+            ArgumentNullException.ThrowIfNull(rule);
 
             var content = rule.ContentContainer.GetContentAs<object>();
             var serializedContent = this.contentSerializationProvider.GetContentSerializer(rule.Ruleset).Serialize(content);
@@ -69,7 +64,7 @@ namespace Regulae.Providers.MongoDb
                 DateEnd = rule.DateEnd,
                 Name = rule.Name,
                 Priority = rule.Priority,
-                RootCondition = rule.RootCondition is { } ? ConvertConditionNode(rule.RootCondition) : null,
+                RootCondition = rule.RootCondition is { } ? this.ConvertConditionNode(rule.RootCondition) : null,
                 Ruleset = rule.Ruleset,
             };
 
@@ -151,7 +146,7 @@ namespace Regulae.Providers.MongoDb
             return valueConditionNode;
         }
 
-        private static IDictionary<string, object> FilterProperties(IDictionary<string, object> source)
+        private static Dictionary<string, object> FilterProperties(IDictionary<string, object> source)
         {
             var properties = new Dictionary<string, object>(StringComparer.Ordinal);
             foreach (var property in source)
@@ -193,7 +188,7 @@ namespace Regulae.Providers.MongoDb
                 return ConvertValueConditionNode(conditionNode as ValueConditionNode);
             }
 
-            return ConvertComposedConditionNode(conditionNode as ComposedConditionNode);
+            return this.ConvertComposedConditionNode(conditionNode as ComposedConditionNode);
         }
     }
 }

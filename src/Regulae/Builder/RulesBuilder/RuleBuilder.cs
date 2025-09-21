@@ -61,10 +61,10 @@ namespace Regulae.Builder.RulesBuilder
 
             if (validationResult.IsValid)
             {
-                return RuleBuilderResult.Success(rule);
+                return RuleOperation.Success(rule);
             }
 
-            return RuleBuilderResult.Failure(validationResult.Errors.Select(ve => ve.ErrorMessage).ToList());
+            return RuleOperation.Failure([.. validationResult.Errors.Select(ve => OperationError.Create(ve.ErrorCode, ve.ErrorMessage))]);
         }
 
         public IRuleConfigureContent InRuleset(string ruleset)

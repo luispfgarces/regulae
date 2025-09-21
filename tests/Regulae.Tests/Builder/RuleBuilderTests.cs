@@ -95,7 +95,6 @@ namespace Regulae.Tests.Builder
             const ConditionNames condition = ConditionNames.NumberOfSales;
             const int conditionValue = 40;
             var conditionOperator = containsOperator;
-            const DataTypes dataType = DataTypes.Integer;
 
             // Act
             var ruleBuilderResult = Rule.Create<RulesetNames, ConditionNames>(ruleName)
@@ -111,7 +110,6 @@ namespace Regulae.Tests.Builder
             ruleBuilderResult.Rule.Should().BeNull();
 
             ruleBuilderResult.Errors.Should().NotBeNull().And.NotBeEmpty();
-            ruleBuilderResult.Errors.Should().ContainMatch($"*{dataType}*{conditionOperator}*");
         }
 
         [Theory]

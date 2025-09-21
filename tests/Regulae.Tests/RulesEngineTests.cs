@@ -22,19 +22,21 @@ namespace Regulae.Tests
 
     public class RulesEngineTests
     {
+        private readonly IAddRuleController addRuleControllerMock;
         private readonly IConditionsEvalEngine conditionsEvalEngineMock;
         private readonly IRuleConditionsExtractor ruleConditionsExtractorMock;
-        private readonly IRuleSanitizer ruleSanitizerMock;
         private readonly IRulesSource rulesSourceMock;
         private readonly IValidatorProvider validatorProviderMock;
+        private readonly IUpdateRuleController updateRuleControllerMock;
 
         public RulesEngineTests()
         {
-            this.ruleSanitizerMock = Mock.Of<IRuleSanitizer>();
+            this.addRuleControllerMock = Mock.Of<IAddRuleController>();
             this.rulesSourceMock = Mock.Of<IRulesSource>();
             this.ruleConditionsExtractorMock = Mock.Of<IRuleConditionsExtractor>();
             this.conditionsEvalEngineMock = Mock.Of<IConditionsEvalEngine>();
             this.validatorProviderMock = Mock.Of<IValidatorProvider>();
+            this.updateRuleControllerMock = Mock.Of<IUpdateRuleController>();
         }
 
         [Fact]
@@ -50,11 +52,13 @@ namespace Regulae.Tests
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            Mock.Get(rulesSourceMock)
-                .Setup(s => s.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule> { testRule });
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.UpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
 
-            var validatorProviderMock = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
@@ -65,8 +69,8 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeTrue();
             actual.Errors.Should().BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
         }
 
         [Fact]
@@ -81,17 +85,14 @@ namespace Regulae.Tests
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            Mock.Get(rulesSourceMock)
-                .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new Dictionary<string, Ruleset> { { ruleset.Name, ruleset } });
-            Mock.Get(rulesSourceMock)
-                .Setup(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule>());
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Success());
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Success());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            Mock.Get(this.ruleSanitizerMock)
-                .Setup(x => x.SanitizeAsync(It.IsAny<Rule>()))
-                .ReturnsAsync(OperationResult.Success());
 
             rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
@@ -103,8 +104,9 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeTrue();
             actual.Errors.Should().BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once());
+            Mock.Get(this.rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()), Times.Never());
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once());
         }
 
         [Fact]
@@ -119,9 +121,12 @@ namespace Regulae.Tests
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            Mock.Get(rulesSourceMock)
-                .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new Dictionary<string, Ruleset>());
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Failure(OperationError.Create("R0006", "Dummy message")));
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Success());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
@@ -135,8 +140,9 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeFalse();
             actual.Errors.Should().HaveCount(1);
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Never());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once());
+            Mock.Get(this.rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()), Times.Never());
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Never());
         }
 
         [Fact]
@@ -151,18 +157,15 @@ namespace Regulae.Tests
                 RootCondition = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "USA"),
             };
 
-            Mock.Get(this.rulesSourceMock)
-                .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
-                .ReturnsAsync(new Dictionary<string, Ruleset>());
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Failure(OperationError.Create("R0006", "Dummy message")));
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()))
                 .Returns(new ValueTask());
-            Mock.Get(this.rulesSourceMock)
-                .Setup(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule>());
-            Mock.Get(this.ruleSanitizerMock)
-                .Setup(x => x.SanitizeAsync(It.IsAny<Rule>()))
-                .ReturnsAsync(OperationResult.Success());
+            Mock.Get(this.addRuleControllerMock)
+                .Setup(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Success());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
             rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
@@ -176,10 +179,9 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeTrue();
             actual.Errors.Should().BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
-            Mock.Get(rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()), Times.Once());
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.ValidateAddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once());
+            Mock.Get(this.rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.IsAny<CreateRulesetArgs>()), Times.Once());
+            Mock.Get(this.addRuleControllerMock).Verify(x => x.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once());
         }
 
         [Fact]
@@ -205,9 +207,9 @@ namespace Regulae.Tests
             operationResult.Errors.Should().NotBeNull()
                 .And.HaveCount(1);
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
-            Mock.Get(rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))), Times.Never());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
+            Mock.Get(this.rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))), Times.Never());
+            Mock.Get(this.conditionsEvalEngineMock).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -219,7 +221,7 @@ namespace Regulae.Tests
             Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()))
                 .ReturnsAsync(new Dictionary<string, Ruleset>());
-            Mock.Get(rulesSourceMock)
+            Mock.Get(this.rulesSourceMock)
                 .Setup(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))))
                 .Returns(new ValueTask());
 
@@ -236,9 +238,9 @@ namespace Regulae.Tests
             operationResult.Errors.Should().NotBeNull()
                 .And.BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
-            Mock.Get(rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
+            Mock.Get(this.rulesSourceMock).Verify(x => x.CreateRulesetAsync(It.Is<CreateRulesetArgs>(x => string.Equals(x.Name, ruleset))), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -258,8 +260,12 @@ namespace Regulae.Tests
                 MatchMode = MatchModes.Exact
             };
 
-            Mock.Get(rulesSourceMock).Setup(s => s.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule> { testRule });
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.UpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
@@ -272,11 +278,8 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeTrue();
             actual.Errors.Should().BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
-                It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, Operand>>(),
-                It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
         }
 
         [Fact]
@@ -303,8 +306,8 @@ namespace Regulae.Tests
                 .And.ContainKey(nameof(RulesetNames.Type1))
                 .And.ContainKey(nameof(RulesetNames.Type2));
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).VerifyNoOtherCalls();
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesetsAsync(It.IsAny<GetRulesetsArgs>()), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -322,7 +325,7 @@ namespace Regulae.Tests
 
             var expectedConditions = new List<string> { ConditionNames.IsoCountryCode.ToString() };
 
-            Mock.Get(ruleConditionsExtractorMock)
+            Mock.Get(this.ruleConditionsExtractorMock)
                 .Setup(x => x.GetConditions(It.IsAny<IReadOnlyCollection<Rule>>()))
                 .Returns(expectedConditions);
 
@@ -402,8 +405,8 @@ namespace Regulae.Tests
             actual.Should().Contain(expected1)
                 .And.Contain(expected2)
                 .And.NotContain(notExpected);
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
                 It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
@@ -458,8 +461,8 @@ namespace Regulae.Tests
 
             // Assert
             actual.Should().BeSameAs(expected);
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
                 It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
@@ -513,8 +516,8 @@ namespace Regulae.Tests
 
             // Assert
             actual.Should().BeSameAs(expected);
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
                 It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
@@ -564,8 +567,8 @@ namespace Regulae.Tests
 
             // Assert
             actual.Should().BeNull();
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
+            Mock.Get(this.rulesSourceMock).Verify(x => x.GetRulesAsync(It.IsAny<GetRulesArgs>()), Times.Once());
+            Mock.Get(this.conditionsEvalEngineMock).Verify(x => x.Eval(
                 It.IsAny<IConditionNode>(),
                 It.IsAny<IDictionary<string, Operand>>(),
                 It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.AtLeastOnce());
@@ -588,8 +591,12 @@ namespace Regulae.Tests
                 MatchMode = MatchModes.Exact
             };
 
-            Mock.Get(rulesSourceMock).Setup(s => s.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule> { testRule });
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.UpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
@@ -605,11 +612,8 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeTrue();
             actual.Errors.Should().BeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
-                It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, Operand>>(),
-                It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
         }
 
         [Fact]
@@ -627,8 +631,12 @@ namespace Regulae.Tests
                 MatchMode = MatchModes.Exact
             };
 
-            Mock.Get(rulesSourceMock).Setup(s => s.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()))
-                .ReturnsAsync(new List<Rule> { testRule });
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Failure(OperationError.Create("E1", "Sample error 1")));
+            Mock.Get(this.updateRuleControllerMock)
+                .Setup(x => x.UpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success());
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
@@ -644,11 +652,8 @@ namespace Regulae.Tests
             actual.IsSuccess.Should().BeFalse();
             actual.Errors.Should().NotBeEmpty();
 
-            Mock.Get(rulesSourceMock).Verify(x => x.GetRulesFilteredAsync(It.IsAny<GetRulesFilteredArgs>()), Times.Once());
-            Mock.Get(conditionsEvalEngineMock).Verify(x => x.Eval(
-                It.IsAny<IConditionNode>(),
-                It.IsAny<IDictionary<string, Operand>>(),
-                It.Is<EvaluationOptions>(eo => eo == evaluationOptions)), Times.Never());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.ValidateUpdateRuleAsync(It.IsAny<Rule>()), Times.Once());
+            Mock.Get(this.updateRuleControllerMock).Verify(x => x.UpdateRuleAsync(It.IsAny<Rule>()), Times.Never());
         }
 
         [Theory]
@@ -674,7 +679,7 @@ namespace Regulae.Tests
             var validator = Mock.Of<IValidator<SearchArgs<string, string>>>();
             Mock.Get(validator)
                 .Setup(x => x.ValidateAsync(It.IsAny<SearchArgs<string, string>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ValidationResult(new[] { new ValidationFailure("Prop1", "Sample error message") }));
+                .ReturnsAsync(new ValidationResult([new ValidationFailure("Prop1", "Sample error message")]));
             Mock.Get(this.validatorProviderMock)
                 .Setup(x => x.GetValidatorFor<SearchArgs<string, string>>())
                 .Returns(validator);
@@ -776,13 +781,14 @@ namespace Regulae.Tests
         {
             var rulesEngineArgs = new RulesEngineArgs
             {
+                AddRuleController = this.addRuleControllerMock,
                 ConditionsConverter = Mock.Of<IConditionsConverter>(),
                 ConditionsEvalEngine = this.conditionsEvalEngineMock,
                 RulesSource = this.rulesSourceMock,
                 ValidatorProvider = this.validatorProviderMock,
                 RulesEngineOptions = rulesEngineOptions,
                 RuleConditionsExtractor = this.ruleConditionsExtractorMock,
-                RuleSanitizer = this.ruleSanitizerMock,
+                UpdateRuleController = this.updateRuleControllerMock,
             };
 
             var sut = new RulesEngine(rulesEngineArgs);

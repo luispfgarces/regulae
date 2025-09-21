@@ -8,12 +8,13 @@ namespace Regulae
 
     internal struct RulesEngineArgs
     {
-        public IConditionsConverter ConditionsConverter { get; set; }
-        public IConditionsEvalEngine ConditionsEvalEngine { get; set; }
-        public IRuleConditionsExtractor RuleConditionsExtractor { get; set; }
-        public IRuleSanitizer RuleSanitizer { get; set; }
-        public RulesEngineOptions RulesEngineOptions { get; set; }
-        public IRulesSource RulesSource { get; set; }
-        public IValidatorProvider ValidatorProvider { get; set; }
+        public IAddRuleController AddRuleController { get; init; }
+        public IConditionsConverter ConditionsConverter { get; init; }
+        public IConditionsEvalEngine ConditionsEvalEngine { get; init; }
+        public IRuleConditionsExtractor RuleConditionsExtractor { get; init; }
+        public RulesEngineOptions RulesEngineOptions { get; init; }
+        public IRulesSource RulesSource { get; init; }
+        public IValidatorProvider ValidatorProvider { get; init; }
+        public IUpdateRuleController UpdateRuleController { get; init; }
     }
 }

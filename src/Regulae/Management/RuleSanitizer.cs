@@ -27,26 +27,26 @@ namespace Regulae.Management
         {
             if (rule.RootCondition is not null)
             {
-                var errors = new List<string>();
+                var errors = new List<OperationError>();
                 var conditions = await this.rulesSource.GetConditionsAsync(new GetConditionsArgs()).ConfigureAwait(false);
-                SanitizeCondition(rule.RootCondition, conditions, errors);
+                this.SanitizeCondition(rule.RootCondition, conditions, errors);
 
                 if (errors.Count > 0)
                 {
-                    return OperationResult.Failure(errors);
+                    return Operation.Failure(errors);
                 }
             }
 
-            return OperationResult.Success();
+            return Operation.Success();
         }
 
-        private void SanitizeCondition(IConditionNode conditionNode, IReadOnlyDictionary<string, Condition> conditions, List<string> errors)
+        private void SanitizeCondition(IConditionNode conditionNode, IReadOnlyDictionary<string, Condition> conditions, List<OperationError> errors)
         {
             if (conditionNode is ComposedConditionNode composedCondition)
             {
                 foreach (var childCondition in composedCondition.ChildConditionNodes)
                 {
-                    SanitizeCondition(childCondition, conditions, errors);
+                    this.SanitizeCondition(childCondition, conditions, errors);
                 }
             }
             else
@@ -67,7 +67,7 @@ namespace Regulae.Management
 
                         if (valueCondition.RightOperand.DataType == DataTypes.String && !dataTypeConfiguration.ValuePattern.IsMatch((string)valueCondition.RightOperand.Value!))
                         {
-                            errors.Add($"Condition '{condition.Name}' value '{valueCondition.RightOperand.Value!}' is not a valid value for {condition.DataType}.");
+                            errors.Add(OperationError.Create(Constants.ErrorCodes.R0026, $"Condition '{condition.Name}' value '{valueCondition.RightOperand.Value!}' is not a valid value for {condition.DataType}."));
                             return;
                         }
 
@@ -80,7 +80,7 @@ namespace Regulae.Management
                         }
                         catch (InvalidCastException)
                         {
-                            errors.Add($"Condition '{condition.Name}' value '{valueCondition.RightOperand.Value!}' is not convertible to {dataTypeConfiguration.OneCardinality.Type.Name}.");
+                            errors.Add(OperationError.Create(Constants.ErrorCodes.R0027, $"Condition '{condition.Name}' value '{valueCondition.RightOperand.Value!}' is not convertible to {dataTypeConfiguration.OneCardinality.Type.Name}."));
                         }
                     }
                     else
@@ -91,7 +91,7 @@ namespace Regulae.Management
                             valueCondition.RightOperand = new Operand(converted, condition.DataType, Cardinalities.One);
                         }
 
-                        errors.Add($"Condition '{condition.Name}' value must be of type {nameof(IEnumerable)}.");
+                        errors.Add(OperationError.Create(Constants.ErrorCodes.R0028, $"Condition '{condition.Name}' value must be of type {nameof(IEnumerable)}."));
                     }
                 }
             }

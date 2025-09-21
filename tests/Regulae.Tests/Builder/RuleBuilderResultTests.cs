@@ -10,13 +10,13 @@ namespace Regulae.Tests.Builder
     public class RuleBuilderResultTests
     {
         [Fact]
-        public void Failure_GivenAllValidParameters_ReturnsRuleBuilderResultWithFailure()
+        public void Ctor_GivenAllValidParameters_ReturnsRuleBuilderResultWithFailure()
         {
             // Arrange
-            IEnumerable<string> expectedErrors = new[] { "Error1", "Error2" };
+            IList<OperationError> expectedErrors = [OperationError.Create("E1", "Error1"), OperationError.Create("E2", "Error2")];
 
             // Act
-            var ruleBuilderResult = RuleBuilderResult.Failure(expectedErrors);
+            var ruleBuilderResult = new RuleBuilderResult(null!, expectedErrors);
 
             // Assert
             ruleBuilderResult.Should().NotBeNull();
@@ -26,13 +26,13 @@ namespace Regulae.Tests.Builder
         }
 
         [Fact]
-        public void Failure_GivenNullErrorsCollection_ThrowsArgumentNullException()
+        public void Ctor_GivenNullErrorsCollection_ThrowsArgumentNullException()
         {
             // Arrange
-            IEnumerable<string> expectedErrors = null;
+            IList<OperationError> expectedErrors = null;
 
             // Act
-            var argumentNullException = Assert.Throws<ArgumentNullException>(() => RuleBuilderResult.Failure(expectedErrors));
+            var argumentNullException = Assert.Throws<ArgumentNullException>(() => new RuleBuilderResult(null!, expectedErrors));
 
             // Arrange
             argumentNullException.Should().NotBeNull();
@@ -40,33 +40,19 @@ namespace Regulae.Tests.Builder
         }
 
         [Fact]
-        public void Success_GivenAllValidParameters_ReturnsRuleBuilderResultWithSuccessAndNewRule()
+        public void Ctor_GivenAllValidParameters_ReturnsRuleBuilderResultWithSuccessAndNewRule()
         {
             // Arrange
             var rule = new Rule("Test rule", "Test ruleset", DateTime.UtcNow, null, new ObjectContentContainer(new object()));
 
             // Act
-            var ruleBuilderResult = RuleBuilderResult.Success(rule);
+            var ruleBuilderResult = new RuleBuilderResult(rule, []);
 
             // Assert
             ruleBuilderResult.Should().NotBeNull();
             ruleBuilderResult.IsSuccess.Should().BeTrue();
             ruleBuilderResult.Errors.Should().NotBeNull().And.BeEmpty();
             ruleBuilderResult.Rule.Should().NotBeNull().And.Be(rule);
-        }
-
-        [Fact]
-        public void Success_GivenNullErrorsCollection_ThrowsArgumentNullException()
-        {
-            // Arrange
-            Rule rule = null;
-
-            // Act
-            var argumentNullException = Assert.Throws<ArgumentNullException>(() => RuleBuilderResult.Success(rule));
-
-            // Arrange
-            argumentNullException.Should().NotBeNull();
-            argumentNullException.ParamName.Should().Be("rule");
         }
     }
 }

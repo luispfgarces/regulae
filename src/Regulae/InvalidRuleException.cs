@@ -3,7 +3,6 @@ namespace Regulae
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
 
     /// <summary>
     /// Exception thrown when a operation is attempted with a invalid rule.
@@ -20,7 +19,7 @@ namespace Regulae
         public InvalidRuleException(string message)
             : base(message)
         {
-            this.Errors = Enumerable.Empty<string>();
+            this.Errors = [];
         }
 
         /// <summary>
@@ -30,7 +29,7 @@ namespace Regulae
         /// <param name="errors">The errors.</param>
         public InvalidRuleException(
             string message,
-            IEnumerable<string> errors)
+            IEnumerable<OperationError> errors)
             : base(message)
         {
             this.Errors = errors ?? throw new ArgumentNullException(nameof(errors));
@@ -42,6 +41,6 @@ namespace Regulae
         /// <value>
         /// The errors.
         /// </value>
-        public IEnumerable<string> Errors { get; }
+        public IEnumerable<OperationError> Errors { get; }
     }
 }

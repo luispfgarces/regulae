@@ -53,14 +53,14 @@ namespace Regulae.Builder.Generic.RulesBuilder
 
             if (ruleBuilderResult.IsSuccess)
             {
-                var genericRule = new Rule<TRuleset, TCondition>(ruleBuilderResult.Rule);
+                var genericRule = new Rule<TRuleset, TCondition>(ruleBuilderResult.Rule!);
                 var validationResult = this.genericRuleValidator.Validate(genericRule);
                 if (validationResult.IsValid)
                 {
                     return RuleBuilderResult.Success<TRuleset, TCondition>(genericRule);
                 }
 
-                return RuleBuilderResult.Failure<TRuleset, TCondition>(validationResult.Errors.Select(ve => ve.ErrorMessage).ToList());
+                return RuleBuilderResult.Failure<TRuleset, TCondition>([.. validationResult.Errors.Select(ve => OperationError.Create(ve.ErrorCode, ve.ErrorMessage))]);
             }
 
             return RuleBuilderResult.Failure<TRuleset, TCondition>(ruleBuilderResult.Errors);

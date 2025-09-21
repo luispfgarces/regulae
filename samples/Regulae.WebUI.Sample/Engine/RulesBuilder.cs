@@ -13,7 +13,7 @@ namespace Regulae.WebUI.Sample.Engine
 
         public async Task BuildAsync(IRulesEngine rulesEngine)
         {
-            foreach (var ruleSpecificationsProvider in ruleSpecificationsProviders)
+            foreach (var ruleSpecificationsProvider in this.ruleSpecificationsProviders)
             {
                 foreach (var condition in ruleSpecificationsProvider.Conditions)
                 {
@@ -23,7 +23,7 @@ namespace Regulae.WebUI.Sample.Engine
 
                     if (!conditionOperationResult.IsSuccess)
                     {
-                        throw new RulesBuilderException("Rules builder error creating conditions", conditionOperationResult.Errors);
+                        throw new RulesBuilderException("Rules builder error creating conditions", conditionOperationResult.Errors.Select(e => e.Message));
                     }
                 }
 
@@ -38,17 +38,17 @@ namespace Regulae.WebUI.Sample.Engine
                 {
                     if (!ruleSpecification.RuleBuilderResult.IsSuccess)
                     {
-                        throw new RulesBuilderException("Rules builder error getting rules specifications", ruleSpecification.RuleBuilderResult.Errors);
+                        throw new RulesBuilderException("Rules builder error getting rules specifications", ruleSpecification.RuleBuilderResult.Errors.Select(e => e.Message));
                     }
 
                     var ruleOperationResult = await rulesEngine
                         .AddRuleAsync(
-                            ruleSpecification.RuleBuilderResult.Rule,
+                            ruleSpecification.RuleBuilderResult.Rule!,
                             ruleSpecification.RuleAddPriorityOption);
 
                     if (!ruleOperationResult.IsSuccess)
                     {
-                        throw new RulesBuilderException("Rules builder error adding rules to engine", ruleOperationResult.Errors);
+                        throw new RulesBuilderException("Rules builder error adding rules to engine", ruleOperationResult.Errors.Select(e => e.Message));
                     }
                 }
             }

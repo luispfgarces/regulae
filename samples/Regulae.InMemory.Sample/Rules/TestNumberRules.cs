@@ -13,23 +13,31 @@ namespace Regulae.InMemory.Sample.Rules
 
         public TestNumberRules()
         {
-            this.rulesSpecifications = new List<RuleSpecification>();
+            this.rulesSpecifications = [];
         }
 
-        public RulesetNames[] Rulesets => new[] { RulesetNames.TestNumber, };
+        public RulesetNames[] Rulesets => [RulesetNames.TestNumber,];
+
+        public IReadOnlyDictionary<ConditionNames, DataTypes> Conditions => new Dictionary<ConditionNames, DataTypes>
+        {
+            { ConditionNames.RoyalNumber, DataTypes.Integer },
+            { ConditionNames.IsPrimeNumber, DataTypes.Boolean },
+            { ConditionNames.CanNumberBeDividedBy3, DataTypes.Boolean },
+            { ConditionNames.SumAll, DataTypes.Integer },
+        };
 
         public IEnumerable<RuleSpecification> GetRulesSpecifications()
         {
-            Add(CreateRuleForCoolNumbers(), RuleAddPriorityOption.AtNumber(3));
-            Add(CreateRuleForSosoNumbers(), RuleAddPriorityOption.AtNumber(2));
-            Add(CreateDefaultRule(), RuleAddPriorityOption.AtNumber(1));
+            this.Add(this.CreateRuleForCoolNumbers(), RuleAddPriorityOption.AtNumber(3));
+            this.Add(this.CreateRuleForSosoNumbers(), RuleAddPriorityOption.AtNumber(2));
+            this.Add(this.CreateDefaultRule(), RuleAddPriorityOption.AtNumber(1));
 
             return this.rulesSpecifications;
         }
 
         private void Add(
             RuleBuilderResult<RulesetNames, ConditionNames> rule,
-            RuleAddPriorityOption ruleAddPriorityOption) => rulesSpecifications.Add(
+            RuleAddPriorityOption ruleAddPriorityOption) => this.rulesSpecifications.Add(
                 new RuleSpecification
                 {
                     RuleBuilderResult = rule,
@@ -51,7 +59,7 @@ namespace Regulae.InMemory.Sample.Rules
                     .Value(ConditionNames.RoyalNumber, Operators.Equal, 7)
                     .And(a => a
                         .Value(ConditionNames.IsPrimeNumber, Operators.Equal, 7)
-                        .Value(ConditionNames.SumAll, Operators.StartsWith, "5"))))
+                        .Value(ConditionNames.SumAll, Operators.GreaterThanOrEqual, 5))))
             .Build();
 
         private RuleBuilderResult<RulesetNames, ConditionNames> CreateRuleForSosoNumbers() => Rule.Create<RulesetNames, ConditionNames>("Rule for so so numbers")
@@ -62,7 +70,7 @@ namespace Regulae.InMemory.Sample.Rules
                 .Or(o => o
                     .Value(ConditionNames.CanNumberBeDividedBy3, Operators.Equal, true)
                     .Value(ConditionNames.IsPrimeNumber, Operators.Equal, false)
-                    .Value(ConditionNames.SumAll, Operators.StartsWith, "9")))
+                    .Value(ConditionNames.SumAll, Operators.GreaterThanOrEqual, 9)))
             .Build();
     }
 }

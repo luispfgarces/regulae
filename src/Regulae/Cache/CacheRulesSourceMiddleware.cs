@@ -61,9 +61,9 @@ namespace Regulae.Cache
                 dateBegin.Year, dateBegin.Month, dateBegin.Day, "_",
                 dateEnd.Year, dateEnd.Month, dateEnd.Day);
 
-            if (this.cache.TryGet(cacheKey, out var cachedRules))
+            if (this.cache.TryGet(cacheKey, out var cacheValue))
             {
-                return (IReadOnlyCollection<Rule>)cachedRules;
+                return CloneCachedRules((IReadOnlyCollection<Rule>)cacheValue);
             }
 
             var rules = await next(args).ConfigureAwait(false);
@@ -92,6 +92,18 @@ namespace Regulae.Cache
 
             this.cache.Evict(RulesAllCacheKey);
             this.cache.EvictMany(GetRulesByRulesetCachekeyPrefix(args.Rule.Ruleset));
+        }
+
+        private static Rule[] CloneCachedRules(IReadOnlyCollection<Rule> rulesFromCache)
+        {
+            var cachedRules = new Rule[rulesFromCache.Count];
+            var i = 0;
+            foreach (var rule in rulesFromCache)
+            {
+                cachedRules[i++] = rule.Clone();
+            }
+
+            return cachedRules;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
