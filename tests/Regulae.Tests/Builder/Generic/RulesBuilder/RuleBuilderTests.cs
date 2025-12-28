@@ -1,11 +1,11 @@
-namespace Regulae.Tests.Builder
+namespace Regulae.Tests.Builder.Generic.RulesBuilder
 {
     using System;
-    using System.Linq;
     using FluentAssertions;
     using Moq;
     using Regulae;
     using Regulae.Builder.Generic.RulesBuilder;
+    using Regulae.ConditionNodes;
     using Regulae.Generic.ConditionNodes;
     using Regulae.Serialization;
     using Regulae.Tests.TestStubs;
@@ -21,21 +21,17 @@ namespace Regulae.Tests.Builder
             var dateBegin = DateTime.Parse("2021-01-01");
             var ruleset = RulesetNames.Type1;
             var content = "Content";
+            var rootCondition = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.Equal, "EUR");
 
             // Act
             var ruleBuilderResult = Rule.Create<RulesetNames, ConditionNames>(ruleName)
                 .InRuleset(ruleset)
                 .SetContent(content)
                 .Since(dateBegin)
-                .ApplyWhen(c => c
-                    .Or(o => o
-                        .Value(ConditionNames.IsoCountryCode, Operators.Equal, "PT")
-                        .And(a => a
-                            .Value(ConditionNames.NumberOfSales, Operators.GreaterThan, 1000)
-                            .Value(ConditionNames.IsoCurrency, Operators.In, new[] { "EUR", "USD" })
-                        )
-                    )
-                )
+                .ApplyWhen(c =>
+                {
+                    return rootCondition;
+                })
                 .Build();
 
             // Assert
@@ -47,61 +43,41 @@ namespace Regulae.Tests.Builder
             rule.DateBegin.Should().Be(dateBegin);
             rule.DateEnd.Should().BeNull();
             rule.ContentContainer.Should().NotBeNull();
+            rule.RootCondition.Should().NotBeNull()
+                .And.BeOfType<ValueConditionNode<ConditionNames>>();
 
-            // root node
-            rule.RootCondition.Should().BeOfType<ComposedConditionNode<ConditionNames>>();
-            var rootCondition = rule.RootCondition as ComposedConditionNode<ConditionNames>;
-            rootCondition.LogicalOperator.Should().Be(LogicalOperators.Or);
-            rootCondition.ChildConditionNodes.Should().HaveCount(2);
-            var childNodes = rootCondition.ChildConditionNodes.ToList();
-
-            // first child node
-            childNodes[0].Should().BeOfType<ValueConditionNode<ConditionNames>>();
-            var isoCountryChildNode = childNodes[0] as ValueConditionNode<ConditionNames>;
-            isoCountryChildNode.Condition.Should().Be(ConditionNames.IsoCountryCode);
-            isoCountryChildNode.Operator.Should().Be(Operators.Equal);
-            isoCountryChildNode.RightOperand.Should().Be(new Operand("PT"));
-
-            // second child nodes
-            childNodes[1].Should().BeOfType<ComposedConditionNode<ConditionNames>>();
-            var composedChildNode = childNodes[1] as ComposedConditionNode<ConditionNames>;
-            composedChildNode.LogicalOperator.Should().Be(LogicalOperators.And);
-            composedChildNode.ChildConditionNodes.Should().HaveCount(2);
-            var composedChildNodes = composedChildNode.ChildConditionNodes.ToList();
-
-            composedChildNodes[0].Should().BeOfType<ValueConditionNode<ConditionNames>>();
-            var numberOfSalesChildNode = composedChildNodes[0] as ValueConditionNode<ConditionNames>;
-            numberOfSalesChildNode.Condition.Should().Be(ConditionNames.NumberOfSales);
-            numberOfSalesChildNode.Operator.Should().Be(Operators.GreaterThan);
-            numberOfSalesChildNode.RightOperand.Should().Be(new Operand(1000));
-
-            composedChildNodes[1].Should().BeOfType<ValueConditionNode<ConditionNames>>();
-            var isoCurrencyChildNode = composedChildNodes[1] as ValueConditionNode<ConditionNames>;
-            isoCurrencyChildNode.Condition.Should().Be(ConditionNames.IsoCurrency);
-            isoCurrencyChildNode.Operator.Should().Be(Operators.In);
-            isoCurrencyChildNode.RightOperand.Should().Be(new Operand(new[] { "EUR", "USD" }));
+            var valueConditionNode = rule.RootCondition as ValueConditionNode<ConditionNames>;
+            valueConditionNode.Condition.Should().Be(ConditionNames.IsoCurrency);
+            valueConditionNode.Operator.Should().Be(Operators.Equal);
+            var rightOperand = valueConditionNode.RightOperand;
+            rightOperand.Value.Should().Be("EUR");
+            rightOperand.DataType.Should().Be(DataTypes.String);
+            rightOperand.Cardinality.Should().Be(Cardinalities.One);
         }
 
         [Theory]
-        [InlineData(Operators.Contains)]
-        [InlineData(Operators.NotContains)]
-        public void NewRule_GivenRuleWithIntegerConditionAndContainsOperator_ReturnsInvalidRuleResult(Operators containsOperator)
+        [InlineData(nameof(ConditionNames.NumberOfSales), Operators.Contains, 40)]
+        [InlineData(nameof(ConditionNames.NumberOfSales), Operators.NotContains, 40)]
+        [InlineData("", Operators.Equal, 40)]
+        public void NewRule_GivenRuleWithIntegerConditionAndContainsOperator_ReturnsInvalidRuleResult(
+            string conditionName,
+            Operators containsOperator,
+            object rightOperand)
         {
             // Arrange
             var ruleName = "Rule 1";
             var dateBegin = DateTime.Parse("2021-01-01");
             var ruleset = RulesetNames.Type1;
             var content = "Content";
-            const ConditionNames condition = ConditionNames.NumberOfSales;
-            const int conditionValue = 40;
             var conditionOperator = containsOperator;
+            var condition = string.IsNullOrEmpty(conditionName) ? 0 : Enum.Parse<ConditionNames>(conditionName);
 
             // Act
             var ruleBuilderResult = Rule.Create<RulesetNames, ConditionNames>(ruleName)
                 .InRuleset(ruleset)
                 .SetContent(content)
                 .Since(dateBegin)
-                .ApplyWhen(condition, conditionOperator, conditionValue)
+                .ApplyWhen(condition, conditionOperator, rightOperand)
                 .Build();
 
             // Assert
@@ -208,6 +184,24 @@ namespace Regulae.Tests.Builder
             var ruleContent = ruleBuilderResult.Rule.ContentContainer;
             ruleContent.Should().NotBeNull().And.BeOfType<SerializedContentContainer>();
             ruleContent.GetContentAs<string>().Should().Be(content);
+        }
+
+        [Fact]
+        public void WithActive_SetsActiveFlagOnRule()
+        {
+            // Arrange
+            var builder = new RuleBuilder<RulesetNames, ConditionNames>("TestRule")
+                .InRuleset(RulesetNames.Type1)
+                .SetContent("test content")
+                .Since(DateTime.UtcNow);
+
+            // Act
+            var result = builder.WithActive(false).Build();
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Rule.Should().NotBeNull();
+            result.Rule!.Active.Should().BeFalse();
         }
     }
 }

@@ -35,23 +35,21 @@ namespace Regulae.Rql.IntegrationTests.GrammarCheck
             foreach (var checksFile in checksFiles)
             {
                 var checksStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(checksFile);
-                using (var checksStreamReader = new StreamReader(checksStream!))
+                using var checksStreamReader = new StreamReader(checksStream!);
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
+
+                var checks = deserializer.Deserialize<GrammarChecks>(checksStreamReader);
+
+                if (checks.Checks is null || checks.Checks.Length == 0)
                 {
-                    var deserializer = new DeserializerBuilder()
-                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                        .Build();
+                    throw new InvalidOperationException($"No checks found in the file '{checksFile}'.");
+                }
 
-                    var checks = deserializer.Deserialize<GrammarChecks>(checksStreamReader);
-
-                    if (checks.Checks is null || !checks.Checks.Any())
-                    {
-                        throw new InvalidOperationException($"No checks found in the file '{checksFile}'.");
-                    }
-
-                    foreach (var checkLine in checks.Checks)
-                    {
-                        yield return new object[] { checkLine.Rql!, checkLine.ExpectsSuccess!, checkLine.ExpectedMessages!, };
-                    }
+                foreach (var checkLine in checks.Checks)
+                {
+                    yield return new object[] { checkLine.Rql!, checkLine.ExpectsSuccess!, checkLine.ExpectedMessages!, };
                 }
             }
 

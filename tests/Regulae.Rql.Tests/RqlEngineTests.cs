@@ -8,6 +8,7 @@ namespace Regulae.Rql.Tests
     using Regulae.Rql.Ast.Segments;
     using Regulae.Rql.Ast.Statements;
     using Regulae.Rql.Messages;
+    using Regulae.Rql.Pipeline.Assist;
     using Regulae.Rql.Pipeline.Interpret;
     using Regulae.Rql.Pipeline.Parse;
     using Regulae.Rql.Pipeline.Scan;
@@ -30,9 +31,9 @@ namespace Regulae.Rql.Tests
             this.interpreter = Mock.Of<IInterpreter>();
             var rqlEngineArgs = new RqlEngineArgs
             {
-                Interpreter = interpreter,
-                Parser = parser,
-                TokenScanner = tokenScanner,
+                Interpreter = this.interpreter,
+                Parser = this.parser,
+                TokenScanner = this.tokenScanner,
             };
 
             this.rqlEngine = new RqlEngine(rqlEngineArgs);
@@ -521,6 +522,110 @@ namespace Regulae.Rql.Tests
                 Mock.Get(this.interpreter));
 
             notSupportedException.Message.Should().Be($"Result of type '{typeof(StubResult).FullName}' is not supported.");
+        }
+
+        [Fact]
+        public async Task ProvideAssistSuggestionsAsync_DelegatesToAssistEngineAndReturnsSuggestions()
+        {
+            // Arrange
+            const string rql = "MATCH ONE RULE FOR \"RS1\" ON $2024-01-01Z$;";
+            var position = RqlSourcePosition.From(1u, 8u);
+
+            var token = CreateToken("\"RS1\"", "RS1", TokenType.STRING);
+            var tokens = new[] { token }.ToList().AsReadOnly();
+            var scanResult = ScanResult.CreateSuccess(tokens, new List<Message>());
+
+            var statements = new Statement[0].ToList().AsReadOnly();
+            var parseResult = ParseResult.CreateSuccess(statements, new List<Message>());
+
+            var suggestion = AssistSuggestion.New(@"""RS1""");
+            var suggestions = new IAssistSuggestion[] { suggestion };
+
+            var scannerMock = new Mock<ITokenScanner>();
+            var parserMock = new Mock<IParser>();
+            var assistEngineMock = new Mock<IAssistEngine>();
+            var interpreterMock = new Mock<IInterpreter>();
+
+            scannerMock.Setup(s => s.ScanTokens(It.Is<string>(x => x == rql))).Returns(scanResult);
+            parserMock.Setup(p => p.Parse(It.Is<IReadOnlyList<Token>>(t => object.Equals(t, tokens))))
+                .Returns(parseResult);
+            assistEngineMock
+                .Setup(a => a.ProcessAssistAsync(It.Is<IReadOnlyList<Token>>(t => object.Equals(t, tokens)),
+                    It.Is<IReadOnlyList<Statement>>(s => object.Equals(s, statements)),
+                    It.Is<RqlSourcePosition>(pos => pos == position)))
+                .ReturnsAsync(suggestions);
+
+            var args = new RqlEngineArgs
+            {
+                AssistEngine = assistEngineMock.Object,
+                Interpreter = interpreterMock.Object,
+                Parser = parserMock.Object,
+                TokenScanner = scannerMock.Object,
+            };
+
+            var engine = new RqlEngine(args);
+
+            // Act
+            var actual = await engine.ProvideAssistSuggestionsAsync(rql, position);
+
+            // Assert
+            actual.Should().NotBeNull();
+            actual.Should().HaveCount(1);
+            actual.First().Lexeme.Should().Be(suggestion.Lexeme);
+
+            scannerMock.Verify(s => s.ScanTokens(rql), Times.Once);
+            parserMock.Verify(p => p.Parse(It.IsAny<IReadOnlyList<Token>>()), Times.Once);
+            assistEngineMock.Verify(a => a.ProcessAssistAsync(It.IsAny<IReadOnlyList<Token>>(), It.IsAny<IReadOnlyList<Statement>>(), position), Times.Once);
+        }
+
+        [Fact]
+        public async Task ProvideAssistSuggestionsAsync_WhenAssistEngineReturnsEmpty_ReturnsEmptyCollection()
+        {
+            // Arrange
+            const string rql = "ARRAY[3];";
+            var position = RqlSourcePosition.From(1u, 2u);
+
+            var token = CreateToken("ARRAY", null, TokenType.ARRAY);
+            var tokens = new[] { token }.ToList().AsReadOnly();
+            var scanResult = ScanResult.CreateSuccess(tokens, new List<Message>());
+
+            var statements = new Statement[0].ToList().AsReadOnly();
+            var parseResult = ParseResult.CreateSuccess(statements, new List<Message>());
+
+            var emptySuggestions = new IAssistSuggestion[0];
+
+            var scannerMock = new Mock<ITokenScanner>();
+            var parserMock = new Mock<IParser>();
+            var assistEngineMock = new Mock<IAssistEngine>();
+            var interpreterMock = new Mock<IInterpreter>();
+
+            scannerMock.Setup(s => s.ScanTokens(It.Is<string>(x => x == rql))).Returns(scanResult);
+            parserMock.Setup(p => p.Parse(It.Is<IReadOnlyList<Token>>(t => object.Equals(t, tokens))))
+                .Returns(parseResult);
+            assistEngineMock
+                .Setup(a => a.ProcessAssistAsync(It.IsAny<IReadOnlyList<Token>>(), It.IsAny<IReadOnlyList<Statement>>(), It.IsAny<RqlSourcePosition>()))
+                .ReturnsAsync(emptySuggestions);
+
+            var args = new RqlEngineArgs
+            {
+                AssistEngine = assistEngineMock.Object,
+                Interpreter = interpreterMock.Object,
+                Parser = parserMock.Object,
+                TokenScanner = scannerMock.Object,
+            };
+
+            var engine = new RqlEngine(args);
+
+            // Act
+            var actual = await engine.ProvideAssistSuggestionsAsync(rql, position);
+
+            // Assert
+            actual.Should().NotBeNull();
+            actual.Should().BeEmpty();
+
+            scannerMock.Verify(s => s.ScanTokens(rql), Times.Once);
+            parserMock.Verify(p => p.Parse(It.IsAny<IReadOnlyList<Token>>()), Times.Once);
+            assistEngineMock.Verify(a => a.ProcessAssistAsync(It.IsAny<IReadOnlyList<Token>>(), It.IsAny<IReadOnlyList<Statement>>(), It.IsAny<RqlSourcePosition>()), Times.Once);
         }
 
         private static Token CreateToken(string lexeme, object? literal, TokenType type)

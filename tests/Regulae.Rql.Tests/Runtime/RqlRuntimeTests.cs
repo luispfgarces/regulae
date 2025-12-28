@@ -1,87 +1,91 @@
 namespace Regulae.Rql.Tests.Runtime
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Moq;
     using Regulae;
-    using Regulae.Rql.Tests.TestStubs;
     using Regulae.Rql.Runtime;
     using Regulae.Rql.Runtime.RuleManipulation;
     using Regulae.Rql.Runtime.Types;
+    using Regulae.Rql.Tests.TestStubs;
     using Xunit;
 
     public class RqlRuntimeTests
     {
-        public static IEnumerable<object?[]> ApplyBinary_ErrorCases() => new[]
+        public static TheoryData<object, object, object, string> ApplyBinary_ErrorCases() => new()
         {
             // RqlOperators.Minus
-            new object?[] { new RqlInteger(1), RqlOperators.Minus, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Minus, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Minus, new RqlBool(true), "Expected right operand of type decimal but found bool." },
-            new object?[] { new RqlInteger(9), RqlOperators.Minus, new RqlBool(true), "Expected right operand of type integer but found bool." },
-            new object?[] { new RqlString("abc"), RqlOperators.Minus, new RqlInteger(1), "Cannot subtract operand of type string." },
+            { new RqlInteger(1), RqlOperators.Minus, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
+            { new RqlDecimal(1.5m), RqlOperators.Minus, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
+            { new RqlDecimal(1.5m), RqlOperators.Minus, new RqlBool(true), "Expected right operand of type decimal but found bool." },
+            { new RqlInteger(9), RqlOperators.Minus, new RqlBool(true), "Expected right operand of type integer but found bool." },
+            { new RqlString("abc"), RqlOperators.Minus, new RqlInteger(1), "Cannot subtract operand of type string." },
 
             // RqlOperators.Plus
-            new object?[] { new RqlInteger(1), RqlOperators.Plus, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Plus, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Plus, new RqlBool(true), "Expected right operand of type decimal but found bool." },
-            new object?[] { new RqlInteger(9), RqlOperators.Plus, new RqlBool(true), "Expected right operand of type integer but found bool." },
-            new object?[] { new RqlString("abc"), RqlOperators.Plus, new RqlInteger(1), "Cannot sum operand of type string." },
+            { new RqlInteger(1), RqlOperators.Plus, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
+            { new RqlDecimal(1.5m), RqlOperators.Plus, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
+            { new RqlDecimal(1.5m), RqlOperators.Plus, new RqlBool(true), "Expected right operand of type decimal but found bool." },
+            { new RqlInteger(9), RqlOperators.Plus, new RqlBool(true), "Expected right operand of type integer but found bool." },
+            { new RqlString("abc"), RqlOperators.Plus, new RqlInteger(1), "Cannot sum operand of type string." },
 
             // RqlOperators.Slash
-            new object?[] { new RqlInteger(1), RqlOperators.Slash, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Slash, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Slash, new RqlBool(true), "Expected right operand of type decimal but found bool." },
-            new object?[] { new RqlInteger(9), RqlOperators.Slash, new RqlBool(true), "Expected right operand of type integer but found bool." },
-            new object?[] { new RqlString("abc"), RqlOperators.Slash, new RqlInteger(1), "Cannot divide operand of type string." },
+            { new RqlInteger(1), RqlOperators.Slash, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
+            { new RqlDecimal(1.5m), RqlOperators.Slash, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
+            { new RqlDecimal(1.5m), RqlOperators.Slash, new RqlBool(true), "Expected right operand of type decimal but found bool." },
+            { new RqlInteger(9), RqlOperators.Slash, new RqlBool(true), "Expected right operand of type integer but found bool." },
+            { new RqlString("abc"), RqlOperators.Slash, new RqlInteger(1), "Cannot divide operand of type string." },
 
             // RqlOperators.Star
-            new object?[] { new RqlInteger(1), RqlOperators.Star, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Star, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
-            new object?[] { new RqlDecimal(1.5m), RqlOperators.Star, new RqlBool(true), "Expected right operand of type decimal but found bool." },
-            new object?[] { new RqlInteger(9), RqlOperators.Star, new RqlBool(true), "Expected right operand of type integer but found bool." },
-            new object?[] { new RqlString("abc"), RqlOperators.Star, new RqlInteger(1), "Cannot multiply operand of type string." },
+            { new RqlInteger(1), RqlOperators.Star, new RqlDecimal(2.0m), "Expected right operand of type integer but found decimal." },
+            { new RqlDecimal(1.5m), RqlOperators.Star, new RqlInteger(3), "Expected right operand of type decimal but found integer." },
+            { new RqlDecimal(1.5m), RqlOperators.Star, new RqlBool(true), "Expected right operand of type decimal but found bool." },
+            { new RqlInteger(9), RqlOperators.Star, new RqlBool(true), "Expected right operand of type integer but found bool." },
+            { new RqlString("abc"), RqlOperators.Star, new RqlInteger(1), "Cannot multiply operand of type string." },
         };
 
-        public static IEnumerable<object?[]> ApplyBinary_SuccessCases() => new[]
+        public static TheoryData<object, object, object, object> ApplyBinary_SuccessCases() => new()
         {
             // RqlOperators.Minus
-            new object?[] { new RqlInteger(5), RqlOperators.Minus, new RqlInteger(4), new RqlInteger(1) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Minus, new RqlDecimal(2.3m), new RqlDecimal(2.8m) },
-            new object?[] { new RqlAny(new RqlInteger(5)), RqlOperators.Minus, new RqlInteger(4), new RqlInteger(1) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Minus, new RqlAny(new RqlDecimal(2.3m)), new RqlDecimal(2.8m) },
+            { new RqlInteger(5), RqlOperators.Minus, new RqlInteger(4), new RqlInteger(1) },
+            { new RqlDecimal(5.1m), RqlOperators.Minus, new RqlDecimal(2.3m), new RqlDecimal(2.8m) },
+            { new RqlAny(new RqlInteger(5)), RqlOperators.Minus, new RqlInteger(4), new RqlInteger(1) },
+            { new RqlDecimal(5.1m), RqlOperators.Minus, new RqlAny(new RqlDecimal(2.3m)), new RqlDecimal(2.8m) },
 
             // RqlOperators.Plus
-            new object?[] { new RqlInteger(2), RqlOperators.Plus, new RqlInteger(4), new RqlInteger(6) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Plus, new RqlDecimal(14.3m), new RqlDecimal(19.4m) },
-            new object?[] { new RqlAny(new RqlInteger(2)), RqlOperators.Plus, new RqlInteger(4), new RqlInteger(6) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Plus, new RqlAny(new RqlDecimal(14.3m)), new RqlDecimal(19.4m) },
+            { new RqlInteger(2), RqlOperators.Plus, new RqlInteger(4), new RqlInteger(6) },
+            { new RqlDecimal(5.1m), RqlOperators.Plus, new RqlDecimal(14.3m), new RqlDecimal(19.4m) },
+            { new RqlAny(new RqlInteger(2)), RqlOperators.Plus, new RqlInteger(4), new RqlInteger(6) },
+            { new RqlDecimal(5.1m), RqlOperators.Plus, new RqlAny(new RqlDecimal(14.3m)), new RqlDecimal(19.4m) },
 
             // RqlOperators.Slash
-            new object?[] { new RqlInteger(6), RqlOperators.Slash, new RqlInteger(2), new RqlInteger(3) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Slash, new RqlDecimal(2m), new RqlDecimal(2.55m) },
-            new object?[] { new RqlAny(new RqlInteger(6)), RqlOperators.Slash, new RqlInteger(2), new RqlInteger(3) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Slash, new RqlAny(new RqlDecimal(2m)), new RqlDecimal(2.55m) },
+            { new RqlInteger(6), RqlOperators.Slash, new RqlInteger(2), new RqlInteger(3) },
+            { new RqlDecimal(5.1m), RqlOperators.Slash, new RqlDecimal(2m), new RqlDecimal(2.55m) },
+            { new RqlAny(new RqlInteger(6)), RqlOperators.Slash, new RqlInteger(2), new RqlInteger(3) },
+            { new RqlDecimal(5.1m), RqlOperators.Slash, new RqlAny(new RqlDecimal(2m)), new RqlDecimal(2.55m) },
 
             // RqlOperators.Star
-            new object?[] { new RqlInteger(6), RqlOperators.Star, new RqlInteger(2), new RqlInteger(12) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Star, new RqlDecimal(2m), new RqlDecimal(10.2m) },
-            new object?[] { new RqlAny(new RqlInteger(6)), RqlOperators.Star, new RqlInteger(2), new RqlInteger(12) },
-            new object?[] { new RqlDecimal(5.1m), RqlOperators.Star, new RqlAny(new RqlDecimal(2m)), new RqlDecimal(10.2m) },
-            new object?[] { new RqlInteger(1), RqlOperators.None, new RqlInteger(1), new RqlNothing() },
+            { new RqlInteger(6), RqlOperators.Star, new RqlInteger(2), new RqlInteger(12) },
+            { new RqlDecimal(5.1m), RqlOperators.Star, new RqlDecimal(2m), new RqlDecimal(10.2m) },
+            { new RqlAny(new RqlInteger(6)), RqlOperators.Star, new RqlInteger(2), new RqlInteger(12) },
+            { new RqlDecimal(5.1m), RqlOperators.Star, new RqlAny(new RqlDecimal(2m)), new RqlDecimal(10.2m) },
+            { new RqlInteger(1), RqlOperators.None, new RqlInteger(1), new RqlNothing() },
         };
 
-        public static IEnumerable<object?[]> ApplyUnary_ErrorCases() => new[]
+        public static TheoryData<object, object, string> ApplyUnary_ErrorCases() => new()
         {
-            new object?[] { new RqlInteger(10), RqlOperators.Plus, "Unary operator Plus is not supported for value '<integer> 10'." },
-            new object?[] { new RqlString("abc"), RqlOperators.Minus, "Unary operator Minus is not supported for value '<string> \"abc\"'." },
+            { new RqlInteger(10), RqlOperators.Plus, "Unary operator Plus is not supported for value '<integer> 10'." },
+            { new RqlString("abc"), RqlOperators.Minus, "Unary operator Minus is not supported for value '<string> \"abc\"'." },
         };
 
-        public static IEnumerable<object?[]> ApplyUnary_SuccessCases() => new[]
+        public static TheoryData<object, object, object> ApplyUnary_SuccessCases() => new()
         {
-            new object?[] { new RqlInteger(10), RqlOperators.Minus, new RqlInteger(-10) },
-            new object?[] { new RqlDecimal(34.7m), RqlOperators.Minus, new RqlDecimal(-34.7m) },
-            new object?[] { new RqlAny(new RqlInteger(10)), RqlOperators.Minus, new RqlInteger(-10) },
-            new object?[] { new RqlAny(new RqlDecimal(34.7m)), RqlOperators.Minus, new RqlDecimal(-34.7m) },
+            { new RqlInteger(10), RqlOperators.Minus, new RqlInteger(-10) },
+            { new RqlDecimal(34.7m), RqlOperators.Minus, new RqlDecimal(-34.7m) },
+            { new RqlAny(new RqlInteger(10)), RqlOperators.Minus, new RqlInteger(-10) },
+            { new RqlAny(new RqlDecimal(34.7m)), RqlOperators.Minus, new RqlDecimal(-34.7m) },
         };
 
         [Theory]
@@ -338,11 +342,69 @@ namespace Regulae.Rql.Tests.Runtime
                 .Subject.Value.Should().BeSameAs(expectedRule2);
         }
 
+        [Fact]
+        public async Task GetRulesetsAsync_WhenRulesEngineReturnsRulesets_ReturnsRqlArrayWithRqlRulesets()
+        {
+            // Arrange
+            var rulesEngine = Mock.Of<IRulesEngine>();
+            var ruleset1 = new Ruleset("RS1", DateTime.UtcNow);
+            var ruleset2 = new Ruleset("RS2", DateTime.UtcNow);
+            var rulesetsDict = new Dictionary<string, Ruleset>(StringComparer.Ordinal)
+            {
+                { ruleset1.Name, ruleset1 },
+                { ruleset2.Name, ruleset2 },
+            };
+
+            Mock.Get(rulesEngine)
+                .Setup(re => re.GetRulesetsAsync())
+                .ReturnsAsync(rulesetsDict);
+
+            var runtime = RqlRuntime.Create(rulesEngine);
+
+            // Act
+            var rqlArray = await runtime.GetRulesetsAsync();
+
+            // Assert
+            rqlArray.Should().NotBeNull();
+            rqlArray.Size.Value.Should().Be(2);
+
+            var names = rqlArray.Value.Select(v => v.Unwrap<RqlRuleset>().Value.Name).ToList();
+            names.Should().Contain(["RS1", "RS2"]);
+        }
+
+        [Fact]
+        public async Task GetUniqueConditionsAsync_WhenRulesEngineReturnsConditions_ReturnsRqlArrayOfRqlStrings()
+        {
+            // Arrange
+            var rulesEngine = Mock.Of<IRulesEngine>();
+            var rulesetName = "RS1";
+            var dateBegin = new DateTime(2024, 01, 01);
+            var dateEnd = new DateTime(2024, 12, 31);
+
+            var conditions = new List<string> { "CondA", "CondB" };
+
+            Mock.Get(rulesEngine)
+                .Setup(re => re.GetUniqueConditionsAsync(rulesetName, dateBegin, dateEnd))
+                .ReturnsAsync(conditions);
+
+            var runtime = RqlRuntime.Create(rulesEngine);
+
+            // Act
+            var rqlArray = await runtime.GetUniqueConditionsAsync(rulesetName, dateBegin, dateEnd);
+
+            // Assert
+            rqlArray.Should().NotBeNull();
+            rqlArray.Size.Value.Should().Be(2);
+
+            var values = rqlArray.Value.Select(v => v.Unwrap<RqlString>().Value).ToList();
+            values.Should().Contain(["CondA", "CondB"]);
+        }
+
         private static Rule BuildRule(string name, DateTime dateBegin, DateTime? dateEnd, object content, string ruleset)
             => Rule.Create(name)
                 .InRuleset(ruleset)
                 .SetContent(content)
                 .Since(dateBegin).Until(dateEnd)
-                .Build().Rule;
+                .Build().Rule!;
     }
 }

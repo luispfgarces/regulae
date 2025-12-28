@@ -74,7 +74,7 @@ namespace Regulae.Tests.Generic
                 .Setup(x => x.GetUniqueConditionsAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new[] { nameof(ConditionNames.NumberOfSales), nameof(ConditionNames.IsVip), });
 
-            var genericRulesEngine = new RulesEngine<RulesetNames, ConditionNames>(rulesEngineMock);
+            var genericRulesEngine = new RulesEngine<RulesetNames, ConditionNames>(this.rulesEngineMock);
 
             // Act
             var genericConditions = await genericRulesEngine.GetUniqueConditionsAsync(RulesetNames.Type1, DateTime.MinValue, DateTime.MaxValue);
@@ -201,6 +201,224 @@ namespace Regulae.Tests.Generic
                 argumentException.Message.Should().Contain(parameterName);
                 argumentException.ParamName.Should().Be(parameterName);
             }
+        }
+
+
+        [Fact]
+        public async Task ActivateRuleAsync_CallsWrappedEngineAndReturnsResult()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var genericRule = Rule.Create<RulesetNames, ConditionNames>("r1")
+                .InRuleset(RulesetNames.Type1)
+                .SetContent(new object())
+                .Since(DateTime.UtcNow)
+                .Build()
+                .Rule;
+
+            Mock.Get(wrapped.Object)
+                .Setup(w => w.ActivateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success())
+                .Verifiable();
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            // Act
+            var result = await sut.ActivateRuleAsync(genericRule);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            Mock.Get(wrapped.Object).Verify(w => w.ActivateRuleAsync(It.IsAny<Rule>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeactivateRuleAsync_CallsWrappedEngineAndReturnsResult()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var genericRule = Rule.Create<RulesetNames, ConditionNames>("r2")
+                .InRuleset(RulesetNames.Type1)
+                .SetContent(new object())
+                .Since(DateTime.UtcNow)
+                .Build()
+                .Rule;
+
+            Mock.Get(wrapped.Object)
+                .Setup(w => w.DeactivateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success())
+                .Verifiable();
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            // Act
+            var result = await sut.DeactivateRuleAsync(genericRule);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            Mock.Get(wrapped.Object).Verify(w => w.DeactivateRuleAsync(It.IsAny<Rule>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddRuleAsync_CallsWrappedEngineAndReturnsResult()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var genericRule = Rule.Create<RulesetNames, ConditionNames>("r3")
+                .InRuleset(RulesetNames.Type1)
+                .SetContent(new object())
+                .Since(DateTime.UtcNow)
+                .Build()
+                .Rule;
+
+            var option = RuleAddPriorityOption.AtLargestNumber;
+
+            Mock.Get(wrapped.Object)
+                .Setup(w => w.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()))
+                .ReturnsAsync(Operation.Success())
+                .Verifiable();
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            // Act
+            var result = await sut.AddRuleAsync(genericRule, option);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            Mock.Get(wrapped.Object).Verify(w => w.AddRuleAsync(It.IsAny<Rule>(), It.IsAny<RuleAddPriorityOption>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateRuleAsync_CallsWrappedEngineAndReturnsResult()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var genericRule = Rule.Create<RulesetNames, ConditionNames>("r4")
+                .InRuleset(RulesetNames.Type1)
+                .SetContent(new object())
+                .Since(DateTime.UtcNow)
+                .Build()
+                .Rule;
+
+            Mock.Get(wrapped.Object)
+                .Setup(w => w.UpdateRuleAsync(It.IsAny<Rule>()))
+                .ReturnsAsync(Operation.Success())
+                .Verifiable();
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            // Act
+            var result = await sut.UpdateRuleAsync(genericRule);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            Mock.Get(wrapped.Object).Verify(w => w.UpdateRuleAsync(It.IsAny<Rule>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateRulesetAsync_CallsWrappedEngine()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            wrapped.Setup(w => w.CreateRulesetAsync(It.IsAny<string>())).ReturnsAsync(Operation.Success()).Verifiable();
+
+            // Act
+            await sut.CreateRulesetAsync(RulesetNames.Type1);
+
+            // Assert
+            wrapped.Verify(w => w.CreateRulesetAsync(It.Is<string>(s => s == GenericConversions.Convert(RulesetNames.Type1))), Times.Once);
+        }
+
+        [Fact]
+        public async Task MatchManyAsync_ConvertsConditionsAndReturnsGenericRules()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var nonGenericRule = Rule.Create("rA").InRuleset(RulesetNames.Type1.ToString()).SetContent(new object()).Since(DateTime.UtcNow).Build().Rule;
+            nonGenericRule.Priority = 1;
+
+            wrapped.Setup(w => w.MatchManyAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<IDictionary<string, object>>()))
+                .ReturnsAsync([nonGenericRule]);
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            var conditions = new Dictionary<ConditionNames, object>
+            {
+                { ConditionNames.IsoCountryCode, "PT" }
+            };
+
+            // Act
+            var result = await sut.MatchManyAsync(RulesetNames.Type1, DateTime.UtcNow, conditions);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(1);
+            result.First().Should().BeOfType<Rule<RulesetNames, ConditionNames>>();
+            Mock.Get(wrapped.Object).Verify(w => w.MatchManyAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<IDictionary<string, object>>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task MatchOneAsync_ConvertsConditionsAndReturnsGenericRule()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var nonGenericRule = Rule.Create("rB").InRuleset(RulesetNames.Type1.ToString()).SetContent(new object()).Since(DateTime.UtcNow).Build().Rule;
+            nonGenericRule.Priority = 2;
+
+            wrapped.Setup(w => w.MatchOneAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<IDictionary<string, object>>()))
+                .ReturnsAsync(nonGenericRule);
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            var conditions = new Dictionary<ConditionNames, object>
+            {
+                { ConditionNames.IsoCurrency, "EUR" }
+            };
+
+            // Act
+            var result = await sut.MatchOneAsync(RulesetNames.Type1, DateTime.UtcNow, conditions);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeOfType<Rule<RulesetNames, ConditionNames>>();
+            Mock.Get(wrapped.Object).Verify(w => w.MatchOneAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<IDictionary<string, object>>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task SearchAsync_WithConditions_ConvertsAndReturnsGenericRules()
+        {
+            // Arrange
+            var wrapped = new Mock<IRulesEngine>();
+
+            var nonGenericRule = Rule.Create("rC").InRuleset(RulesetNames.Type1.ToString()).SetContent(new object()).Since(DateTime.UtcNow).Build().Rule;
+            nonGenericRule.Priority = 3;
+
+            wrapped.Setup(w => w.SearchAsync(It.IsAny<SearchArgs<string, string>>()))
+                .ReturnsAsync([nonGenericRule]);
+
+            var sut = new RulesEngine<RulesetNames, ConditionNames>(wrapped.Object);
+
+            var searchArgs = new SearchArgs<RulesetNames, ConditionNames>(RulesetNames.Type1, DateTime.MinValue, DateTime.MaxValue)
+            {
+                Conditions = new Dictionary<ConditionNames, object>
+                {
+                    { ConditionNames.IsoCountryCode, "PT" }
+                }
+            };
+
+            // Act
+            var result = await sut.SearchAsync(searchArgs);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(1);
+            result.First().Should().BeOfType<Rule<RulesetNames, ConditionNames>>();
+            Mock.Get(wrapped.Object).Verify(w => w.SearchAsync(It.IsAny<SearchArgs<string, string>>()), Times.Once);
         }
     }
 }

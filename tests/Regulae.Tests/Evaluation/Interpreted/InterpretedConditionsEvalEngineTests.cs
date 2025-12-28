@@ -23,7 +23,7 @@ namespace Regulae.Tests.Evaluation.Interpreted
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.And,
-                new IConditionNode[] { condition1, condition2 });
+                [condition1, condition2]);
 
             var conditions = new Dictionary<string, Operand>
             {
@@ -74,7 +74,7 @@ namespace Regulae.Tests.Evaluation.Interpreted
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Eval,
-                new IConditionNode[] { condition1, condition2 });
+                [condition1, condition2]);
 
             var conditions = new Dictionary<string, Operand>
             {
@@ -125,7 +125,7 @@ namespace Regulae.Tests.Evaluation.Interpreted
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Eval,
-                new IConditionNode[] { condition1, condition2 });
+                [condition1, condition2]);
 
             var conditions = new Dictionary<string, Operand>
             {
@@ -176,7 +176,7 @@ namespace Regulae.Tests.Evaluation.Interpreted
 
             var composedConditionNode = new ComposedConditionNode(
                 LogicalOperators.Or,
-                new IConditionNode[] { condition1, condition2 });
+                [condition1, condition2]);
 
             var conditions = new Dictionary<string, Operand>
             {
@@ -198,6 +198,57 @@ namespace Regulae.Tests.Evaluation.Interpreted
             var mockConditionEvalDispatcher = new Mock<IConditionEvalDispatcher>();
             mockConditionEvalDispatcher.Setup(x => x.EvalDispatch(It.IsAny<Operand>(), It.IsAny<Operators>(), It.IsAny<Operand>()))
                 .Returns(true);
+
+            var mockConditionEvalDispatchProvider = new Mock<IConditionEvalDispatcherProvider>();
+            mockConditionEvalDispatchProvider.Setup(x => x.GetEvalDispatcher(It.IsAny<Operand>(), It.IsAny<Operators>(), It.IsAny<Operand>()))
+                .Returns(() =>
+                {
+                    return mockConditionEvalDispatcher.Object;
+                });
+            var conditionsTreeAnalyzer = Mock.Of<IConditionsTreeAnalyzer>();
+            var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
+
+            var sut = new InterpretedConditionsEvalEngine(mockConditionEvalDispatchProvider.Object, conditionsTreeAnalyzer, rulesEngineOptions);
+
+            // Act
+            var actual = sut.Eval(composedConditionNode, conditions, evaluationOptions);
+
+            // Assert
+            actual.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Eval_GivenComposedConditionNodeWithXorOperatorWithExactMatch_EvalsAndReturnsResult()
+        {
+            // Arrange
+            var condition1 = new ValueConditionNode(ConditionNames.IsVip.ToString(), Operators.Equal, true);
+            var condition2 = new ValueConditionNode(ConditionNames.IsoCurrency.ToString(), Operators.NotEqual, "SGD");
+
+            var composedConditionNode = new ComposedConditionNode(
+                LogicalOperators.Xor,
+                [condition1, condition2]);
+
+            var conditions = new Dictionary<string, Operand>
+            {
+                {
+                    ConditionNames.IsoCurrency.ToString(),
+                    "SGD"
+                },
+                {
+                    ConditionNames.IsVip.ToString(),
+                    true
+                }
+            };
+
+            var evaluationOptions = new EvaluationOptions
+            {
+                MatchMode = MatchModes.Exact
+            };
+
+            var mockConditionEvalDispatcher = new Mock<IConditionEvalDispatcher>();
+            mockConditionEvalDispatcher.SetupSequence(x => x.EvalDispatch(It.IsAny<Operand>(), It.IsAny<Operators>(), It.IsAny<Operand>()))
+                .Returns(true)
+                .Returns(false);
 
             var mockConditionEvalDispatchProvider = new Mock<IConditionEvalDispatcherProvider>();
             mockConditionEvalDispatchProvider.Setup(x => x.GetEvalDispatcher(It.IsAny<Operand>(), It.IsAny<Operators>(), It.IsAny<Operand>()))

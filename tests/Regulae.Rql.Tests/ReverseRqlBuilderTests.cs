@@ -22,7 +22,7 @@ namespace Regulae.Rql.Tests
             switch (astElementType)
             {
                 case "expression":
-                    var expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+                    var expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
                     Mock.Get(expression)
                         .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                         .Returns("test");
@@ -30,7 +30,7 @@ namespace Regulae.Rql.Tests
                     break;
 
                 case "segment":
-                    var segment = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+                    var segment = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
                     Mock.Get(segment)
                         .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                         .Returns("test");
@@ -38,7 +38,7 @@ namespace Regulae.Rql.Tests
                     break;
 
                 case "statement":
-                    var statement = CreateMock<Statement>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+                    var statement = this.CreateMock<Statement>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
                     Mock.Get(statement)
                         .Setup(x => x.Accept(It.IsAny<IStatementVisitor<string>>()))
                         .Returns("test");
@@ -75,7 +75,7 @@ namespace Regulae.Rql.Tests
         public void BuildRql_GivenUnknownAstElement_ThrowsNotSupportedException()
         {
             // Arrange
-            var unknownAstElement = CreateMock<IAstElement>();
+            var unknownAstElement = this.CreateMock<IAstElement>();
 
             var builder = new ReverseRqlBuilder();
 
@@ -90,11 +90,11 @@ namespace Regulae.Rql.Tests
         public void VisitAssignmentExpression_GivenAssignmentExpression_ReturnsRqlRepresentation()
         {
             // Arrange
-            var left = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var left = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(left)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("var1");
-            var right = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var right = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(right)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("array { 1, 2, 3 }");
@@ -114,15 +114,15 @@ namespace Regulae.Rql.Tests
         public void VisitBinaryExpression_GivenBinaryExpression_ReturnsRqlRepresentation()
         {
             // Arrange
-            var left = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var left = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(left)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("1");
-            var right = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var right = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(right)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("{ 1, 2, 3 }");
-            var @operator = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var @operator = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(@operator)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("in");
@@ -141,11 +141,11 @@ namespace Regulae.Rql.Tests
         public void VisitCardinalitySegment_GivenCardinalitySegment_ReturnsRqlRepresentation()
         {
             // Arrange
-            var cardinalityKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var cardinalityKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(cardinalityKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("one");
-            var ruleKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var ruleKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(ruleKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("rule");
@@ -161,10 +161,88 @@ namespace Regulae.Rql.Tests
         }
 
         [Fact]
+        public void VisitRulesetSegment_GivenRulesetSegment_ReturnsRqlRepresentation()
+        {
+            // Arrange
+            var forKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(forKeyword)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("FOR");
+            var rulesetName = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(rulesetName)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("\"TestRuleset\"");
+            var rulesetSegment = RulesetSegment.Create(forKeyword, rulesetName);
+
+            var reverseRqlBuilder = new ReverseRqlBuilder();
+
+            // Act
+            var actual = reverseRqlBuilder.VisitRulesetSegment(rulesetSegment);
+
+            // Assert
+            actual.Should().Be("FOR \"TestRuleset\"");
+        }
+
+        [Fact]
+        public void VisitMatchDateSegment_GivenMatchDateSegment_ReturnsRqlRepresentation()
+        {
+            // Arrange
+            var onKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(onKeyword)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("ON");
+            var matchDate = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(matchDate)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("$2024-03-24$");
+            var matchDateSegment = MatchDateSegment.Create(onKeyword, matchDate);
+
+            var reverseRqlBuilder = new ReverseRqlBuilder();
+
+            // Act
+            var actual = reverseRqlBuilder.VisitMatchDateSegment(matchDateSegment);
+
+            // Assert
+            actual.Should().Be("ON $2024-03-24$");
+        }
+
+        [Fact]
+        public void VisitDatesIntervalSegment_GivenDatesIntervalSegment_ReturnsRqlRepresentation()
+        {
+            // Arrange
+            var sinceKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(sinceKeyword)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("SINCE");
+            var sinceDate = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(sinceDate)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("$2023-01-01$");
+            var untilKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(untilKeyword)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("UNTIL");
+            var untilDate = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            Mock.Get(untilDate)
+                .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
+                .Returns("$2024-01-01$");
+
+            var datesIntervalSegment = DatesIntervalSegment.Create(sinceKeyword, sinceDate, untilKeyword, untilDate);
+
+            var reverseRqlBuilder = new ReverseRqlBuilder();
+
+            // Act
+            var actual = reverseRqlBuilder.VisitDatesIntervalSegment(datesIntervalSegment);
+
+            // Assert
+            actual.Should().Be("SINCE $2023-01-01$ UNTIL $2024-01-01$");
+        }
+
+        [Fact]
         public void VisitExpressionStatement_GivenExpressionStatement_ReturnsRqlRepresentation()
         {
             // Arrange
-            var expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("MATCH ONE RULE FOR \"Test\" ON $2023-01-01Z$");
@@ -199,12 +277,12 @@ namespace Regulae.Rql.Tests
         public void VisitInputConditionSegment_GivenInputConditionSegment_ReturnsRqlRepresentation()
         {
             // Arrange
-            var leftExpression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var leftExpression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(leftExpression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("@TestCondition");
             var operatorToken = Token.Create("is", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 2, TokenType.IS);
-            var rightExpression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var rightExpression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(rightExpression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("true");
@@ -223,16 +301,16 @@ namespace Regulae.Rql.Tests
         public void VisitInputConditionsSegment_GivenInputConditionsSegmentWithConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var whenKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var whenKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(whenKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("WHEN");
             var beginToken = Token.Create("{", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.BRACE_LEFT);
-            var inputConditionSegment1 = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditionSegment1 = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditionSegment1)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("@TestCondition1 is true");
-            var inputConditionSegment2 = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditionSegment2 = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditionSegment2)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("@TestCondition2 is 30");
@@ -252,7 +330,7 @@ namespace Regulae.Rql.Tests
         public void VisitInputConditionsSegment_GivenInputConditionsSegmentWithoutConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var whenKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var whenKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             var beginToken = Token.Create("{", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.BRACE_LEFT);
             var endToken = Token.Create("}", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.BRACE_RIGHT);
             var inputConditionsSegment = new InputConditionsSegment(whenKeyword, beginToken, new Segment[0], endToken);
@@ -309,23 +387,23 @@ namespace Regulae.Rql.Tests
         public void VisitMatchExpression_GivenMatchExpressionWithConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var matchKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var matchKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(matchKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("MATCH");
-            var cardinalitySegment = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var cardinalitySegment = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(cardinalitySegment)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("ONE RULE");
-            var rulesetExpression = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var rulesetExpression = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(rulesetExpression)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("FOR \"Test\"");
-            var matchDateExpression = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var matchDateExpression = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(matchDateExpression)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("ON $2024-03-24$");
-            var inputConditionsSegment = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditionsSegment = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditionsSegment)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("WITH { @TestCondition1 is true }");
@@ -344,23 +422,23 @@ namespace Regulae.Rql.Tests
         public void VisitMatchExpression_GivenMatchExpressionWithoutConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var matchKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var matchKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(matchKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("MATCH");
-            var cardinalitySegment = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var cardinalitySegment = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(cardinalitySegment)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("ONE RULE");
-            var rulesetExpression = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var rulesetExpression = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(rulesetExpression)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("FOR \"Test\"");
-            var matchDateExpression = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var matchDateExpression = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(matchDateExpression)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("ON $2024-03-24$");
-            var inputConditionsSegment = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditionsSegment = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditionsSegment)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns(string.Empty);
@@ -382,11 +460,11 @@ namespace Regulae.Rql.Tests
             var arrayToken = Token.Create("ARRAY", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 5, TokenType.ARRAY);
             var initializerBeginToken = Token.Create("{", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.BRACE_LEFT);
             var sizeExpression = Expression.None;
-            var value1Expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var value1Expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(value1Expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("\"abc\"");
-            var value2Expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var value2Expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(value2Expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("123");
@@ -413,11 +491,11 @@ namespace Regulae.Rql.Tests
             // Arrange
             var arrayToken = Token.Create("ARRAY", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 5, TokenType.ARRAY);
             var initializerBeginToken = Token.Create("[", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.STRAIGHT_BRACKET_LEFT);
-            var sizeExpression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var sizeExpression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(sizeExpression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("3");
-            var value1Expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var value1Expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(value1Expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("\"test\"");
@@ -443,11 +521,11 @@ namespace Regulae.Rql.Tests
         {
             // Arrange
             var objectToken = Token.Create("OBJECT", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 6, TokenType.OBJECT);
-            var propertyAssignment1Expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var propertyAssignment1Expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(propertyAssignment1Expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("\"Name\" = \"John Doe\"");
-            var propertyAssignment2Expression = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var propertyAssignment2Expression = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(propertyAssignment2Expression)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("\"Age\" = 1");
@@ -578,23 +656,23 @@ namespace Regulae.Rql.Tests
         public void VisitSearchExpression_GivenSearchExpressionWithInputConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var searchKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var searchKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(searchKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("SEARCH");
-            var rulesKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var rulesKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(rulesKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("RULES");
-            var ruleset = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var ruleset = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(ruleset)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("FOR \"test ruleset\"");
-            var datesInterval = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var datesInterval = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(datesInterval)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("SINCE $2023-01-01$ UNTIL $2024-01-01$");
-            var inputConditions = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditions = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditions)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("WHEN { @TestCondition1 is \"abc\" }");
@@ -614,23 +692,23 @@ namespace Regulae.Rql.Tests
         public void VisitSearchExpression_GivenSearchExpressionWithoutInputConditions_ReturnsRqlRepresentation()
         {
             // Arrange
-            var searchKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var searchKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(searchKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("SEARCH");
-            var rulesKeyword = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var rulesKeyword = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(rulesKeyword)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("RULES");
-            var ruleset = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var ruleset = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(ruleset)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("FOR \"test ruleset\"");
-            var datesInterval = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var datesInterval = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(datesInterval)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("SINCE $2023-01-01$");
-            var inputConditions = CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var inputConditions = this.CreateMock<Segment>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(inputConditions)
                 .Setup(x => x.Accept(It.IsAny<ISegmentVisitor<string>>()))
                 .Returns("UNTIL $2024-01-01$");
@@ -651,7 +729,7 @@ namespace Regulae.Rql.Tests
         {
             // Arrange
             var unaryOperator = Token.Create("-", false, null, RqlSourcePosition.Empty, RqlSourcePosition.Empty, 1, TokenType.MINUS);
-            var right = CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
+            var right = this.CreateMock<Expression>(RqlSourcePosition.Empty, RqlSourcePosition.Empty);
             Mock.Get(right)
                 .Setup(x => x.Accept(It.IsAny<IExpressionVisitor<string>>()))
                 .Returns("123");

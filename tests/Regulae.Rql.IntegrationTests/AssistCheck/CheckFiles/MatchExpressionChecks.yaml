@@ -1,0 +1,210 @@
+checks:
+  - rql: M
+    line: 1
+    column: 1
+    expectedAssistSuggestions:
+      - MATCH
+  - rql: MATCH O
+    line: 1
+    column: 7
+    expectedAssistSuggestions:
+      - ONE
+  - rql: MATCH A
+    line: 1
+    column: 7
+    expectedAssistSuggestions:
+      - ALL
+  - rql: MATCH ALL RU
+    line: 1
+    column: 12
+    expectedAssistSuggestions:
+      - RULES
+  - rql: MATCH ONE RU
+    line: 1
+    column: 12
+    expectedAssistSuggestions:
+      - RULE
+  - rql: MATCH ALL RULES F
+    line: 1
+    column: 17
+    expectedAssistSuggestions:
+      - FOR
+  - rql: MATCH ONE RULE F
+    line: 1
+    column: 16
+    expectedAssistSuggestions:
+      - FOR
+  - rql: MATCH ONE RULE FOR "
+    line: 1
+    column: 20
+    expectedAssistSuggestions:
+  - rql: MATCH ONE RULE FOR T
+    line: 1
+    column: 20
+    expectedAssistSuggestions:
+      - "\"TexasHoldemPokerSingleCombinations\""
+  - rql: MATCH ALL RULES FOR "
+    line: 1
+    column: 21
+    expectedAssistSuggestions:
+  - rql: MATCH ALL RULES FOR T
+    line: 1
+    column: 21
+    expectedAssistSuggestions:
+      - "\"TexasHoldemPokerSingleCombinations\""
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" O
+    line: 1
+    column: 57
+    expectedAssistSuggestions:
+      - ON
+  - rql: MATCH ALL RULES FOR "TexasHoldemPokerSingleCombinations" O
+    line: 1
+    column: 58
+    expectedAssistSuggestions:
+      - ON
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020
+    line: 1
+    column: 64
+    expectedAssistSuggestions:
+  - rql: MATCH ALL RULES FOR "TexasHoldemPokerSingleCombinations" ON $2020
+    line: 1
+    column: 65
+    expectedAssistSuggestions:
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$;
+    line: 1
+    column: 72
+    expectedAssistSuggestions:
+  - rql: MATCH ALL RULES FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$;
+    line: 1
+    column: 73
+    expectedAssistSuggestions:
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ W
+    line: 1
+    column: 73
+    expectedAssistSuggestions:
+      - WHEN
+  - rql: MATCH ALL RULES FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ W
+    line: 1
+    column: 74
+    expectedAssistSuggestions:
+      - WHEN
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN {
+    line: 1
+    column: 78
+    expectedAssistSuggestions:
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @ };
+    line: 1
+    column: 80
+    expectedAssistSuggestions:
+      - "@DeuceOfClubs"
+      - "@TreyOfClubs"
+      - "@FourOfClubs"
+      - "@FiveOfClubs"
+      - "@SixOfClubs"
+      - "@SevenOfClubs"
+      - "@EightOfClubs"
+      - "@NineOfClubs"
+      - "@TenOfClubs"
+      - "@JackOfClubs"
+      - "@QueenOfClubs"
+      - "@KingOfClubs"
+      - "@AceOfClubs"
+      - "@DeuceOfDiamonds"
+      - "@TreyOfDiamonds"
+      - "@FourOfDiamonds"
+      - "@FiveOfDiamonds"
+      - "@SixOfDiamonds"
+      - "@SevenOfDiamonds"
+      - "@EightOfDiamonds"
+      - "@NineOfDiamonds"
+      - "@TenOfDiamonds"
+      - "@JackOfDiamonds"
+      - "@QueenOfDiamonds"
+      - "@KingOfDiamonds"
+      - "@AceOfDiamonds"
+      - "@DeuceOfHearts"
+      - "@TreyOfHearts"
+      - "@FourOfHearts"
+      - "@FiveOfHearts"
+      - "@SixOfHearts"
+      - "@SevenOfHearts"
+      - "@EightOfHearts"
+      - "@NineOfHearts"
+      - "@TenOfHearts"
+      - "@JackOfHearts"
+      - "@QueenOfHearts"
+      - "@KingOfHearts"
+      - "@AceOfHearts"
+      - "@DeuceOfSpades"
+      - "@TreyOfSpades"
+      - "@FourOfSpades"
+      - "@FiveOfSpades"
+      - "@SixOfSpades"
+      - "@SevenOfSpades"
+      - "@EightOfSpades"
+      - "@NineOfSpades"
+      - "@TenOfSpades"
+      - "@JackOfSpades"
+      - "@QueenOfSpades"
+      - "@KingOfSpades"
+      - "@AceOfSpades"
+      - "@NumberOfAces"
+      - "@NumberOfDeuces"
+      - "@NumberOfTreys"
+      - "@NumberOfFours"
+      - "@NumberOfFives"
+      - "@NumberOfSixes"
+      - "@NumberOfSevens"
+      - "@NumberOfEigths"
+      - "@NumberOfNines"
+      - "@NumberOfTens"
+      - "@NumberOfJacks"
+      - "@NumberOfQueens"
+      - "@NumberOfKings"
+      - "@NumberOfClubs"
+      - "@NumberOfDiamonds"
+      - "@NumberOfHearts"
+      - "@NumberOfSpades"
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @Numb };
+    line: 1
+    column: 84
+    expectedAssistSuggestions:
+      - "@NumberOfAces"
+      - "@NumberOfDeuces"
+      - "@NumberOfTreys"
+      - "@NumberOfFours"
+      - "@NumberOfFives"
+      - "@NumberOfSixes"
+      - "@NumberOfSevens"
+      - "@NumberOfEigths"
+      - "@NumberOfNines"
+      - "@NumberOfTens"
+      - "@NumberOfJacks"
+      - "@NumberOfQueens"
+      - "@NumberOfKings"
+      - "@NumberOfClubs"
+      - "@NumberOfDiamonds"
+      - "@NumberOfHearts"
+      - "@NumberOfSpades"
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @AceOf };
+    line: 1
+    column: 85
+    expectedAssistSuggestions:
+      - "@AceOfClubs"
+      - "@AceOfDiamonds"
+      - "@AceOfHearts"
+      - "@AceOfSpades"
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @NumberOfDeuces I };
+    line: 1
+    column: 95
+    expectedAssistSuggestions:
+      - IS
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @NumberOfDeuces IS 2 };
+    line: 1
+    column: 98
+    expectedAssistSuggestions:
+  - rql: MATCH ONE RULE FOR "TexasHoldemPokerSingleCombinations" ON $2020-01-01$ WHEN { @NumberOfDeuces IS 2, @NumberOfTr };
+    line: 1
+    column: 111
+    expectedAssistSuggestions:
+      - "@NumberOfTreys"

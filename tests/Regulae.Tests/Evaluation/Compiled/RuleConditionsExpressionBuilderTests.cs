@@ -18,7 +18,7 @@ namespace Regulae.Tests.Evaluation.Compiled
     using Regulae.Tests.TestStubs;
     using Xunit;
 
-    public class RuleConditionsExpressionBuilderTests
+    public partial class RuleConditionsExpressionBuilderTests
     {
         public static IEnumerable<object[]> AndComposedConditionNodeScenarios => new[]
         {
@@ -372,6 +372,110 @@ namespace Regulae.Tests.Evaluation.Compiled
             // Assert
             notSupportedException.Should().NotBeNull();
             notSupportedException.Message.Should().Contain(nameof(LogicalOperators.Eval));
+        }
+
+        [Fact]
+        public void BuildExpression_GivenXorComposedConditionNode_EvaluatesExclusiveOr()
+        {
+            // Arrange
+            var valueConditionNode1 = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "A");
+            var valueConditionNode2 = new ValueConditionNode(ConditionNames.IsoCountryCode.ToString(), Operators.Equal, "B");
+            var composed = new ComposedConditionNode(LogicalOperators.Xor, new[] { valueConditionNode1, valueConditionNode2 });
+
+            // Create a provider that returns a builder which assigns sequential values for each child
+            var seq = new Queue<bool>(new[] { true, false });
+            var builderMock = new Mock<IValueConditionNodeExpressionBuilder>();
+            builderMock.Setup(b => b.Build(It.IsAny<IExpressionBlockBuilder>(), It.IsAny<BuildValueConditionNodeExpressionArgs>()))
+                .Callback<IExpressionBlockBuilder, BuildValueConditionNodeExpressionArgs>((blk, args) =>
+                {
+                    var val = seq.Dequeue();
+                    blk.Assign(args.ResultVariableExpression, blk.Constant(val));
+                    blk.AddExpression(blk.Empty());
+                });
+
+            var providerMock = new Mock<IValueConditionNodeExpressionBuilderProvider>();
+            providerMock.Setup(p => p.GetExpressionBuilder(It.IsAny<Multiplicities>())).Returns(builderMock.Object);
+
+            var dataTypeProvider = Mock.Of<IDataTypesConfigurationProvider>();
+            Mock.Get(dataTypeProvider).Setup(d => d.GetDataTypeConfiguration(DataTypes.String))
+                .Returns(DataTypeConfiguration.Create(DataTypes.String, typeof(string), string.Empty));
+
+            var options = RulesEngineOptions.NewWithDefaults();
+
+            var sut = new RuleConditionsExpressionBuilder(providerMock.Object, dataTypeProvider, options);
+
+            // Act
+            var expr = sut.BuildExpression(composed, MatchModes.Exact);
+
+            // Assert
+            expr.Should().NotBeNull();
+            var fn = expr.Compile();
+
+            // Provide dummy operands dictionary (builders ignore operands since they set constants)
+            var context = new Dictionary<string, Operand>
+            {
+                { ConditionNames.IsoCountryCode.ToString(), "X" }
+            };
+
+            // Seq returns true (first child true, second false) -> XOR true
+            fn(context).Should().BeTrue();
+        }
+
+        [Fact]
+        public void BuildExpression_ManyMultiplicities_SelectsCorrectMultiplicityBranch()
+        {
+            // Arrange: operator Contains supports OneToOne and ManyToOne
+            var conditionName = ConditionNames.NumberOfSales.ToString();
+            var valueConditionNode = new ValueConditionNode(conditionName, Operators.Contains, 5);
+
+            var providerMock = new Mock<IValueConditionNodeExpressionBuilderProvider>();
+            var builderOne = new Mock<IValueConditionNodeExpressionBuilder>();
+            var builderMany = new Mock<IValueConditionNodeExpressionBuilder>();
+
+            // builderOne sets result to false
+            builderOne.Setup(b => b.Build(It.IsAny<IExpressionBlockBuilder>(), It.IsAny<BuildValueConditionNodeExpressionArgs>()))
+                .Callback<IExpressionBlockBuilder, BuildValueConditionNodeExpressionArgs>((blk, args) =>
+                {
+                    blk.Assign(args.ResultVariableExpression, blk.Constant(false));
+                    blk.AddExpression(blk.Empty());
+                });
+
+            // builderMany sets result to true
+            builderMany.Setup(b => b.Build(It.IsAny<IExpressionBlockBuilder>(), It.IsAny<BuildValueConditionNodeExpressionArgs>()))
+                .Callback<IExpressionBlockBuilder, BuildValueConditionNodeExpressionArgs>((blk, args) =>
+                {
+                    blk.Assign(args.ResultVariableExpression, blk.Constant(true));
+                    blk.AddExpression(blk.Empty());
+                });
+
+            providerMock.Setup(p => p.GetExpressionBuilder(Multiplicities.OneToOne)).Returns(builderOne.Object);
+            providerMock.Setup(p => p.GetExpressionBuilder(Multiplicities.ManyToOne)).Returns(builderMany.Object);
+
+            var dataTypeProvider = Mock.Of<IDataTypesConfigurationProvider>();
+            Mock.Get(dataTypeProvider).Setup(d => d.GetDataTypeConfiguration(DataTypes.Integer))
+                .Returns(DataTypeConfiguration.Create(DataTypes.Integer, typeof(int), 0));
+
+            var options = RulesEngineOptions.NewWithDefaults();
+            var sut = new RuleConditionsExpressionBuilder(providerMock.Object, dataTypeProvider, options);
+
+            // Act
+            var expr = sut.BuildExpression(valueConditionNode, MatchModes.Exact);
+            var fn = expr.Compile();
+
+            // Assert:
+            // Case 1: left operand single (One), right operand single -> OneToOne -> builderOne returns false
+            var ctxOne = new Dictionary<string, Operand>
+            {
+                { conditionName, 5 }
+            };
+            fn(ctxOne).Should().BeFalse();
+
+            // Case 2: left operand many (array), right operand single -> ManyToOne -> builderMany returns true
+            var ctxMany = new Dictionary<string, Operand>
+            {
+                { conditionName, new[] { 1, 2, 3 } }
+            };
+            fn(ctxMany).Should().BeTrue();
         }
     }
 }

@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="AssistCheck\CheckFiles\MatchExpressionChecks.yaml" />
+    <EmbeddedResource Include="AssistCheck\CheckFiles\SearchExpressionChecks.yaml" />
     <EmbeddedResource Include="GrammarCheck\CheckFiles\BasicLanguageChecks.yaml" />
     <EmbeddedResource Include="GrammarCheck\CheckFiles\MatchExpressionChecks.yaml" />
     <EmbeddedResource Include="GrammarCheck\CheckFiles\SearchExpressionChecks.yaml" />

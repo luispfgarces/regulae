@@ -30,6 +30,7 @@ namespace Regulae.Rql.Tests.Pipeline.Interpret
         [InlineData(new object[] { TokenType.PLUS }, RqlOperators.Plus)]
         [InlineData(new object[] { TokenType.SLASH }, RqlOperators.Slash)]
         [InlineData(new object[] { TokenType.STAR }, RqlOperators.Star)]
+        [InlineData(new object[] { TokenType.XOR }, RqlOperators.Xor)]
         public async Task VisitOperatorSegment_GivenOperatorSegmentWithSupportedOperatorToken_ReturnsRqlOperator(object[] tokenTypes, object expected)
         {
             // Arrange

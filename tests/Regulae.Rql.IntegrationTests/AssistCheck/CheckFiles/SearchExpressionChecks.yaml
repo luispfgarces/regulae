@@ -1,0 +1,292 @@
+checks:
+  - rql: S
+    line: 1
+    column: 1
+    expectedAssistSuggestions:
+      - SEARCH
+  - rql: SEARCH R
+    line: 1
+    column: 8
+    expectedAssistSuggestions:
+      - RULES
+  - rql: SEARCH RULES F
+    line: 1
+    column: 14
+    expectedAssistSuggestions:
+      - FOR
+  - rql: SEARCH RULES FOR "
+    line: 1
+    column: 18
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR T
+    line: 1
+    column: 18
+    expectedAssistSuggestions:
+      - "\"TexasHoldemPokerSingleCombinations\""
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" S
+    line: 1
+    column: 55
+    expectedAssistSuggestions:
+      - SINCE
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020
+    line: 1
+    column: 65
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ U
+    line: 1
+    column: 74
+    expectedAssistSuggestions:
+      - UNTIL
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021
+    line: 1
+    column: 84
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$;
+    line: 1
+    column: 92
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ W
+    line: 1
+    column: 93
+    expectedAssistSuggestions:
+      - WHEN
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN {
+    line: 1
+    column: 98
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @ };
+    line: 1
+    column: 100
+    expectedAssistSuggestions:
+      - "@DeuceOfClubs"
+      - "@TreyOfClubs"
+      - "@FourOfClubs"
+      - "@FiveOfClubs"
+      - "@SixOfClubs"
+      - "@SevenOfClubs"
+      - "@EightOfClubs"
+      - "@NineOfClubs"
+      - "@TenOfClubs"
+      - "@JackOfClubs"
+      - "@QueenOfClubs"
+      - "@KingOfClubs"
+      - "@AceOfClubs"
+      - "@DeuceOfDiamonds"
+      - "@TreyOfDiamonds"
+      - "@FourOfDiamonds"
+      - "@FiveOfDiamonds"
+      - "@SixOfDiamonds"
+      - "@SevenOfDiamonds"
+      - "@EightOfDiamonds"
+      - "@NineOfDiamonds"
+      - "@TenOfDiamonds"
+      - "@JackOfDiamonds"
+      - "@QueenOfDiamonds"
+      - "@KingOfDiamonds"
+      - "@AceOfDiamonds"
+      - "@DeuceOfHearts"
+      - "@TreyOfHearts"
+      - "@FourOfHearts"
+      - "@FiveOfHearts"
+      - "@SixOfHearts"
+      - "@SevenOfHearts"
+      - "@EightOfHearts"
+      - "@NineOfHearts"
+      - "@TenOfHearts"
+      - "@JackOfHearts"
+      - "@QueenOfHearts"
+      - "@KingOfHearts"
+      - "@AceOfHearts"
+      - "@DeuceOfSpades"
+      - "@TreyOfSpades"
+      - "@FourOfSpades"
+      - "@FiveOfSpades"
+      - "@SixOfSpades"
+      - "@SevenOfSpades"
+      - "@EightOfSpades"
+      - "@NineOfSpades"
+      - "@TenOfSpades"
+      - "@JackOfSpades"
+      - "@QueenOfSpades"
+      - "@KingOfSpades"
+      - "@AceOfSpades"
+      - "@NumberOfAces"
+      - "@NumberOfDeuces"
+      - "@NumberOfTreys"
+      - "@NumberOfFours"
+      - "@NumberOfFives"
+      - "@NumberOfSixes"
+      - "@NumberOfSevens"
+      - "@NumberOfEigths"
+      - "@NumberOfNines"
+      - "@NumberOfTens"
+      - "@NumberOfJacks"
+      - "@NumberOfQueens"
+      - "@NumberOfKings"
+      - "@NumberOfClubs"
+      - "@NumberOfDiamonds"
+      - "@NumberOfHearts"
+      - "@NumberOfSpades"
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @Numb };
+    line: 1
+    column: 104
+    expectedAssistSuggestions:
+      - "@NumberOfAces"
+      - "@NumberOfDeuces"
+      - "@NumberOfTreys"
+      - "@NumberOfFours"
+      - "@NumberOfFives"
+      - "@NumberOfSixes"
+      - "@NumberOfSevens"
+      - "@NumberOfEigths"
+      - "@NumberOfNines"
+      - "@NumberOfTens"
+      - "@NumberOfJacks"
+      - "@NumberOfQueens"
+      - "@NumberOfKings"
+      - "@NumberOfClubs"
+      - "@NumberOfDiamonds"
+      - "@NumberOfHearts"
+      - "@NumberOfSpades"
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @AceOf };
+    line: 1
+    column: 105
+    expectedAssistSuggestions:
+      - "@AceOfClubs"
+      - "@AceOfDiamonds"
+      - "@AceOfHearts"
+      - "@AceOfSpades"
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @NumberOfDeuces I };
+    line: 1
+    column: 116
+    expectedAssistSuggestions:
+      - IS
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @NumberOfDeuces IS 2 };
+    line: 1
+    column: 119
+    expectedAssistSuggestions:
+  - rql: SEARCH RULES FOR "TexasHoldemPokerSingleCombinations" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @NumberOfDeuces IS 2, @NumberOfTr };
+    line: 1
+    column: 132
+    expectedAssistSuggestions:
+      - "@NumberOfTreys"
+  # - rql: SEARCH
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'RULES'.
+  # - rql: SEARCH RULE
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'RULES'.
+  # - rql: SEARCH RULES
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'FOR'.
+  # - rql: SEARCH RULES FOR
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected ruleset name.
+  # - rql: SEARCH RULES FOR "Test Ruleset"
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'SINCE'.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'UNTIL'.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$;
+  #   expectsSuccess: true
+  #   expectedMessages: []
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE "Test not a date"
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL "Test not a date"
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE 123
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE 16.8
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE false
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE nothing
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal of type date.
+  # - rql: SEARCH RULES FOR 123 SINCE $2020-01-01$ UNTIL $2021-01-01$;
+  #   expectsSuccess: true
+  #   expectedMessages: []
+  # - rql: SEARCH RULES FOR true SINCE $2020-01-01$ UNTIL $2021-01-01$;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Literal 'TRUE' is not allowed as a valid ruleset. Only literals of types [Integer, String] are allowed.
+  # - rql: SEARCH RULES FOR 13.1 SINCE $2020-01-01$ UNTIL $2021-01-01$;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Literal '13.1' is not allowed as a valid ruleset. Only literals of types [Integer, String] are allowed.
+  # - rql: SEARCH RULES FOR NOTHING SINCE $2020-01-01$ UNTIL $2021-01-01$;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Literal 'NOTHING' is not allowed as a valid ruleset. Only literals of types [Integer, String] are allowed.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is true };
+  #   expectsSuccess: true
+  #   expectedMessages: []
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is true }
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token ';'.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected '{' after WHEN.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN {};
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected placeholder (@<placeholder name>) for condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition };
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected token 'IS'.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is };
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal for condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is $2024-01-01$ };
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal for condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is nothing };
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected literal for condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is true, };
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected placeholder (@<placeholder name>) for condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is true
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Expected ',' or '}' after input condition.
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ WHEN { @SomeCondition is true, @OtherCondition is 123, @AnotherCondition is 123.45, @YetAnotherCondition is "Test" };
+  #   expectsSuccess: true
+  #   expectedMessages: []
+  # - rql: SEARCH RULES FOR "Test Ruleset" SINCE $2020-01-01$ UNTIL $2021-01-01$ test;
+  #   expectsSuccess: false
+  #   expectedMessages:
+  #     - Unrecognized token 'test'.

@@ -1,6 +1,6 @@
 namespace Regulae.Rql.IntegrationTests.GrammarCheck
 {
-    internal class GrammarCheckLine
+    internal sealed class GrammarCheckLine
     {
         public string[]? ExpectedMessages { get; init; }
         public bool? ExpectsSuccess { get; init; }
