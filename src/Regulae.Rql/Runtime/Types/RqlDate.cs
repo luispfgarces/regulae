@@ -2,6 +2,7 @@ namespace Regulae.Rql.Runtime.Types
 {
     using System;
     using System.Diagnostics;
+    using System.Globalization;
     using Regulae.Rql.Runtime;
 
     /// <summary>
@@ -58,12 +59,19 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlDate other) => this.Value == other.Value;
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{this.Type.Name}> {this.Value:g}";
+        public override string ToString() => this.ToPrettyString();
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is RqlDate date && this.Equals(date);
 
         /// <inheritdoc/>
         public override int GetHashCode() => this.Value.GetHashCode();
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel)
+            => $"<{this.Type.Name}> {this.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture)}";
     }
 }

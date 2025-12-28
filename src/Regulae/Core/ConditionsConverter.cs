@@ -60,12 +60,9 @@ namespace Regulae.Core
                 convertedValues.Add(ConvertSingle(type, value));
             }
 
-            if (!EnumerableConverters.TryGetValue(type, out var converter))
-            {
-                throw new NotSupportedException($"The data type '{type}' is not supported.");
-            }
+            _ = !EnumerableConverters.TryGetValue(type, out var converter);
 
-            return converter(convertedValues);
+            return converter!(convertedValues);
         }
 
         private static object ConvertSingle(DataTypes type, object value)

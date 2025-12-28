@@ -33,13 +33,18 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlNothing other) => true;
 
         /// <inheritdoc/>
-        public override string ToString()
-                    => $"<{this.Type.Name}>";
+        public override string ToString() => this.ToPrettyString();
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is RqlNothing && this.Equals((RqlNothing)obj);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine<object>(null);
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel) => $"<{this.Type.Name}>";
     }
 }

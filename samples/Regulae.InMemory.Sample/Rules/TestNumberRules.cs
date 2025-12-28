@@ -28,9 +28,10 @@ namespace Regulae.InMemory.Sample.Rules
 
         public IEnumerable<RuleSpecification> GetRulesSpecifications()
         {
-            this.Add(this.CreateRuleForCoolNumbers(), RuleAddPriorityOption.AtNumber(3));
-            this.Add(this.CreateRuleForSosoNumbers(), RuleAddPriorityOption.AtNumber(2));
-            this.Add(this.CreateDefaultRule(), RuleAddPriorityOption.AtNumber(1));
+            this.Add(this.CreateRuleForCoolNumbers(), RuleAddPriorityOption.AtLargestNumber);
+            this.Add(this.CreateRuleForSosoNumbers(), RuleAddPriorityOption.AtLargestNumber);
+            this.Add(this.CreateRuleForBadNumbers(), RuleAddPriorityOption.AtLargestNumber);
+            this.Add(this.CreateDefaultRule(), RuleAddPriorityOption.AtSmallestNumber);
 
             return this.rulesSpecifications;
         }
@@ -71,6 +72,16 @@ namespace Regulae.InMemory.Sample.Rules
                     .Value(ConditionNames.CanNumberBeDividedBy3, Operators.Equal, true)
                     .Value(ConditionNames.IsPrimeNumber, Operators.Equal, false)
                     .Value(ConditionNames.SumAll, Operators.GreaterThanOrEqual, 9)))
+            .Build();
+
+        private RuleBuilderResult<RulesetNames, ConditionNames> CreateRuleForBadNumbers() => Rule.Create<RulesetNames, ConditionNames>("Rule for bad numbers")
+            .InRuleset(RulesetNames.TestNumber)
+            .SetContent(":( this number is bad")
+            .Since(new DateTime(2019, 01, 01))
+            .ApplyWhen(c => c
+                .Xor(a => a
+                    .Value(ConditionNames.IsPrimeNumber, Operators.Equal, false)
+                    .Value(ConditionNames.SumAll, Operators.LesserThan, 5)))
             .Build();
     }
 }

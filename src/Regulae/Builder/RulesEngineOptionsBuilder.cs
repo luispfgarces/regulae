@@ -67,29 +67,94 @@ namespace Regulae.Builder
 
         public IRulesEngineConfiguration SetDataTypeDefault(DataTypes dataType, object defaultValue)
         {
-            ThrowArgumentExceptionIf(
-                (dt, v) => dataType switch
-                {
-                    DataTypes.Integer => defaultValue is null || !int.TryParse(defaultValue.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var _),
-                    DataTypes.Decimal => defaultValue is null || !decimal.TryParse(defaultValue.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var _),
-                    DataTypes.String => defaultValue is null || defaultValue is not string,
-                    DataTypes.Boolean => defaultValue is null || !bool.TryParse(defaultValue.ToString(), out var _),
-                    _ => throw new ArgumentOutOfRangeException(nameof(dataType), $"Invalid {nameof(DataTypes)} value specified: {dataType}."),
-                },
-                dataType,
-                defaultValue);
-
-            this.dataTypeDefaults[dataType] = defaultValue;
-            return this;
-
-            static void ThrowArgumentExceptionIf(Func<DataTypes, object, bool> conditionFunc, DataTypes dataType, object defaultValue)
+            object sanitizedValue = null!;
+            var sanitationSucceeded = false;
+            if (defaultValue is not null)
             {
-                if (conditionFunc(dataType, defaultValue))
+                sanitationSucceeded = dataType switch
                 {
-                    throw new ArgumentException(
-                        $"Specified invalid default value for data type {dataType}: {defaultValue ?? "null"}.", nameof(defaultValue));
-                }
+                    DataTypes.Integer => TrySanitizeInteger(defaultValue, out sanitizedValue),
+                    DataTypes.Decimal => TrySanitizeDecimal(defaultValue, out sanitizedValue),
+                    DataTypes.String => TrySanitizeString(defaultValue, out sanitizedValue),
+                    DataTypes.Boolean => TrySanitizeBool(defaultValue, out sanitizedValue),
+                    _ => throw new ArgumentOutOfRangeException(nameof(dataType), $"Invalid {nameof(DataTypes)} value specified: {dataType}."),
+                };
             }
+
+            if (!sanitationSucceeded)
+            {
+                throw new ArgumentException(
+                    $"Specified invalid default value for data type {dataType}: {defaultValue ?? "null"}.", nameof(defaultValue));
+            }
+
+            this.dataTypeDefaults[dataType] = sanitizedValue;
+            return this;
+        }
+
+        private static bool TrySanitizeBool(object inputValue, out object sanitizedValue)
+        {
+            if (inputValue is bool nativeValue)
+            {
+                sanitizedValue = nativeValue;
+                return true;
+            }
+
+            if (bool.TryParse(inputValue.ToString(), out var parsedValue))
+            {
+                sanitizedValue = parsedValue;
+                return true;
+            }
+
+            sanitizedValue = null!;
+            return false;
+        }
+
+        private static bool TrySanitizeDecimal(object inputValue, out object sanitizedValue)
+        {
+            if (inputValue is decimal nativeValue)
+            {
+                sanitizedValue = nativeValue;
+                return true;
+            }
+
+            if (decimal.TryParse(inputValue.ToString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsedValue))
+            {
+                sanitizedValue = parsedValue;
+                return true;
+            }
+
+            sanitizedValue = null!;
+            return false;
+        }
+
+        private static bool TrySanitizeInteger(object inputValue, out object sanitizedValue)
+        {
+            if (inputValue is int intValue)
+            {
+                sanitizedValue = intValue;
+                return true;
+            }
+
+            if (int.TryParse(inputValue.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var intParsedValue))
+            {
+                sanitizedValue = intParsedValue;
+                return true;
+            }
+
+            sanitizedValue = null!;
+            return false;
+        }
+
+        private static bool TrySanitizeString(object inputValue, out object sanitizedValue)
+        {
+            if (inputValue is string nativeValue)
+            {
+                sanitizedValue = nativeValue;
+                return true;
+            }
+
+            sanitizedValue = null!;
+            return false;
         }
 
         public IRulesEngineConfiguration SetMissingConditionBehavior(MissingConditionBehaviors missingConditionBehavior)

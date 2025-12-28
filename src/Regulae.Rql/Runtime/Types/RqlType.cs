@@ -73,7 +73,18 @@ namespace Regulae.Rql.Runtime.Types
         }
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(this.assignableTypes, this.AssignableTypes, this.Name);
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(this.Name);
+            foreach (var assignableType in this.assignableTypes)
+            {
+                hashCode.Add(assignableType.Key);
+                hashCode.Add(assignableType.Value);
+            }
+
+            return hashCode.ToHashCode();
+        }
 
         /// <summary>
         /// Determines whether the RQL type represented by this is instance is assignable to given

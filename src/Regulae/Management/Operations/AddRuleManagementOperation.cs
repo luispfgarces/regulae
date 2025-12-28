@@ -9,11 +9,11 @@ namespace Regulae.Management.Operations
     internal sealed class AddRuleManagementOperation : IManagementOperation
     {
         private readonly Rule rule;
-        private readonly IRulesSource rulesDataSource;
+        private readonly IRulesSource rulesSource;
 
-        public AddRuleManagementOperation(IRulesSource rulesDataSource, Rule rule)
+        public AddRuleManagementOperation(IRulesSource rulesSource, Rule rule)
         {
-            this.rulesDataSource = rulesDataSource;
+            this.rulesSource = rulesSource;
             this.rule = rule;
         }
 
@@ -24,7 +24,7 @@ namespace Regulae.Management.Operations
                 Rule = this.rule,
             };
 
-            await this.rulesDataSource.AddRuleAsync(addRuleArgs).ConfigureAwait(false);
+            await this.rulesSource.AddRuleAsync(addRuleArgs).ConfigureAwait(false);
 
             var rulesResult = new List<Rule>(rules) { this.rule };
 

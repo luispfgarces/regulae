@@ -157,7 +157,7 @@ namespace Regulae.Extensions
             int year,
             int month,
             int day)
-            => builder.Until(new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc));
+            => builder.UntilUtc(year, month, day, 0, 0, 0);
 
         /// <summary>
         /// Sets the new rule with a date begin using the specified year, month, day, hour, minute,
@@ -198,7 +198,7 @@ namespace Regulae.Extensions
             int day)
             where TRuleset : notnull
             where TCondition : notnull
-            => builder.Until(new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc));
+            => builder.UntilUtc(year, month, day, 0, 0, 0);
 
         /// <summary>
         /// Sets the new rule with a date begin using the specified year, month, day, hour, minute,

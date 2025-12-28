@@ -83,7 +83,11 @@ namespace Regulae.Rql.Pipeline.Scan
                             previousToken.Next = token;
                         }
 
-                        previousToken = token;
+                        if (token != Token.None)
+                        {
+                            previousToken = token;
+                        }
+
                         if (scanContext.TokenCandidate.HasError)
                         {
                             messageContainer.Error(

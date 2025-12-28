@@ -26,6 +26,11 @@ namespace Regulae.Rql.Runtime.Types
 
         internal RqlArray(int size, bool shouldInitializeElements)
         {
+            if (size < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size), size, $"The size of '{nameof(RqlArray)}' cannot be negative.");
+            }
+
             this.size = size;
             this.Value = new RqlAny[size];
             if (shouldInitializeElements)
@@ -119,27 +124,47 @@ namespace Regulae.Rql.Runtime.Types
 
         /// <inheritdoc/>
         public override string ToString()
-            => this.ToString(0);
+            => this.ToPrettyString();
 
-        internal string ToString(int indent)
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is RqlArray array && this.Equals(array);
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(this.size);
+            foreach (var item in this.Value)
+            {
+                hashCode.Add(item);
+            }
+
+            return hashCode.ToHashCode();
+        }
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel)
         {
             var stringBuilder = new StringBuilder()
                 .Append('<')
                 .Append(this.Type.Name)
-                .Append('>')
-                .Append(' ');
+                .Append('>');
 
             if (this.size > 0)
             {
                 stringBuilder.AppendLine()
-                    .Append(new string(' ', indent))
+                    .Append(new string(' ', indentLevel))
                     .Append('{')
                     .AppendLine();
                 var min = Math.Min(this.size, 5);
                 for (var i = 0; i < min; i++)
                 {
-                    stringBuilder.Append(new string(' ', indent + 4))
-                        .Append(this.Value[i]);
+                    stringBuilder.Append(new string(' ', indentLevel + 4))
+                        .Append(this.Value[i].ToPrettyString(indentLevel + 4));
+
                     if (i < min - 1)
                     {
                         stringBuilder.Append(',')
@@ -151,26 +176,20 @@ namespace Regulae.Rql.Runtime.Types
                 {
                     stringBuilder.Append(',')
                         .AppendLine()
-                        .Append(new string(' ', indent + 4))
+                        .Append(new string(' ', indentLevel + 4))
                         .Append("...");
                 }
 
                 stringBuilder.AppendLine()
-                    .Append(new string(' ', indent))
+                    .Append(new string(' ', indentLevel))
                     .Append('}');
             }
             else
             {
-                stringBuilder.Append("{ (empty) }");
+                stringBuilder.Append(" { (empty) }");
             }
 
             return stringBuilder.ToString();
         }
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is RqlArray array && this.Equals(array);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(this.size, this.Value);
     }
 }

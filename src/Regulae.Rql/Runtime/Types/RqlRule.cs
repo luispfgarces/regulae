@@ -59,46 +59,7 @@ namespace Regulae.Rql.Runtime.Types
         public bool Equals(RqlRule other) => object.Equals(this.Value, other.Value);
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{this.Type.Name}>{Environment.NewLine}{this.ToString(4)}";
-
-        internal string ToString(int indent)
-        {
-            var stringBuilder = new StringBuilder()
-                .Append('{');
-
-            foreach (var property in this.properties)
-            {
-                stringBuilder.AppendLine()
-                    .Append(new string(' ', indent))
-                    .Append(property.Key)
-                    .Append(": ");
-
-                if (property.Value.UnderlyingType == RqlTypes.Object)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlObject>().ToString(indent + 4));
-                    continue;
-                }
-
-                if (property.Value.UnderlyingType == RqlTypes.ReadOnlyObject)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlReadOnlyObject>().ToString(indent + 4));
-                    continue;
-                }
-
-                if (property.Value.UnderlyingType == RqlTypes.Array)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlArray>().ToString());
-                    continue;
-                }
-
-                stringBuilder.Append(property.Value.Value);
-            }
-
-            return stringBuilder.AppendLine()
-                .Append(new string(' ', indent - 4))
-                .Append('}')
-                .ToString();
-        }
+        public override string ToString() => this.ToPrettyString();
 
         private static RqlAny ConvertCondition(IConditionNode condition)
         {
@@ -174,5 +135,33 @@ namespace Regulae.Rql.Runtime.Types
 
         /// <inheritdoc/>
         public override int GetHashCode() => this.Value.GetHashCode();
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel)
+        {
+            var stringBuilder = new StringBuilder()
+                .Append('<')
+                .Append(this.Type.Name)
+                .Append('>')
+                .AppendLine()
+                .Append('{');
+
+            foreach (var property in this.properties)
+            {
+                stringBuilder.AppendLine()
+                    .Append(new string(' ', indentLevel + 4))
+                    .Append(property.Key)
+                    .Append(": ")
+                    .Append(property.Value.ToPrettyString(indentLevel + 4));
+            }
+
+            return stringBuilder.AppendLine()
+                .Append(new string(' ', indentLevel))
+                .Append('}')
+                .ToString();
+        }
     }
 }

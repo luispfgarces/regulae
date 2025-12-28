@@ -82,7 +82,7 @@ namespace Regulae.Rql.Pipeline.Interpret
             }
             catch (RuntimeException ex)
             {
-                throw CreateInterpreterException(ex.Message, binaryExpression);
+                throw this.CreateInterpreterException(ex.Message, binaryExpression);
             }
         }
 
@@ -178,7 +178,7 @@ namespace Regulae.Rql.Pipeline.Interpret
             }
             catch (RuntimeException ex)
             {
-                throw CreateInterpreterException(ex.Message, matchExpression);
+                throw this.CreateInterpreterException(ex.Message, matchExpression);
             }
         }
 
@@ -265,13 +265,13 @@ namespace Regulae.Rql.Pipeline.Interpret
             var value = RqlTypes.Any.IsAssignableTo(rawValue.Type) ? ((RqlAny)rawValue).Unwrap() : rawValue;
             if (!RqlTypes.String.IsAssignableTo(value.Type))
             {
-                throw CreateInterpreterException($"Expected a ruleset value of type '{RqlTypes.String.Name}' but found '{value.Type.Name}' instead", rulesetSegment);
+                throw this.CreateInterpreterException($"Expected a ruleset value of type '{RqlTypes.String.Name}' but found '{value.Type.Name}' instead", rulesetSegment);
             }
 
             var rulesets = await this.runtime.GetRulesetsAsync().ConfigureAwait(false);
             if (!rulesets.Value.Select(r => r.Unwrap<RqlRuleset>().Value.Name).Contains(value.RuntimeValue))
             {
-                throw CreateInterpreterException($"The ruleset '{value.RuntimeValue}' was not found", rulesetSegment);
+                throw this.CreateInterpreterException($"The ruleset '{value.RuntimeValue}' was not found", rulesetSegment);
             }
 
             return (RqlString)value;
@@ -296,7 +296,7 @@ namespace Regulae.Rql.Pipeline.Interpret
             }
             catch (RuntimeException ex)
             {
-                throw CreateInterpreterException(ex.Message, searchExpression);
+                throw this.CreateInterpreterException(ex.Message, searchExpression);
             }
         }
 
@@ -310,7 +310,7 @@ namespace Regulae.Rql.Pipeline.Interpret
             }
             catch (RuntimeException re)
             {
-                throw CreateInterpreterException(re.Errors, unaryExpression);
+                throw this.CreateInterpreterException(re.Errors, unaryExpression);
             }
         }
 
@@ -328,7 +328,7 @@ namespace Regulae.Rql.Pipeline.Interpret
 
         private Exception CreateInterpreterException(string error, IAstElement astElement)
         {
-            return CreateInterpreterException(new[] { error }, astElement);
+            return this.CreateInterpreterException(new[] { error }, astElement);
         }
 
         private async Task<string> HandleConditionNameAsync(Expression conditionExpression)

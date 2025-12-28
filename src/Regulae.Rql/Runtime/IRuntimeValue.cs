@@ -6,7 +6,7 @@ namespace Regulae.Rql.Runtime
     /// <summary>
     /// Defines the interface contract for representing a RQL runtime type under the .NET runtime.
     /// </summary>
-    internal interface IRuntimeValue
+    internal interface IRuntimeValue : IPrettyPrintable
     {
         /// <summary>
         /// Gets the .NET runtime type.

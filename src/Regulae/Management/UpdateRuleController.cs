@@ -17,6 +17,7 @@ namespace Regulae.Management
             this.rulesSource = rulesSource ?? throw new ArgumentNullException(nameof(rulesSource));
             this.validatorProvider = validatorProvider ?? throw new ArgumentNullException(nameof(validatorProvider));
         }
+
         public async ValueTask<OperationResult> UpdateRuleAsync(Rule rule)
         {
             await ManagementOperations.Manage(rule.Ruleset)

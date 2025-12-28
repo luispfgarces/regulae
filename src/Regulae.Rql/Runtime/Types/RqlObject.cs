@@ -47,52 +47,24 @@ namespace Regulae.Rql.Runtime.Types
         public static implicit operator RqlAny(RqlObject rqlObject) => new RqlAny(rqlObject);
 
         /// <inheritdoc/>
-        public bool Equals(RqlObject other) => this.properties.Equals(other.properties);
+        public bool Equals(RqlObject other)
+        {
+            foreach (var kvp in this.properties)
+            {
+                if (!other.properties.TryGetValue(kvp.Key, out var otherValue) || !kvp.Value.Equals(otherValue))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /// <inheritdoc/>
         public RqlAny SetPropertyValue(RqlString name, RqlAny value) => this.properties[name.Value] = value;
 
         /// <inheritdoc/>
-        public override string ToString() => $"<{this.Type.Name}>{Environment.NewLine}{this.ToString(4)}";
-
-        internal string ToString(int indent)
-        {
-            var stringBuilder = new StringBuilder()
-                .Append('{');
-
-            foreach (var property in this.properties)
-            {
-                stringBuilder.AppendLine()
-                    .Append(new string(' ', indent))
-                    .Append(property.Key)
-                    .Append(": ");
-
-                if (property.Value.UnderlyingType == RqlTypes.Object)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlObject>().ToString(indent + 4));
-                    continue;
-                }
-
-                if (property.Value.UnderlyingType == RqlTypes.ReadOnlyObject)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlReadOnlyObject>().ToString(indent + 4));
-                    continue;
-                }
-
-                if (property.Value.UnderlyingType == RqlTypes.Array)
-                {
-                    stringBuilder.Append(property.Value.Unwrap<RqlArray>().ToString(indent));
-                    continue;
-                }
-
-                stringBuilder.Append(property.Value.Value);
-            }
-
-            return stringBuilder.AppendLine()
-                .Append(new string(' ', indent - 4))
-                .Append('}')
-                .ToString();
-        }
+        public override string ToString() => this.ToPrettyString();
 
         private static IDictionary<string, object> ConvertToDictionary(RqlObject value)
         {
@@ -109,6 +81,44 @@ namespace Regulae.Rql.Runtime.Types
         public override bool Equals(object obj) => obj is RqlObject @object && this.Equals(@object);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => this.properties.GetHashCode();
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            foreach (var property in this.properties)
+            {
+                hashCode.Add(property.Key);
+                hashCode.Add(property.Value);
+            }
+
+            return hashCode.ToHashCode();
+        }
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel)
+        {
+            var stringBuilder = new StringBuilder()
+                .Append('<')
+                .Append(this.Type.Name)
+                .Append('>')
+                .AppendLine()
+                .Append('{');
+
+            foreach (var property in this.properties)
+            {
+                stringBuilder.AppendLine()
+                    .Append(new string(' ', indentLevel + 4))
+                    .Append(property.Key)
+                    .Append(": ")
+                    .Append(property.Value.ToPrettyString(indentLevel + 4));
+            }
+
+            return stringBuilder.AppendLine()
+                .Append(new string(' ', indentLevel))
+                .Append('}')
+                .ToString();
+        }
     }
 }

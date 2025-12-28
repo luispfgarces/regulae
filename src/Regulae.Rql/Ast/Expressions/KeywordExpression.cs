@@ -6,7 +6,7 @@ namespace Regulae.Rql.Ast.Expressions
     [ExcludeFromCodeCoverage]
     internal class KeywordExpression : Expression
     {
-        private KeywordExpression(Token keyword)
+        protected KeywordExpression(Token keyword)
             : base(keyword.BeginPosition, keyword.EndPosition)
         {
             this.Keyword = keyword;

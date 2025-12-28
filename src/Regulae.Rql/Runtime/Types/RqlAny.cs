@@ -55,11 +55,10 @@ namespace Regulae.Rql.Runtime.Types
         public object Value => this.underlyingRuntimeValue.RuntimeValue;
 
         /// <inheritdoc/>
-        public bool Equals(RqlAny other) => this.underlyingRuntimeValue == other.underlyingRuntimeValue;
+        public bool Equals(RqlAny other) => object.Equals(this.underlyingRuntimeValue, other.underlyingRuntimeValue);
 
         /// <inheritdoc/>
-        public override string ToString()
-            => $"<{this.Type.Name}> ({this.underlyingRuntimeValue.ToString()})";
+        public override string ToString() => this.ToPrettyString();
 
         internal IRuntimeValue Unwrap() => this.underlyingRuntimeValue;
 
@@ -70,5 +69,12 @@ namespace Regulae.Rql.Runtime.Types
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(this.Type, this.underlyingRuntimeValue);
+
+        /// <inheritdoc/>
+        public string ToPrettyString() => this.ToPrettyString(0);
+
+        /// <inheritdoc/>
+        public string ToPrettyString(int indentLevel)
+            => $"<{this.Type.Name}> ({this.underlyingRuntimeValue.ToPrettyString(indentLevel)})";
     }
 }

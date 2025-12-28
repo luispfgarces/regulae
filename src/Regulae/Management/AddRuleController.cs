@@ -56,12 +56,12 @@ namespace Regulae.Management
             switch (ruleAddPriorityOption.PriorityOption)
             {
                 case PriorityOptions.AtSmallestNumber:
-                    await this.AddRuleInternalAtTopAsync(rule).ConfigureAwait(false);
+                    await this.AddRuleInternalAtSmallestNumberAsync(rule).ConfigureAwait(false);
                     break;
 
                 case PriorityOptions.AtLargestNumber:
 
-                    await this.AddRuleInternalAtBottomAsync(rule).ConfigureAwait(false);
+                    await this.AddRuleInternalAtHighestNumberAsync(rule).ConfigureAwait(false);
                     break;
 
                 case PriorityOptions.AtNumber:
@@ -79,7 +79,7 @@ namespace Regulae.Management
             return Operation.Success();
         }
 
-        private async ValueTask AddRuleInternalAtBottomAsync(Rule rule)
+        private async ValueTask AddRuleInternalAtHighestNumberAsync(Rule rule)
         {
             var getRulesFilteredArgs = new GetRulesFilteredArgs
             {
@@ -140,7 +140,7 @@ namespace Regulae.Management
                 .ExecuteOperationsAsync().ConfigureAwait(false);
         }
 
-        private ValueTask AddRuleInternalAtTopAsync(Rule rule)
+        private ValueTask AddRuleInternalAtSmallestNumberAsync(Rule rule)
         {
             rule.Priority = 1;
 

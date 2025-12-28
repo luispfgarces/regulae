@@ -32,7 +32,7 @@ namespace Regulae.Rql.Pipeline.Assist
         {
             foreach (var statement in statements)
             {
-                if (statement.ContainsPosition(position))
+                if (statement.ContainsPosition(this.position))
                 {
                     var assistSuggestions = await statement.Accept(this).ConfigureAwait(false);
                     return assistSuggestions;
@@ -78,12 +78,17 @@ namespace Regulae.Rql.Pipeline.Assist
                 this.storedContext["Since-Date"] = sinceDateLiteral.Value;
             }
 
+            if (datesIntervalSegment.SinceDate == Expression.None || datesIntervalSegment.SinceDate.ContainsPosition(this.position))
+            {
+                return Task.FromResult(EmptyAssistSuggestions());
+            }
+
             if (datesIntervalSegment.UntilKeyword == Expression.None)
             {
                 return Task.FromResult(MultipleAssistSuggestions(nameof(TokenType.UNTIL)));
             }
 
-            if (datesIntervalSegment.SinceDate is LiteralExpression untilDateLiteral && untilDateLiteral.Type == LiteralType.DateTime)
+            if (datesIntervalSegment.UntilDate is LiteralExpression untilDateLiteral && untilDateLiteral.Type == LiteralType.DateTime)
             {
                 this.storedContext["Until-Date"] = untilDateLiteral.Value;
             }
@@ -109,7 +114,7 @@ namespace Regulae.Rql.Pipeline.Assist
 
         public async Task<IAssistSuggestion[]> VisitInputConditionSegment(InputConditionSegment inputConditionSegment)
         {
-            if (inputConditionSegment.Left is PlaceholderExpression placeholderExpression)
+            if (inputConditionSegment.Left is PlaceholderExpression placeholderExpression && placeholderExpression.ContainsPosition(this.position))
             {
                 return await placeholderExpression.Accept(this).ConfigureAwait(false);
             }
@@ -162,11 +167,6 @@ namespace Regulae.Rql.Pipeline.Assist
 
         public async Task<IAssistSuggestion[]> VisitMatchExpression(MatchExpression matchExpression)
         {
-            if (matchExpression.Cardinality is not CardinalitySegment)
-            {
-                return MultipleAssistSuggestions(nameof(TokenType.ALL), nameof(TokenType.ONE));
-            }
-
             var assistSuggestions = await matchExpression.Cardinality.Accept(this).ConfigureAwait(false);
             if (assistSuggestions.Length > 0)
             {
@@ -237,7 +237,7 @@ namespace Regulae.Rql.Pipeline.Assist
 
         public async Task<IAssistSuggestion[]> VisitPlaceholderExpression(PlaceholderExpression placeholderExpression)
         {
-            if (placeholderExpression.ContainsPosition(this.position) && this.storedContext.TryGetValue("Ruleset-Name", out var rulesetName))
+            if (this.storedContext.TryGetValue("Ruleset-Name", out var rulesetName))
             {
                 var dateBegin = DateTime.MinValue;
                 var dateEnd = DateTime.MinValue;
@@ -275,9 +275,8 @@ namespace Regulae.Rql.Pipeline.Assist
                 var rulesets = await this.runtime.GetRulesetsAsync().ConfigureAwait(false);
                 return MultipleAssistSuggestions(rulesets.Value.Select(r => @$"""{r.Unwrap<RqlRuleset>().Value.Name}""").ToArray());
             }
-            else
+            else if (rulesetSegment.RulesetName is LiteralExpression rulesetName)
             {
-                var rulesetName = rulesetSegment.RulesetName as LiteralExpression;
                 this.storedContext["Ruleset-Name"] = rulesetName.Value;
             }
 
