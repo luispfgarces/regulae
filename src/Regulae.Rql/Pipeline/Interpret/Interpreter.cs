@@ -34,6 +34,7 @@ namespace Regulae.Rql.Pipeline.Interpret
             { TokenType.PLUS, RqlOperators.Plus },
             { TokenType.SLASH, RqlOperators.Slash },
             { TokenType.STAR, RqlOperators.Star },
+            { TokenType.XOR, RqlOperators.Xor },
         };
 
         public Interpreter(

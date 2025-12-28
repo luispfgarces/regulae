@@ -56,6 +56,7 @@ namespace Regulae.Evaluation.Interpreted
             {
                 LogicalOperators.And => childConditionNodesSpecifications.Aggregate((s1, s2) => s1.And(s2)),
                 LogicalOperators.Or => childConditionNodesSpecifications.Aggregate((s1, s2) => s1.Or(s2)),
+                LogicalOperators.Xor => childConditionNodesSpecifications.Aggregate((s1, s2) => s1.Xor(s2)),
                 _ => throw new NotSupportedException($"Unsupported logical operator: '{composedConditionNode.LogicalOperator}'."),
             };
         }

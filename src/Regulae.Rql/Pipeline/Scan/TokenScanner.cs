@@ -54,6 +54,7 @@ namespace Regulae.Rql.Pipeline.Scan
             { nameof(TokenType.VAR), TokenType.VAR },
             { nameof(TokenType.WHEN), TokenType.WHEN },
             { nameof(TokenType.WITH), TokenType.WITH },
+            { nameof(TokenType.XOR), TokenType.XOR },
         };
 
         public ScanResult ScanTokens(string source)

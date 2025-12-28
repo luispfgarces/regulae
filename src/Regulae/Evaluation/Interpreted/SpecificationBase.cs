@@ -13,5 +13,10 @@ namespace Regulae.Evaluation.Interpreted
         {
             return new OrSpecification<T>(this, otherSpecification);
         }
+
+        public ISpecification<T> Xor(ISpecification<T> otherSpecification)
+        {
+            return new XorSpecification<T>(this, otherSpecification);
+        }
     }
 }

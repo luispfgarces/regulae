@@ -30,5 +30,11 @@ namespace Regulae.Builder.Generic.RulesBuilder
             var conditionAsString = GenericConversions.Convert(condition);
             return ConditionNodeFactory.CreateValueNode(conditionAsString, condOperator, operand);
         }
+
+        public IConditionNode Xor(
+            Func<IFluentConditionNodeBuilder<TCondition>, IFluentConditionNodeBuilder<TCondition>> conditionFunc)
+        {
+            return ConditionNodeFactory.CreateComposedNode(LogicalOperators.Xor, conditionFunc);
+        }
     }
 }

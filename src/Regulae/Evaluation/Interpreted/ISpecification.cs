@@ -7,5 +7,7 @@ namespace Regulae.Evaluation.Interpreted
         bool IsSatisfiedBy(T input);
 
         ISpecification<T> Or(ISpecification<T> otherSpecification);
+
+        ISpecification<T> Xor(ISpecification<T> otherSpecification);
     }
 }

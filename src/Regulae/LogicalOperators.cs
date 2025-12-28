@@ -24,5 +24,10 @@ namespace Regulae
         /// Evals a condition node (only applicable when not in a composed condition node).
         /// </summary>
         Eval = 3,
+
+        /// <summary>
+        /// Applies a XOR between a set of condition nodes.
+        /// </summary>
+        Xor = 4,
     }
 }

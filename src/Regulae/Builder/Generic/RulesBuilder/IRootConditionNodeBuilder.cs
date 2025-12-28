@@ -39,5 +39,13 @@ namespace Regulae.Builder.Generic.RulesBuilder
         /// <param name="operand">The condition operand.</param>
         /// <returns></returns>
         IConditionNode Value<T>(TCondition condition, Operators condOperator, T operand);
+
+        /// <summary>
+        /// Sets a Xor composed condition to the root condition node builder.
+        /// </summary>
+        /// <param name="conditionFunc">The function containing the logic for the root condition.</param>
+        /// <returns></returns>
+        IConditionNode Xor(
+            Func<IFluentConditionNodeBuilder<TCondition>, IFluentConditionNodeBuilder<TCondition>> conditionFunc);
     }
 }

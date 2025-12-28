@@ -42,5 +42,12 @@ namespace Regulae.Builder.RulesBuilder
         /// <param name="operand">The condition operand.</param>
         /// <returns></returns>
         IFluentConditionNodeBuilder Value<T>(string condition, Operators condOperator, T operand);
+
+        /// <summary>
+        /// Adds a 'xor' composed condition to the new rule's conditions tree.
+        /// </summary>
+        /// <param name="conditionFunc">The function containing the logic for the new condition.</param>
+        /// <returns></returns>
+        IFluentConditionNodeBuilder Xor(Func<IFluentConditionNodeBuilder, IFluentConditionNodeBuilder> conditionFunc);
     }
 }

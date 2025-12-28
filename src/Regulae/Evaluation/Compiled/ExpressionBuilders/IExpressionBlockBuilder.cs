@@ -59,6 +59,10 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         Expression Equal(Expression left, Expression right);
 
+        Expression ExclusiveOr(Expression left, Expression right);
+
+        Expression ExclusiveOr(IEnumerable<Expression> expressions);
+
         LabelTarget GetLabelTarget(string name);
 
         ParameterExpression GetParameter(string name);

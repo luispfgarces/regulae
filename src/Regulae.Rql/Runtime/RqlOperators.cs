@@ -19,5 +19,6 @@ namespace Regulae.Rql.Runtime
         In = 14,
         NotIn = 15,
         Assign = 16,
+        Xor = 17,
     }
 }

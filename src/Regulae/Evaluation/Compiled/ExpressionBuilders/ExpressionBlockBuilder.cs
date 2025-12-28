@@ -210,6 +210,10 @@ namespace Regulae.Evaluation.Compiled.ExpressionBuilders
 
         public Expression Equal(Expression left, Expression right)
             => Expression.Equal(left, right);
+        public Expression ExclusiveOr(Expression left, Expression right)
+            => Expression.ExclusiveOr(left, right);
+        public Expression ExclusiveOr(IEnumerable<Expression> expressions)
+            => expressions.Aggregate((e1, e2) => Expression.ExclusiveOr(e1, e2));
 
         public LabelTarget GetLabelTarget(string name)
         {

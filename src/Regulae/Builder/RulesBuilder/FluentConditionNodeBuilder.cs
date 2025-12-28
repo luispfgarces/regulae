@@ -50,5 +50,13 @@ namespace Regulae.Builder.RulesBuilder
             this.conditions.Add(valueConditionNode);
             return this;
         }
+
+        public IFluentConditionNodeBuilder Xor(
+            Func<IFluentConditionNodeBuilder, IFluentConditionNodeBuilder> conditionFunc)
+        {
+            var composedConditionNode = ConditionNodeFactory.CreateComposedNode(LogicalOperators.Xor, conditionFunc);
+            this.conditions.Add(composedConditionNode);
+            return this;
+        }
     }
 }

@@ -114,6 +114,9 @@ namespace Regulae.Rql.Tokens
         [AllowAsIdentifier]
         WITH,
 
+        [AllowAsIdentifier]
+        XOR,
+
         #endregion Keywords
 
         #region Literals

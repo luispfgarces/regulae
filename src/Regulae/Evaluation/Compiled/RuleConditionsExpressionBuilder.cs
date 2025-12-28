@@ -232,6 +232,7 @@ namespace Regulae.Evaluation.Compiled
                     {
                         LogicalOperators.And => builder.AndAlso(conditionExpressions),
                         LogicalOperators.Or => builder.OrElse(conditionExpressions),
+                        LogicalOperators.Xor => builder.ExclusiveOr(conditionExpressions),
                         _ => throw new NotSupportedException($"Unsupported logical operator on composed condition node: '{conditionNode.LogicalOperator}'."),
                     };
                     builder.Assign(builder.GetVariable("Result"), conditionExpression);

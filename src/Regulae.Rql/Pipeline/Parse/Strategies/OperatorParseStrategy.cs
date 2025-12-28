@@ -37,6 +37,7 @@ namespace Regulae.Rql.Pipeline.Parse.Strategies
                 case TokenType.PLUS:
                 case TokenType.SLASH:
                 case TokenType.STAR:
+                case TokenType.XOR:
                     break;
 
                 case TokenType.NOT:

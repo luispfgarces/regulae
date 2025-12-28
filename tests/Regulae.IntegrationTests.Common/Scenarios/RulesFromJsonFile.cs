@@ -186,9 +186,10 @@ namespace Regulae.IntegrationTests.Common.Scenarios
 
             return logicalOperator switch
             {
-                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
-                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.And => conditionNodeBuilder.And(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Or => conditionNodeBuilder.Or(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
                 LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel, ruleName),
+                LogicalOperators.Xor => conditionNodeBuilder.Xor(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
                 _ => throw new NotSupportedException($"The logical operator '{logicalOperator}' is not supported."),
             };
         }
@@ -204,9 +205,10 @@ namespace Regulae.IntegrationTests.Common.Scenarios
 
             return logicalOperator switch
             {
-                LogicalOperators.And => conditionNodeBuilder.And(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
-                LogicalOperators.Or => conditionNodeBuilder.Or(b => HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.And => conditionNodeBuilder.And(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
+                LogicalOperators.Or => conditionNodeBuilder.Or(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
                 LogicalOperators.Eval => CreateValueConditionNode(conditionNodeBuilder, conditionNodeDataModel, ruleName),
+                LogicalOperators.Xor => conditionNodeBuilder.Xor(b => this.HandleChildConditionNodes(b, conditionNodeDataModel, ruleName)),
                 _ => throw new NotSupportedException($"The logical operator '{logicalOperator}' is not supported."),
             };
         }
