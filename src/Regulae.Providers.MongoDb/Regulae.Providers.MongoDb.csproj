@@ -14,8 +14,8 @@
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl></RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>rules rulesframework mongo mongodb</PackageTags>
-    <Description>A data source provider implementation using Mongo DB for rules framework.</Description>
+    <PackageTags>rule rules regulae mongo mongodb</PackageTags>
+    <Description>A data source provider implementation using Mongo DB for Regulae.</Description>
     <Copyright></Copyright>
   </PropertyGroup>
 

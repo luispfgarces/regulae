@@ -14,8 +14,8 @@
         <PackageProjectUrl></PackageProjectUrl>
         <RepositoryUrl></RepositoryUrl>
         <RepositoryType>Git</RepositoryType>
-        <PackageTags>rule rules regula regulae</PackageTags>
-        <Description>A generic rules framework that allows defining and evaluating rules for complex business scenarios.</Description>
+        <PackageTags>rule rules regulae</PackageTags>
+        <Description>A generic rules engine that allows defining, managing, and evaluating rules for complex business scenarios.</Description>
         <Copyright></Copyright>
         <DebugType>full</DebugType>
         <DebugSymbols>true</DebugSymbols>

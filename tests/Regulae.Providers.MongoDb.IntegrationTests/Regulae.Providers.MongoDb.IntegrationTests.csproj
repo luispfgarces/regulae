@@ -1,21 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>13.0</LangVersion>
-        <Nullable>enable</Nullable>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>13.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <None Remove="Scenarios\Scenario2\regulae-tests.car-insurance-advisor.json" />
-      <None Remove="Scenarios\Scenario3\regulae-tests.security-system-actionables.json" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Remove="Scenarios\Scenario2\regulae-tests.car-insurance-advisor.json" />
+    <None Remove="Scenarios\Scenario3\regulae-tests.security-system-actionables.json" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <EmbeddedResource Include="Scenarios\Scenario2\regulae-tests.car-insurance-advisor.json" />
-      <EmbeddedResource Include="Scenarios\Scenario3\regulae-tests.security-system-actionables.json" />
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scenarios\Scenario2\regulae-tests.car-insurance-advisor.json" />
+    <EmbeddedResource Include="Scenarios\Scenario3\regulae-tests.security-system-actionables.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4">
@@ -34,8 +34,8 @@
     </PackageReference>
   </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\Regulae.Providers.MongoDb\Regulae.Providers.MongoDb.csproj" />
-        <ProjectReference Include="..\Regulae.IntegrationTests.Common\Regulae.IntegrationTests.Common.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Regulae.Providers.MongoDb\Regulae.Providers.MongoDb.csproj" />
+    <ProjectReference Include="..\Regulae.IntegrationTests.Common\Regulae.IntegrationTests.Common.csproj" />
+  </ItemGroup>
 </Project>

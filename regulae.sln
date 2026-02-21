@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32414.318
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regulae", "src\Regulae\Regulae.csproj", "{3193A341-094C-4808-9972-173418268894}"
 EndProject
@@ -45,6 +45,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regulae.Rql.Tests", "tests\Regulae.Rql.Tests\Regulae.Rql.Tests.csproj", "{776E54A7-9099-4EBD-9C62-A371DFED58E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regulae.Rql.IntegrationTests", "tests\Regulae.Rql.IntegrationTests\Regulae.Rql.IntegrationTests.csproj", "{C24A2234-AD6A-4377-9FAA-9CC58386107C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regulae.Analyzers", "src\Regulae.Analyzers\Regulae.Analyzers.csproj", "{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regulae.Analyzers.Tests", "tests\Regulae.Analyzers.Tests\Regulae.Analyzers.Tests.csproj", "{7E8528E2-5490-DFBF-2605-015010EE97AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -124,6 +128,14 @@ Global
 		{C24A2234-AD6A-4377-9FAA-9CC58386107C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C24A2234-AD6A-4377-9FAA-9CC58386107C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C24A2234-AD6A-4377-9FAA-9CC58386107C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E8528E2-5490-DFBF-2605-015010EE97AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E8528E2-5490-DFBF-2605-015010EE97AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E8528E2-5490-DFBF-2605-015010EE97AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E8528E2-5490-DFBF-2605-015010EE97AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,6 +158,8 @@ Global
 		{776E54A7-9099-4EBD-9C62-A371DFED58E5} = {74E24C97-8EE4-4B69-AECD-4765FD2C751F}
 		{C24A2234-AD6A-4377-9FAA-9CC58386107C} = {74E24C97-8EE4-4B69-AECD-4765FD2C751F}
 		{C4865D60-3519-4BA1-92F1-636ECF4407E8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E5D1EACE-D6CF-E30A-F9C7-CD3CCB805CEA} = {AEE746EC-CEAA-4892-8C29-0CAAB97A23A8}
+		{7E8528E2-5490-DFBF-2605-015010EE97AF} = {74E24C97-8EE4-4B69-AECD-4765FD2C751F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA9D4C31-972B-49C2-9F63-C56ED766DAB0}

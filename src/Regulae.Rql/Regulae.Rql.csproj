@@ -14,8 +14,8 @@
       <PackageProjectUrl></PackageProjectUrl>
       <RepositoryUrl></RepositoryUrl>
       <RepositoryType>Git</RepositoryType>
-      <PackageTags>rules rulesframework rql query language</PackageTags>
-      <Description>A query languague implementation for rules framework - RQL.</Description>
+      <PackageTags>rule rules regulae rql query language</PackageTags>
+      <Description>A query language implementation for Regulae - RQL.</Description>
       <Copyright></Copyright>
   </PropertyGroup>
 

@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET (for build)
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         dotnet-quality: ga
     - name: Setup .NET (for test)
       uses: actions/setup-dotnet@v3
@@ -33,7 +33,6 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore -c Release
-    # Generate code coverage reports, which are recovered by Codacy afterwards.
     - name: Test
       run: dotnet test --no-build --verbosity normal -m:1 -c Release --collect:"XPlat Code Coverage" --results-directory:"../../coverage-outputs"
     - name: Merge coverage results

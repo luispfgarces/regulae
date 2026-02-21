@@ -14,8 +14,8 @@
 		<PackageProjectUrl></PackageProjectUrl>
 		<RepositoryUrl></RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageTags>rules rulesframework web ui</PackageTags>
-		<Description>A rules framework web ui that allows you to see the rules configured in your application</Description>
+		<PackageTags>rule rules regulae web ui</PackageTags>
+		<Description>A Regulae Web UI that allows you to see the rules configured in your application</Description>
 		<Copyright></Copyright>
 	</PropertyGroup>
 
