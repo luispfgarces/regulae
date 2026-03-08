@@ -561,3 +561,6 @@ coverage-outputs/**
 
 ### Rules Framework Web UI ###
 !samples/Regulae.WebUI.Sample/Properties/launchSettings.json
+
+# Ignore Zensical build outputs
+site/

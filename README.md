@@ -104,7 +104,7 @@ app.UseRegulaeWebUI();
 
 Access is done via the endpoint `{host}/regulae-ui`.
 
-![webUISample](docs/WebUISample.png)
+![webUISample](docs/web-ui-sample.png)
 
 ## Features
 
@@ -136,7 +136,7 @@ The following list presents features available:
 
 ## Documentation
 
-See the [Wiki](https://github.com/luispfgarces/regulae/wiki) for full documentation, short examples and other information.
+See the [full documentation](https://luispfgarces.github.io/regulae/) for an in-depth walthrough on Regulae usage and features.
 
 ## Contributing
 

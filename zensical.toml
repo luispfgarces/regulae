@@ -1,0 +1,75 @@
+[project]
+site_name = "Regulae"
+site_description = "Documentation for the Regulae libraries"
+site_author = "Luís Garcês"
+site_url = "https://luispfgarces.github.io/regulae/"
+copyright = "&copy; 2026 Luís Garcês"
+repo_name = "luispfgarces/regulae"
+repo_url = "https://github.com/luispfgarces/regulae"
+nav = [
+  { "Home" = "index.md" },
+  { "Getting started" = "getting-started.md" },
+  { "Managing rules" = [
+    { "Add rules" = "add-rules.md" },
+    { "Update rules" = "update-rules.md" },
+    { "Activate/deactivate rules" = "activate-deactivate-rules.md" }
+  ]},
+  { "Evaluating rules" = [
+    { "Match rules" = "match-rules.md" },
+    { "Search rules" = "search-rules.md" },
+    { "Get unique conditions" = "get-unique-conditions.md" }
+  ]},
+  { "RQL" = [
+    { "Getting started" = "rql-getting-started.md" },
+    { "Grammar specification" = "rql-grammar.md" }
+  ] },
+  { "Web UI" = [
+    { "How to configure" = "web-ui-how-to-configure.md" }
+  ]},
+  { "Data source providers" = [
+    { "In-memory" = "in-memory-data-source-provider.md" },
+    { "MongoDB" = "mongodb-data-source-provider.md" },
+    { "Create a new provider" = "create-new-data-source-provider.md" }
+  ]},
+  { "Strong typing and type safety" = "type-safety.md" },
+  { "Contributing" = "contributing.md" }
+]
+extra_css = ["css/vs2015.min.css"]
+extra_javascript = ["js/highlight.min.js", "js/rql.min.js", "js/configure-highlight-rql.js"]
+
+[project.theme]
+variant = "modern"
+logo = "logos/regulae-icon-transparent-background-1024x1024.png"
+favicon = "logos/regulae-icon-32x32.png"
+features = [
+  "search.highlight",
+  "navigation.instant",
+  "navigation.instant.progress"
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[project.theme.palette]
+scheme = "slate"
+
+# Extensions
+[project.markdown_extensions.admonition]
+
+[project.markdown_extensions.pymdownx.emoji]
+emoji_index = "zensical.extensions.emoji.twemoji"
+emoji_generator = "zensical.extensions.emoji.to_svg"
+
+[project.markdown_extensions.pymdownx.highlight]
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+
+[project.markdown_extensions.pymdownx.snippets]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "rql", class = "language-rql", format = "pymdownx.superfences.fence_code_format" }
+]
+
+[project.markdown_extensions.toc]
+permalink = true
