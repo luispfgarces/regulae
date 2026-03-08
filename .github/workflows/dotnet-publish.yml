@@ -55,8 +55,9 @@ jobs:
 
     - name: NuGet Login
       uses: NuGet/login@v1
+      id: login
       with:
         user: luisgarces
         
     - name: Publish NuGet packages
-      run: dotnet nuget push **/*.nupkg -s $NUGET_SOURCE --skip-duplicate
+      run: dotnet nuget push **/*.nupkg -s $NUGET_SOURCE --skip-duplicate --api-key ${{steps.login.outputs.NUGET_API_KEY}}
