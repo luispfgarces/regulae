@@ -37,7 +37,9 @@ jobs:
       run: dotnet pack src/Regulae/Regulae.csproj --include-symbols -c Release /p:Version=$BUILD_VERSION
       
     - name: Pack Regulae.Analyzers
-      run: dotnet pack src/Regulae.Analyzers/Regulae.Analyzers.csproj --include-symbols -c Release /p:Version=$BUILD_VERSION
+      run: |
+          dotnet build src/Regulae.Analyzers/Regulae.Analyzers.csproj -c Release /p:Version=$BUILD_VERSION
+          dotnet pack src/Regulae.Analyzers/Regulae.Analyzers.csproj -c Release /p:Version=$BUILD_VERSION
       
     - name: Pack Regulae.Providers.MongoDb
       run: dotnet pack src/Regulae.Providers.MongoDb/Regulae.Providers.MongoDb.csproj --include-symbols -c Release /p:Version=$BUILD_VERSION
