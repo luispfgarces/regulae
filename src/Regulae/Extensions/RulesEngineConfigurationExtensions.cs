@@ -128,7 +128,7 @@ namespace Regulae
                 throw new ArgumentNullException(nameof(rulesEngineConfiguration));
             }
 
-            return rulesEngineConfiguration.UsePriorityCriteria(PriorityCriterias.LargestNumber);
+            return rulesEngineConfiguration.UsePriorityCriteria(PriorityCriterias.PrioritizeLargestNumber);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Regulae
                 throw new ArgumentNullException(nameof(rulesEngineConfiguration));
             }
 
-            return rulesEngineConfiguration.UsePriorityCriteria(PriorityCriterias.SmallestNumber);
+            return rulesEngineConfiguration.UsePriorityCriteria(PriorityCriterias.PrioritizeSmallestNumber);
         }
     }
 }

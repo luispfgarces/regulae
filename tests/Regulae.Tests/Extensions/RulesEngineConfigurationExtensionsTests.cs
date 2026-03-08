@@ -72,7 +72,7 @@ namespace Regulae.Tests.Extensions
             builder.UseLargestNumberPriorityCriteria();
 
             var options = builder.Build();
-            options.PriorityCriteria.Should().Be(PriorityCriterias.LargestNumber);
+            options.PriorityCriteria.Should().Be(PriorityCriterias.PrioritizeLargestNumber);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Regulae.Tests.Extensions
 
             // Assert
             var options = builder.Build();
-            options.PriorityCriteria.Should().Be(PriorityCriterias.SmallestNumber);
+            options.PriorityCriteria.Should().Be(PriorityCriterias.PrioritizeSmallestNumber);
         }
 
         [Fact]

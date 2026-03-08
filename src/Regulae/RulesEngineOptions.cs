@@ -28,7 +28,7 @@ namespace Regulae
             {
                 EvaluationStrategy = EvaluationStrategies.Interpreted,
                 MissingConditionBehavior = MissingConditionBehaviors.UseDataTypeDefault,
-                PriorityCriteria = PriorityCriterias.SmallestNumber,
+                PriorityCriteria = PriorityCriterias.PrioritizeSmallestNumber,
                 DataTypeDefaults =
                 {
                     [DataTypes.Boolean] = default(bool),

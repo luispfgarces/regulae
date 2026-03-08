@@ -195,7 +195,7 @@ namespace Regulae
             var orderedRules = await this.GetRulesAsync(getRulesArgs).ConfigureAwait(false);
             var conditionsAsOperands = await this.conditionsConverter.ConvertConditionsAsync(conditions).ConfigureAwait(false);
 
-            return this.Options.PriorityCriteria == PriorityCriterias.SmallestNumber
+            return this.Options.PriorityCriteria == PriorityCriterias.PrioritizeSmallestNumber
                 ? this.EvalOneTraverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true)
                 : this.EvalOneReverse(orderedRules, evaluationOptions, conditionsAsOperands, active: true);
         }

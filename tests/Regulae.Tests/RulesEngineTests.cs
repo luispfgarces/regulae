@@ -94,7 +94,7 @@ namespace Regulae.Tests
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
@@ -130,7 +130,7 @@ namespace Regulae.Tests
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
 
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
@@ -168,7 +168,7 @@ namespace Regulae.Tests
                 .ReturnsAsync(Operation.Success());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             rulesEngineOptions.AutoCreateRulesets = true;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
@@ -195,7 +195,7 @@ namespace Regulae.Tests
                 .ReturnsAsync(new Dictionary<string, Ruleset> { { nameof(RulesetNames.Type1), new Ruleset(nameof(RulesetNames.Type1), DateTime.UtcNow) } });
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
@@ -226,7 +226,7 @@ namespace Regulae.Tests
                 .Returns(new ValueTask());
 
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
@@ -294,7 +294,7 @@ namespace Regulae.Tests
                     { nameof(RulesetNames.Type2), new Ruleset(nameof(RulesetNames.Type2), DateTime.UtcNow) },
                 });
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act
@@ -453,7 +453,7 @@ namespace Regulae.Tests
 
             var validatorProvider = Mock.Of<IValidatorProvider>();
             var rulesEngineOptions = RulesEngineOptions.NewWithDefaults();
-            rulesEngineOptions.PriorityCriteria = PriorityCriterias.LargestNumber;
+            rulesEngineOptions.PriorityCriteria = PriorityCriterias.PrioritizeLargestNumber;
             var sut = this.CreateRulesEngine(rulesEngineOptions);
 
             // Act

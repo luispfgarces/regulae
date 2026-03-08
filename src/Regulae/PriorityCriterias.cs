@@ -9,11 +9,11 @@ namespace Regulae
         /// <summary>
         /// Sets the rule with the smallest priority number to win on a untie scenario.
         /// </summary>
-        SmallestNumber = 0,
+        PrioritizeSmallestNumber = 0,
 
         /// <summary>
         /// Sets the rule with the largest priority number to win on a untie scenario.
         /// </summary>
-        LargestNumber = 1,
+        PrioritizeLargestNumber = 1,
     }
 }

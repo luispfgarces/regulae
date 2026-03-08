@@ -140,11 +140,11 @@ namespace Regulae.Tests.Builder
         public void UsePriorityCriteria_WithValidValue_SetsCriteria()
         {
             var builder = new RulesEngineOptionsBuilder();
-            builder.UsePriorityCriteria(PriorityCriterias.SmallestNumber);
+            builder.UsePriorityCriteria(PriorityCriterias.PrioritizeSmallestNumber);
 
             var options = builder.Build();
 
-            options.PriorityCriteria.Should().Be(PriorityCriterias.SmallestNumber);
+            options.PriorityCriteria.Should().Be(PriorityCriterias.PrioritizeSmallestNumber);
         }
 
         [Fact]
