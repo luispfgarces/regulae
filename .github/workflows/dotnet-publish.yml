@@ -11,7 +11,6 @@ jobs:
     env:
       BUILD_VERSION: ${{ github.event.release.tag_name }}
       NUGET_SOURCE: https://api.nuget.org/v3/index.json
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
       REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
 
     steps:
@@ -50,4 +49,4 @@ jobs:
       run: dotnet pack src/Regulae.WebUI/Regulae.WebUI.csproj --include-symbols -c Release /p:Version=$BUILD_VERSION
         
     - name: Publish NuGet packages
-      run: dotnet nuget push **/*.nupkg -s $NUGET_SOURCE -k $NUGET_API_KEY --skip-duplicate
+      run: dotnet nuget push **/*.nupkg -s $NUGET_SOURCE --skip-duplicate
