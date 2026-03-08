@@ -49,6 +49,11 @@ jobs:
       
     - name: Pack Regulae.WebUI
       run: dotnet pack src/Regulae.WebUI/Regulae.WebUI.csproj --include-symbols -c Release /p:Version=$BUILD_VERSION
+
+    - name: NuGet Login
+      uses: NuGet/login@v1
+      with:
+        user: luisgarces
         
     - name: Publish NuGet packages
       run: dotnet nuget push **/*.nupkg -s $NUGET_SOURCE --skip-duplicate
