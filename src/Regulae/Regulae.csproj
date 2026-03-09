@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>net8.0</TargetFrameworks>
@@ -11,7 +11,9 @@
         <FileVersion></FileVersion>
         <InformationalVersion></InformationalVersion>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageProjectUrl></PackageProjectUrl>
+        <PackageIcon>regulae-icon-256x256.png</PackageIcon>
         <RepositoryUrl></RepositoryUrl>
         <RepositoryType>Git</RepositoryType>
         <PackageTags>rule rules regulae</PackageTags>
@@ -24,6 +26,14 @@
 
     <ItemGroup>
         <None Include="..\..\LICENSE.md">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+        <None Include="..\..\README.md">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+        <None Include="..\..\docs\logos\regulae-icon-256x256.png">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
