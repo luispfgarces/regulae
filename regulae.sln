@@ -54,7 +54,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{02EA68
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{C4865D60-3519-4BA1-92F1-636ECF4407E8}"
 	ProjectSection(SolutionItems) = preProject
-		deploy-docs.yml = deploy-docs.yml
+		.github\workflows\deploy-docs.yml = .github\workflows\deploy-docs.yml
 		.github\workflows\dotnet-build.yml = .github\workflows\dotnet-build.yml
 		.github\workflows\dotnet-publish.yml = .github\workflows\dotnet-publish.yml
 	EndProjectSection

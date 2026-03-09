@@ -16,13 +16,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
       - name: Build and Deploy with Zensical
-        uses: zensical/action@v1
-        with:
-          deploy: true
+        id: zensical
+        uses: cssnr/zensical-action@v1
