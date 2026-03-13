@@ -17,9 +17,11 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>rule rules regulae analyzer analyzers</PackageTags>
     <Description>Analyzers and code fixes for Regulae packages usage.</Description>
-    <PackageType>Analyzer</PackageType>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
     <ItemGroup>
