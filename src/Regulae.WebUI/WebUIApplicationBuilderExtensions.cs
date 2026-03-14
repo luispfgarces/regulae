@@ -52,7 +52,8 @@ namespace Regulae.WebUI
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = embeddedProvider,
-                RequestPath = new PathString("/regulae-ui")
+                RequestPath = new PathString("/regulae-ui"),
+                ServeUnknownFileTypes = true,
             });
 
             app.UseEndpoints(builder =>
