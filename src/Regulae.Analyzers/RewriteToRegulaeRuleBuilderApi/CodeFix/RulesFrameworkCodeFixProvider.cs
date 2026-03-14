@@ -49,16 +49,20 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi.CodeFix
             var originalSyntaxNode = root.FindNode(diagnostic.Location.SourceSpan);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 
-            var ruleBuilderParameters = RuleBuilderExtractor.ExtractOriginalFluentChain(originalSyntaxNode, semanticModel, cancellationToken);
-
             var trackSyntaxNodeToReplace = new SyntaxAnnotation();
             var annotatedSyntaxNodeToReplace = root.FindNode(diagnostic.Location.SourceSpan)
                 .WithAdditionalAnnotations(trackSyntaxNodeToReplace);
-
             editor.ReplaceNode(originalSyntaxNode, annotatedSyntaxNodeToReplace);
 
             document = await EnsureUsingRegulae(editor.GetChangedDocument(), cancellationToken).ConfigureAwait(false);
-            var currentChain = RewriteSyntaxTree(originalSyntaxNode, semanticModel, ruleBuilderParameters);
+
+            SyntaxNode currentChain = originalSyntaxNode switch
+            {
+                ArgumentSyntax argumentSyntax => RewriteArgumentSyntax(semanticModel, argumentSyntax, cancellationToken),
+                InvocationExpressionSyntax invocationExpressionSyntax => RewriteRuleBuildInvocationExpression(semanticModel, invocationExpressionSyntax, cancellationToken),
+                _ => throw new NotSupportedException("Unsupported syntax node type for rewrite."),
+            };
+
             var trackAnnotation = new SyntaxAnnotation();
             var replacement = currentChain
                 .WithLeadingTrivia(originalSyntaxNode.GetLeadingTrivia())
@@ -85,6 +89,18 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi.CodeFix
             var annotatedNode = simplifiedRoot?.GetAnnotatedNodes(trackAnnotation).FirstOrDefault();
             var formatSpan = annotatedNode?.FullSpan ?? (originalSyntaxNode.FullSpan);
             return await Formatter.FormatAsync(simplified, formatSpan, optionSet, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static ArgumentSyntax RewriteArgumentSyntax(SemanticModel semanticModel, ArgumentSyntax argumentSyntax, CancellationToken cancellationToken)
+        {
+            var newExpression = RewriteRuleBuildInvocationExpression(semanticModel, argumentSyntax, cancellationToken);
+            return argumentSyntax.WithExpression(newExpression);
+        }
+
+        private static ExpressionSyntax RewriteRuleBuildInvocationExpression(SemanticModel semanticModel, SyntaxNode syntaxNode, CancellationToken cancellationToken)
+        {
+            var ruleBuilderParameters = RuleBuilderExtractor.ExtractOriginalFluentChain(syntaxNode, semanticModel, cancellationToken);
+            return RewriteSyntaxTree(syntaxNode, semanticModel, ruleBuilderParameters);
         }
 
         private static ExpressionSyntax RewriteSyntaxTree(SyntaxNode originalSyntaxNode, SemanticModel semanticModel, RuleBuilderParameters ruleBuilderParameters)
