@@ -20,7 +20,7 @@ namespace Regulae.WebUI.ViewModels
                 DateEnd = ruleViewModel.DateEnd,
                 Name = ruleViewModel.Name,
                 Priority = ruleViewModel.Priority,
-                RootCondition = ruleViewModel.RootCondition.ToExportRulesModel(),
+                RootCondition = ruleViewModel.RootCondition?.ToExportRulesModel(),
                 Ruleset = ruleViewModel.Ruleset,
             };
         }
@@ -36,7 +36,7 @@ namespace Regulae.WebUI.ViewModels
                 Id = GuidGenerator.GenerateFromString(rule.Name),
                 Name = rule.Name,
                 Priority = rule.Priority,
-                RootCondition = rule.RootCondition.ToViewModel(),
+                RootCondition = rule.RootCondition?.ToViewModel(),
                 Ruleset = rule.Ruleset,
             };
         }
