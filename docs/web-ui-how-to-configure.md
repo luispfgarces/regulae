@@ -1,5 +1,5 @@
 
-# WebUI Configuration and Usage
+# Web UI Configuration and Usage
 
 The Regulae Web UI provides a user interface to inspect and manage your rules.
 
@@ -27,7 +27,14 @@ The `AddRegulaeWebUI` method allows you to register the rules engine instances t
 
 ### 2. Use the Web UI middleware
 
-In your `Configure` method (or in your `Program.cs` for .NET 6+), add the Regulae Web UI middleware:
+In your `Configure` method (or in your `Program.cs`), add routing and anti-forgery capabilities (dependencies of the Web UI):
+
+```csharp
+app.UseRouting();
+app.UseAntiforgery();
+```
+
+And then add the Regulae Web UI middleware:
 
 ```csharp
 app.UseRegulaeWebUI(opt =>
@@ -36,7 +43,7 @@ app.UseRegulaeWebUI(opt =>
 });
 ```
 
-The `UseRegulaeWebUI` method allows you to configure the Web UI options, such as the document title.
+The `UseRegulaeWebUI` method allows you to configure the Web UI options, such as the document title. Be aware that the "use" methods ordering is important to make sure the Web UI works.
 
 ## Usage
 
