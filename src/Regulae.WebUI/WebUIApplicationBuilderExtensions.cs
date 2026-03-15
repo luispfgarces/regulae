@@ -6,6 +6,7 @@ namespace Regulae.WebUI
     using Components;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.StaticFiles;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
     using Regulae.WebUI.Services;
@@ -48,12 +49,14 @@ namespace Regulae.WebUI
 
             // Blazor
             var embeddedProvider = new EmbeddedFileProvider(typeof(WebUIApplicationBuilderExtensions).Assembly, "Regulae.WebUI.Assets");
+            var contentTypeProvider = new FileExtensionContentTypeProvider();
+            contentTypeProvider.Mappings[".js"] = "text/javascript";
 
             app.UseStaticFiles(new StaticFileOptions
             {
+                ContentTypeProvider = contentTypeProvider,
                 FileProvider = embeddedProvider,
                 RequestPath = new PathString("/regulae-ui"),
-                ServeUnknownFileTypes = true,
             });
 
             app.UseEndpoints(builder =>
