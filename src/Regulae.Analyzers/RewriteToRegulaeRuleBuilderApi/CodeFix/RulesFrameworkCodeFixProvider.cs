@@ -93,7 +93,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi.CodeFix
 
         private static ArgumentSyntax RewriteArgumentSyntax(SemanticModel semanticModel, ArgumentSyntax argumentSyntax, CancellationToken cancellationToken)
         {
-            var newExpression = RewriteRuleBuildInvocationExpression(semanticModel, argumentSyntax, cancellationToken);
+            var newExpression = RewriteRuleBuildInvocationExpression(semanticModel, argumentSyntax.Expression, cancellationToken);
             return argumentSyntax.WithExpression(newExpression);
         }
 
