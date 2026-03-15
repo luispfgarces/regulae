@@ -15,7 +15,3 @@ Also mention any issues to be closed with this pull request: Closes #(issue numb
 - [ ] I have made changes necessary to update the documentation accordingly
 
 Please also check the [_I want to contribute_](../CONTRIBUTING.md#i-want-to-contribute) guidelines and make sure you have done accordingly.
-
-## Disclaimer
-
-By sending us your contributions, you are agreeing that your contribution is made subject to the terms of our [Contributor Ownership Statement](https://github.com/Farfetch/.github/blob/master/COS.md)
