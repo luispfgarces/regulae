@@ -24,6 +24,11 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24.x
+
     - name: Set packages authoring information
       id: set-packages-authoring-information
       run: |
