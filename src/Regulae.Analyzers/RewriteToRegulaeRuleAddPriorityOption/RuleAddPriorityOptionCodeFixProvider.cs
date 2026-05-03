@@ -29,7 +29,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleAddPriorityOption
             var diagnostic = context.Diagnostics.First();
             var nodeCandidateToFix = root.FindNode(diagnostic.Location.SourceSpan);
 
-            if (nodeCandidateToFix is InvocationExpressionSyntax or MemberAccessExpressionSyntax)
+            if (CodeFixEvaluator.CanFixNode(nodeCandidateToFix))
             {
                 context.RegisterCodeFix(
                         Microsoft.CodeAnalysis.CodeActions.CodeAction.Create(
@@ -44,13 +44,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleAddPriorityOption
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var originalNode = root.FindNode(diagnostic.Location.SourceSpan);
-
-            ExpressionSyntax rewrittenNode = originalNode switch
-            {
-                InvocationExpressionSyntax invocation => RewriteInvocation(invocation),
-                MemberAccessExpressionSyntax memberAccess => RewriteMemberAccess(memberAccess),
-                _ => throw new NotSupportedException("Unsupported syntax node type for rewrite."),
-            };
+            var rewrittenNode = RewriteNode(originalNode);
 
             // Replace the node with rewritten expression
             var newRoot = root.ReplaceNode(originalNode, rewrittenNode);
@@ -69,6 +63,15 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleAddPriorityOption
             var simplified = await Simplifier.ReduceAsync(document, optionSet, cancellationToken: cancellationToken).ConfigureAwait(false);
             return await Formatter.FormatAsync(simplified, rewrittenNode.FullSpan, optionSet, cancellationToken).ConfigureAwait(false);
         }
+
+        private static SyntaxNode RewriteNode(SyntaxNode originalNode) =>
+            originalNode switch
+            {
+                InvocationExpressionSyntax invocation => RewriteInvocation(invocation),
+                MemberAccessExpressionSyntax memberAccess => RewriteMemberAccess(memberAccess),
+                ArgumentSyntax argumentSyntax => argumentSyntax.WithExpression((ExpressionSyntax)RewriteNode(argumentSyntax.Expression)),
+                _ => throw new NotSupportedException("Unsupported syntax node type for rewrite."),
+            };
 
         private static InvocationExpressionSyntax RewriteInvocation(InvocationExpressionSyntax invocation)
         {
