@@ -1,0 +1,18 @@
+# Use a specific Docker image for the ubuntu-latest runner
+# The 'medium' image includes common tools like dotnet and node
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+
+# Always pull the latest image to stay updated
+--pull
+
+# Provide a default secrets file if you use them (optional)
+# --secret-file .secrets
+
+# Use a specific shell
+--container-daemon-socket /var/run/docker.sock
+
+--privileged
+
+--env BUILD_VERSION=1.0.0-local
+
+--artifact-server-path ./artifacts

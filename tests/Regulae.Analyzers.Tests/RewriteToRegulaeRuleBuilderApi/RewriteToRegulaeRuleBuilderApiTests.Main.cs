@@ -70,7 +70,7 @@ namespace Sample
 }
 ";
 
-            var test = new CSharpCodeFixTest<RulesFrameworkAnalyzer, RulesFrameworkCodeFixProvider, DefaultVerifier>
+            var test = new CSharpCodeFixTest<RuleBuilderApiAnalyzer, RuleBuilderApiCodeFixProvider, DefaultVerifier>
             {
                 CodeActionEquivalenceKey = "RewriteToRegulaeRuleBuilderApi",
                 NumberOfIncrementalIterations = 1
@@ -148,7 +148,7 @@ namespace Sample
 }
 ";
 
-            var test = new CSharpCodeFixTest<RulesFrameworkAnalyzer, RulesFrameworkCodeFixProvider, DefaultVerifier>
+            var test = new CSharpCodeFixTest<RuleBuilderApiAnalyzer, RuleBuilderApiCodeFixProvider, DefaultVerifier>
             {
                 CodeActionEquivalenceKey = "RewriteToRegulaeRuleBuilderApi",
                 NumberOfIncrementalIterations = 1,
@@ -219,7 +219,7 @@ namespace Sample
 }
 ";
 
-            var test = new CSharpCodeFixTest<RulesFrameworkAnalyzer, RulesFrameworkCodeFixProvider, DefaultVerifier>
+            var test = new CSharpCodeFixTest<RuleBuilderApiAnalyzer, RuleBuilderApiCodeFixProvider, DefaultVerifier>
             {
                 CodeActionEquivalenceKey = "RewriteToRegulaeRuleBuilderApi",
                 TestBehaviors = TestBehaviors.SkipSuppressionCheck,
@@ -284,7 +284,7 @@ namespace Rules.Framework.Builder
 }
 ";
 
-            var test = new CSharpCodeFixTest<RulesFrameworkAnalyzer, RulesFrameworkCodeFixProvider, DefaultVerifier>
+            var test = new CSharpCodeFixTest<RuleBuilderApiAnalyzer, RuleBuilderApiCodeFixProvider, DefaultVerifier>
             {
                 CodeActionEquivalenceKey = "RewriteToRegulaeRuleBuilderApi",
                 NumberOfIncrementalIterations = 0
@@ -348,7 +348,7 @@ namespace Rules.Framework.Builder
 }
 ";
 
-            var test = new CSharpCodeFixTest<RulesFrameworkAnalyzer, RulesFrameworkCodeFixProvider, DefaultVerifier>
+            var test = new CSharpCodeFixTest<RuleBuilderApiAnalyzer, RuleBuilderApiCodeFixProvider, DefaultVerifier>
             {
                 CodeActionEquivalenceKey = "RewriteToRegulaeRuleBuilderApi",
                 NumberOfIncrementalIterations = 0

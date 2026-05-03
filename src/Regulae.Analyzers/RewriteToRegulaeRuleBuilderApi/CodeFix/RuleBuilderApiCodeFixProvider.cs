@@ -14,8 +14,8 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi.CodeFix
     using Microsoft.CodeAnalysis.Simplification;
     using Regulae.Analyzers;
 
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RulesFrameworkCodeFixProvider))]
-    public sealed class RulesFrameworkCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RuleBuilderApiCodeFixProvider))]
+    public sealed class RuleBuilderApiCodeFixProvider : CodeFixProvider
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds => [RegulaeDiagnostics.RewriteToRegulaeRuleBuilderApiId];
 

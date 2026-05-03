@@ -5,3 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
+RG0002 | Migration | Info | Detects usages of Rules.Framework RuleAddPriorityOption to help automated migration to Regulae RuleAddPriorityOption.

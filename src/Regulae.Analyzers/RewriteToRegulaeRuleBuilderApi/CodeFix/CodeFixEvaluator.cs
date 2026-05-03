@@ -5,6 +5,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi.CodeFix
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Regulae.Analyzers;
 
     internal static class CodeFixEvaluator
     {

@@ -1,4 +1,4 @@
-namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
+namespace Regulae.Analyzers
 {
     internal static class RulesFrameworkConstants
     {
@@ -6,7 +6,11 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
         public const string And = "And";
         public const string AsComposed = "AsComposed";
         public const string AsValued = "AsValued";
+        public const string AtBottom = "AtBottom";
+        public const string AtTop = "AtTop";
         public const string Build = "Build";
+        public const string ByPriorityNumber = "ByPriorityNumber";
+        public const string ByRuleName = "ByRuleName";
         public const string NewRule = "NewRule";
         public const string OfDataType = "OfDataType";
         public const string Or = "Or";
@@ -58,7 +62,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
             WithName,
             WithDate,
             WithContent,
-            Build
+            Build,
         ];
 
         public static readonly string[] RuleBuilderAllSupportedMethods =
@@ -70,7 +74,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
             WithContent,
             WithActive,
             WithCondition,
-            Build
+            Build,
         ];
 
         public static readonly string[] RuleBuilderTypes =

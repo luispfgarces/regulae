@@ -10,7 +10,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
     using Microsoft.CodeAnalysis.Text;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public sealed class RulesFrameworkAnalyzer : DiagnosticAnalyzer
+    public sealed class RuleBuilderApiAnalyzer : DiagnosticAnalyzer
     {
         public static readonly string[] RuleBuilderApiTypes = ["RuleBuilder", "IRuleBuilder"];
 
@@ -58,7 +58,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
             if (currentSyntaxNode is IdentifierNameSyntax identifierNameSyntax)
             {
                 if (context.SemanticModel.GetSymbolInfo(identifierNameSyntax, context.CancellationToken).Symbol is INamedTypeSymbol symbol
-                    && RuleBuilderApiTypes.Contains(symbol.Name, StringComparer.Ordinal) && IsRulesFrameworkSymbol(symbol))
+                    && RuleBuilderApiTypes.Contains(symbol.Name, StringComparer.Ordinal) && RulesFrameworkHelpers.IsRulesFrameworkSymbol(symbol))
                 {
                     var display = initialSyntaxNode.WithLeadingTrivia().WithTrailingTrivia().ToFullString();
                     var location = Location.Create(initialSyntaxNode.SyntaxTree, TextSpan.FromBounds(currentSyntaxNode.Span.Start, initialSyntaxNode.Span.End));
@@ -74,7 +74,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
             {
                 if (context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is IMethodSymbol methodSymbol)
                 {
-                    if (IsRulesFrameworkSymbol(methodSymbol.ContainingType))
+                    if (RulesFrameworkHelpers.IsRulesFrameworkSymbol(methodSymbol.ContainingType))
                     {
                         switch (methodSymbol.Name)
                         {
@@ -89,7 +89,7 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
 
                     var expr = invocation.Expression;
                     var exprType = context.SemanticModel.GetTypeInfo(expr, context.CancellationToken).ConvertedType;
-                    if (exprType is INamedTypeSymbol namedExprType && IsRulesFrameworkSymbol(namedExprType))
+                    if (exprType is INamedTypeSymbol namedExprType && RulesFrameworkHelpers.IsRulesFrameworkSymbol(namedExprType))
                     {
                         var display = namedExprType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
                         var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), display);
@@ -112,23 +112,6 @@ namespace Regulae.Analyzers.RewriteToRegulaeRuleBuilderApi
             }
 
             return false;
-        }
-
-        private static bool IsRulesFrameworkSymbol(INamespaceOrTypeSymbol symbol)
-        {
-            if (symbol == null)
-            {
-                return false;
-            }
-
-            var ns = symbol.ContainingNamespace;
-            if (ns == null)
-            {
-                return false;
-            }
-
-            var nsString = ns.ToDisplayString();
-            return nsString.StartsWith("Rules.Framework", StringComparison.Ordinal);
         }
     }
 }
